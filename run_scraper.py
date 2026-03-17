@@ -15,6 +15,8 @@ Other:
 
 import argparse
 import logging
+import sqlite3
+import subprocess
 import sys
 import time
 from pathlib import Path
@@ -93,6 +95,10 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--verbose", "-v", action="store_true",
         help="Enable DEBUG logging"
+    )
+    parser.add_argument(
+        "--push", action="store_true",
+        help="After scraping, checkpoint WAL and git commit+push data/ratings.db to GitHub"
     )
     return parser
 
@@ -193,6 +199,66 @@ def run_bse(limit=None) -> dict:
 
 
 # ------------------------------------------------------------------ #
+# Git auto-push                                                        #
+# ------------------------------------------------------------------ #
+def git_push_db() -> bool:
+    """
+    Checkpoint the SQLite WAL, then git add/commit/push data/ratings.db.
+    Returns True on success, False if push was skipped or failed.
+    """
+    db_path = PROJECT_ROOT / "data" / "ratings.db"
+
+    # 1. Checkpoint WAL so all scraper writes land in the main DB file
+    try:
+        conn = sqlite3.connect(str(db_path))
+        result = conn.execute("PRAGMA wal_checkpoint(TRUNCATE)").fetchone()
+        conn.close()
+        logger.info("WAL checkpoint: busy=%s log=%s checkpointed=%s", *result)
+    except Exception as exc:
+        logger.error("WAL checkpoint failed: %s", exc)
+        return False
+
+    # 2. Stage data/ratings.db
+    def _git(*args):
+        return subprocess.run(
+            ["git", "-C", str(PROJECT_ROOT), *args],
+            capture_output=True, text=True,
+        )
+
+    _git("add", "data/ratings.db")
+
+    # 3. Check if there's actually anything to commit
+    diff = _git("diff", "--cached", "--quiet")
+    if diff.returncode == 0:
+        logger.info("git push: no changes to data/ratings.db, skipping")
+        return True
+
+    # 4. Commit with stats in message
+    try:
+        conn = sqlite3.connect(str(db_path))
+        n = conn.execute("SELECT COUNT(DISTINCT company_id) FROM financials").fetchone()[0]
+        conn.close()
+    except Exception:
+        n = "?"
+
+    from datetime import datetime
+    msg = f"Auto-sync: {n} companies with financials ({datetime.now().strftime('%Y-%m-%d')})"
+    commit = _git("commit", "-m", msg)
+    if commit.returncode != 0:
+        logger.error("git commit failed: %s", commit.stderr.strip())
+        return False
+    logger.info("git commit: %s", commit.stdout.strip())
+
+    # 5. Push
+    push = _git("push")
+    if push.returncode != 0:
+        logger.error("git push failed: %s", push.stderr.strip())
+        return False
+    logger.info("git push: %s", push.stdout.strip() or push.stderr.strip())
+    return True
+
+
+# ------------------------------------------------------------------ #
 # Main                                                                 #
 # ------------------------------------------------------------------ #
 def main():
@@ -253,6 +319,15 @@ def main():
     for scraper, result in all_results.items():
         print(f"{scraper}: {result}")
     print(f"Total time: {total_elapsed:.1f}s")
+
+    # Auto-push DB to GitHub if requested
+    if args.push:
+        logger.info("")
+        logger.info("=" * 60)
+        logger.info("Pushing updated DB to GitHub")
+        logger.info("=" * 60)
+        ok = git_push_db()
+        print(f"Git push: {'OK' if ok else 'FAILED (see log)'}")
 
 
 if __name__ == "__main__":
