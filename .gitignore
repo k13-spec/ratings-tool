@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+
+# Scrapers / local-only
+data/pdfs/
+data/*.log
+data/*.db-shm
+data/*.db-wal
+data/ratings.db-wal
+data/ratings.db-shm
+logs/
+
+# Secrets / env
+.env
+*.env
+
+# OS
+.DS_Store
+Thumbs.db

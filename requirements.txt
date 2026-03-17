@@ -1,0 +1,8 @@
+requests
+playwright
+pdfplumber
+streamlit
+pandas
+openpyxl
+tqdm
+playwright-stealth
