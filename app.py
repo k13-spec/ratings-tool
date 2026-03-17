@@ -180,7 +180,7 @@ def _cached_agencies() -> list:
         conn.close()
 
 
-@st.cache_data(ttl=300, show_spinner=False)
+@st.cache_data(ttl=30, show_spinner=False)
 def _cached_stats() -> dict:
     from database.queries import get_db_stats
     conn = _get_conn()
