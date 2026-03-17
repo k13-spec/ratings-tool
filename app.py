@@ -27,16 +27,34 @@ NOTES_PATH = PROJECT_ROOT / "data" / "notes.json"  # legacy; migrated into DB on
 # ------------------------------------------------------------------ #
 _SECTOR_GROUPS = {
     "Corporate": [
+        # CRISIL-style labels
         "Manufacturing", "Auto", "Healthcare", "Technology", "Textile",
         "Energy", "Retail", "Real Estate", "Telecom", "Chemicals",
         "Pharmaceuticals", "Consumer Durables", "Media", "Education",
         "Agriculture", "Food & Beverages", "Logistics", "Hotels",
         "Construction", "Cement", "Metals", "Mining", "Paper", "Printing",
         "Trading", "Services", "IT Services", "FMCG", "Diversified", "",
+        # ICRA-style labels
+        "Realty", "Textiles & Apparels", "Auto Components", "Automobiles",
+        "Agricultural, Commercial & Construction Vehicles",
+        "Chemicals & Petrochemicals", "Fertilizers & Agrochemicals",
+        "Industrial Products", "Industrial Manufacturing",
+        "Agricultural Food & other Products", "Food Products", "Beverages",
+        "Ferrous Metals", "Diversified Metals", "Metals & Minerals Trading",
+        "Minerals & Mining", "Pharmaceuticals & Biotechnology",
+        "Commercial Services & Supplies", "Other Consumer Services",
+        "Leisure Services", "Telecom - Services", "Telecom - Equipment & Accessories",
+        "Healthcare Services", "Healthcare Equipment & Supplies",
+        "Paper, Forest & Jute Products", "IT - Services", "IT - Software", "IT - Hardware",
+        "Electrical Equipment", "Cement & Cement Products", "Other Construction Materials",
+        "Consumable Fuels", "Petroleum Products", "Diversified FMCG",
+        "Household Products", "Entertainment", "Cigarettes & Tobacco Products",
+        "Retailing", "Not Mapped",
     ],
     "Infrastructure": [
         "Infrastructure", "Transport Infrastructure", "Transport Services",
         "Other Utilities", "Public Services", "Gas", "Power",
+        "Oil",
     ],
     "Financial": [
         "Financial Sector", "Banks", "Capital Markets", "Finance", "Insurance",

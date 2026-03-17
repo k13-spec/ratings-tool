@@ -330,6 +330,42 @@ def _find_kfi_elements(soup) -> list:
     return found
 
 
+_CRITERIA_SECTOR_MAP = [
+    # patterns in "Criteria for X" lines → sector label
+    ("financial sector", "Financial Sector"),
+    ("bank", "Financial Sector"),
+    ("insurance", "Insurance"),
+    ("capital market", "Capital Markets"),
+    ("infrastructure sector", "Infrastructure"),
+    ("real estate", "Real Estate"),
+    ("hotel", "Hotels"),
+    ("healthcare", "Healthcare"),
+    ("pharma", "Pharmaceuticals"),
+    ("textile", "Textile"),
+    ("cement", "Cement"),
+    ("manufacturing, trading and corporate", "Manufacturing"),
+    ("manufacturing", "Manufacturing"),
+]
+
+
+def _parse_sector_from_html(html: str) -> str:
+    """
+    Extract sector from CRISIL rationale HTML by inspecting criteria links.
+    Returns a sector label or empty string if not found.
+    """
+    soup = BeautifulSoup(html, "html.parser")
+    # Look for criteria links / text that mention sector
+    criteria_text = ""
+    for tag in soup.find_all(["a", "td", "th", "li", "p"]):
+        t = tag.get_text(" ", strip=True).lower()
+        if "criteria for" in t:
+            criteria_text += " " + t
+    for kw, label in _CRITERIA_SECTOR_MAP:
+        if kw in criteria_text:
+            return label
+    return ""
+
+
 def _parse_kfi_table(html: str) -> list:
     """
     Parse all 'Key Financial Indicators' tables in the HTML.
@@ -508,6 +544,21 @@ def run(limit: Optional[int] = None) -> dict:
             counts["processed"] += 1
             time.sleep(0.3)
             continue
+
+        # Extract sector from HTML if company currently has none
+        if not (row["sector"] or "").strip():
+            sector_from_html = _parse_sector_from_html(html)
+            if sector_from_html:
+                try:
+                    conn.execute(
+                        "UPDATE ratings SET sector=? "
+                        "WHERE company_id=? AND agency='CRISIL' "
+                        "AND (sector IS NULL OR sector='')",
+                        (sector_from_html, company_id),
+                    )
+                    conn.commit()
+                except Exception as exc:
+                    logger.debug("Sector update for %s: %s", company_name, exc)
 
         # Parse KFI
         financials = _parse_kfi_table(html)
