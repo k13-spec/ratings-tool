@@ -12,6 +12,7 @@ Usage:
 import json
 import logging
 import re
+import urllib.parse
 from pathlib import Path
 from typing import Optional
 
@@ -22,13 +23,10 @@ from parsers.rating import normalize_rating
 
 logger = logging.getLogger(__name__)
 
-PROJECT_ROOT = Path(__file__).resolve().parent.parent
-INDEX_PATH   = PROJECT_ROOT / "data" / "crisil_index.json"
-COMPANY_PAGE = (
-    "https://www.crisilratings.com/en/home/our-business/"
-    "ratings/rating-rationale.html?companyCode={}"
-)
-GENERIC_URL  = (
+PROJECT_ROOT   = Path(__file__).resolve().parent.parent
+INDEX_PATH     = PROJECT_ROOT / "data" / "crisil_index.json"
+RATIONALE_BASE = "https://www.crisilratings.com/mnt/winshare/Ratings/RatingList/RatingDocs/"
+GENERIC_URL    = (
     "https://www.crisilratings.com/en/home/our-business/"
     "ratings/rating-rationale.html"
 )
@@ -165,15 +163,15 @@ def run(limit: Optional[int] = None, dry_run: bool = False) -> dict:
     """
     counts = {"records_scraped": 0, "companies_upserted": 0, "errors": 0}
 
-    # Load company_code index for deep-link URLs
-    _code_map: dict = {}
+    # Load rating_file_name index for direct rationale URLs
+    _fname_map: dict = {}
     if INDEX_PATH.exists():
         try:
             idx = json.loads(INDEX_PATH.read_text(encoding="utf-8")).get("index", {})
-            _code_map = {k: v["company_code"] for k, v in idx.items() if v.get("company_code")}
-            logger.info("Loaded %d company codes from index", len(_code_map))
+            _fname_map = {k: v["rating_file_name"] for k, v in idx.items() if v.get("rating_file_name")}
+            logger.info("Loaded %d file entries from index", len(_fname_map))
         except Exception as exc:
-            logger.warning("Could not load crisil_index for company codes: %s", exc)
+            logger.warning("Could not load crisil_index for file URLs: %s", exc)
 
     def _norm(s: str) -> str:
         s = s.lower().strip()
@@ -221,7 +219,7 @@ def run(limit: Optional[int] = None, dry_run: bool = False) -> dict:
             company_id = upsert_company(conn, parsed["company_name"])
             counts["companies_upserted"] += 1
 
-            code = _code_map.get(_norm(parsed["company_name"]))
+            fname = _fname_map.get(_norm(parsed["company_name"]))
             insert_rating(
                 conn,
                 company_id,
@@ -231,7 +229,9 @@ def run(limit: Optional[int] = None, dry_run: bool = False) -> dict:
                 outlook=parsed["outlook"],
                 rating_date=parsed["rating_date"],
                 sector=parsed["sector"],
-                rationale_url=COMPANY_PAGE.format(code) if code else GENERIC_URL,
+                rationale_url=(
+                    RATIONALE_BASE + urllib.parse.quote(fname) if fname else GENERIC_URL
+                ),
             )
             counts["records_scraped"] += 1
 
