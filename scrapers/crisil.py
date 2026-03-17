@@ -9,8 +9,10 @@ Usage:
     python run_scraper.py --crisil --limit 100
 """
 
+import json
 import logging
 import re
+from pathlib import Path
 from typing import Optional
 
 import requests
@@ -19,6 +21,17 @@ from database.models import get_connection, init_db, upsert_company, insert_rati
 from parsers.rating import normalize_rating
 
 logger = logging.getLogger(__name__)
+
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+INDEX_PATH   = PROJECT_ROOT / "data" / "crisil_index.json"
+COMPANY_PAGE = (
+    "https://www.crisilratings.com/en/home/our-business/"
+    "ratings/rating-rationale.html?companyCode={}"
+)
+GENERIC_URL  = (
+    "https://www.crisilratings.com/en/home/our-business/"
+    "ratings/rating-rationale.html"
+)
 
 SUGGEST_URL = (
     "https://www.crisilratings.com/content/crisilratings/en/home/our-business/"
@@ -152,6 +165,21 @@ def run(limit: Optional[int] = None, dry_run: bool = False) -> dict:
     """
     counts = {"records_scraped": 0, "companies_upserted": 0, "errors": 0}
 
+    # Load company_code index for deep-link URLs
+    _code_map: dict = {}
+    if INDEX_PATH.exists():
+        try:
+            idx = json.loads(INDEX_PATH.read_text(encoding="utf-8")).get("index", {})
+            _code_map = {k: v["company_code"] for k, v in idx.items() if v.get("company_code")}
+            logger.info("Loaded %d company codes from index", len(_code_map))
+        except Exception as exc:
+            logger.warning("Could not load crisil_index for company codes: %s", exc)
+
+    def _norm(s: str) -> str:
+        s = s.lower().strip()
+        s = re.sub(r'\b(limited|ltd|private|pvt|llp)\b', '', s)
+        return re.sub(r'\s+', ' ', s).strip()
+
     logger.info("Fetching CRISIL suggest API...")
     try:
         resp = requests.get(SUGGEST_URL, headers=HEADERS, timeout=60)
@@ -193,6 +221,7 @@ def run(limit: Optional[int] = None, dry_run: bool = False) -> dict:
             company_id = upsert_company(conn, parsed["company_name"])
             counts["companies_upserted"] += 1
 
+            code = _code_map.get(_norm(parsed["company_name"]))
             insert_rating(
                 conn,
                 company_id,
@@ -202,10 +231,7 @@ def run(limit: Optional[int] = None, dry_run: bool = False) -> dict:
                 outlook=parsed["outlook"],
                 rating_date=parsed["rating_date"],
                 sector=parsed["sector"],
-                rationale_url=(
-                    "https://www.crisilratings.com/en/home/our-business/"
-                    "ratings/rating-rationale.html"
-                ),
+                rationale_url=COMPANY_PAGE.format(code) if code else GENERIC_URL,
             )
             counts["records_scraped"] += 1
 
