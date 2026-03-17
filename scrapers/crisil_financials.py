@@ -21,6 +21,7 @@ import json
 import logging
 import re
 import time
+import urllib.parse
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import date, timedelta
 from pathlib import Path
@@ -533,9 +534,9 @@ def run(limit: Optional[int] = None) -> dict:
             counts["processed"] += 1
             continue
 
-        # Fetch rationale HTML
+        # Fetch rationale HTML (URL-encode filename to handle spaces)
         try:
-            resp = session.get(RATIONALE_BASE + rating_file, timeout=20)
+            resp = session.get(RATIONALE_BASE + urllib.parse.quote(rating_file), timeout=20)
             resp.raise_for_status()
             html = resp.text
         except Exception as exc:
