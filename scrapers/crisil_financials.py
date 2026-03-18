@@ -20,6 +20,7 @@ Usage:
 import json
 import logging
 import re
+import socket
 import time
 import urllib.parse
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -497,6 +498,10 @@ def run(limit: Optional[int] = None) -> dict:
         len(candidates),
     )
 
+    # Hard socket timeout to prevent HTTP streaming from hanging indefinitely.
+    # requests timeout= resets per-byte received; socket default is a true hard limit.
+    socket.setdefaulttimeout(30)
+
     session = requests.Session()
     session.headers.update(HEADERS)
     try:
@@ -526,6 +531,11 @@ def run(limit: Optional[int] = None) -> dict:
         if not entry:
             counts["not_found"] += 1
             counts["processed"] += 1
+            if counts["processed"] % 1000 == 0:
+                logger.info(
+                    "CRISIL financials progress: %d processed, %d extracted, %d not found",
+                    counts["processed"], counts["financials_extracted"], counts["not_found"],
+                )
             continue
 
         rating_file = entry.get("rating_file_name", "")
