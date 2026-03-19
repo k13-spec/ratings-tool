@@ -82,6 +82,18 @@ def build_parser() -> argparse.ArgumentParser:
         help="Fetch CRISIL rationale HTML pages and extract Key Financial Indicators for CRISIL-rated companies"
     )
     parser.add_argument(
+        "--care-edge", action="store_true",
+        help="Search CareEdge for each DB company without a CARE Edge rating; extract rating + brief financials from PR PDF"
+    )
+    parser.add_argument(
+        "--care-edge-financials", action="store_true",
+        help="Extract brief financials from CareEdge PR PDFs for companies that have a CARE Edge rating but no financials"
+    )
+    parser.add_argument(
+        "--care-edge-discover", action="store_true",
+        help="Alphabetical prefix search on CareEdge to discover and add net-new companies (aa..zz)"
+    )
+    parser.add_argument(
         "--all", action="store_true", help="Run ICRA + CRISIL + NSE (ratings + listed financials)"
     )
     parser.add_argument(
@@ -186,6 +198,42 @@ def run_crisil_financials(limit=None) -> dict:
     return result
 
 
+def run_care_edge(limit=None) -> dict:
+    logger.info("=" * 60)
+    logger.info("Starting CareEdge ratings scraper%s", f" (limit={limit})" if limit else "")
+    logger.info("=" * 60)
+    from scrapers.care_edge import run
+    t0 = time.time()
+    result = run(limit=limit)
+    elapsed = time.time() - t0
+    logger.info("CareEdge done in %.1fs: %s", elapsed, ", ".join(f"{k}={v}" for k, v in result.items()))
+    return result
+
+
+def run_care_edge_financials(limit=None) -> dict:
+    logger.info("=" * 60)
+    logger.info("Starting CareEdge financials scraper%s", f" (limit={limit})" if limit else "")
+    logger.info("=" * 60)
+    from scrapers.care_edge import run_financials
+    t0 = time.time()
+    result = run_financials(limit=limit)
+    elapsed = time.time() - t0
+    logger.info("CareEdge financials done in %.1fs: %s", elapsed, ", ".join(f"{k}={v}" for k, v in result.items()))
+    return result
+
+
+def run_care_edge_discover(limit=None) -> dict:
+    logger.info("=" * 60)
+    logger.info("Starting CareEdge discover scraper%s", f" (limit={limit})" if limit else "")
+    logger.info("=" * 60)
+    from scrapers.care_edge import run_discover
+    t0 = time.time()
+    result = run_discover(limit=limit)
+    elapsed = time.time() - t0
+    logger.info("CareEdge discover done in %.1fs: %s", elapsed, ", ".join(f"{k}={v}" for k, v in result.items()))
+    return result
+
+
 def run_bse(limit=None) -> dict:
     logger.info("=" * 60)
     logger.info("Starting BSE XBRL scraper%s", f" (limit={limit})" if limit else "")
@@ -269,9 +317,14 @@ def main():
         logging.getLogger().setLevel(logging.DEBUG)
 
     # Require at least one action
-    if not any([args.icra, args.crisil, args.bse, args.nse, args.icra_pdfs, args.crisil_index, args.crisil_financials, args.all]):
+    care_edge = getattr(args, "care_edge", False)
+    care_edge_financials = getattr(args, "care_edge_financials", False)
+    care_edge_discover = getattr(args, "care_edge_discover", False)
+    if not any([args.icra, args.crisil, args.bse, args.nse, args.icra_pdfs,
+                args.crisil_index, args.crisil_financials, args.all,
+                care_edge, care_edge_financials, care_edge_discover]):
         parser.print_help()
-        print("\nError: specify at least one of --icra, --crisil, --nse, --bse, --icra-pdfs, --crisil-index, --crisil-financials, or --all")
+        print("\nError: specify at least one scraper flag")
         sys.exit(1)
 
     all_results = {}
@@ -298,6 +351,15 @@ def main():
 
         if args.crisil_financials:
             all_results["CRISIL-Financials"] = run_crisil_financials(limit=args.limit)
+
+        if care_edge:
+            all_results["CareEdge"] = run_care_edge(limit=args.limit)
+
+        if care_edge_financials:
+            all_results["CareEdge-Financials"] = run_care_edge_financials(limit=args.limit)
+
+        if care_edge_discover:
+            all_results["CareEdge-Discover"] = run_care_edge_discover(limit=args.limit)
 
     except KeyboardInterrupt:
         logger.info("\nInterrupted by user")
