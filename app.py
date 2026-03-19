@@ -166,6 +166,59 @@ def _save_notes(notes: dict):
 
 
 # ------------------------------------------------------------------ #
+# Sector override persistence                                          #
+# ------------------------------------------------------------------ #
+
+def _save_sector_override(company_id: int, sector: str):
+    """Update sector for all ratings of a company, then push DB to git for cross-instance sync."""
+    if not DB_PATH.exists():
+        return
+    import sqlite3 as _sqlite3
+    conn = _sqlite3.connect(str(DB_PATH))
+    try:
+        conn.execute(
+            "UPDATE ratings SET sector=? WHERE company_id=?",
+            (sector.strip() if sector else "", int(company_id)),
+        )
+        conn.commit()
+    finally:
+        conn.close()
+    _push_db_to_git(f"Manual sector edit: company_id={company_id}")
+
+
+def _push_db_to_git(message: str = "Manual edit from dashboard"):
+    """Checkpoint WAL + git add/commit/push data/ratings.db for cross-instance sync."""
+    import sqlite3 as _sqlite3
+    from datetime import datetime as _dt
+    try:
+        conn = _sqlite3.connect(str(DB_PATH))
+        conn.execute("PRAGMA wal_checkpoint(TRUNCATE)")
+        conn.close()
+    except Exception:
+        return
+    try:
+        def _git(*args):
+            return subprocess.run(
+                ["git", "-C", str(PROJECT_ROOT), *args],
+                capture_output=True, text=True,
+            )
+        _git("add", "data/ratings.db")
+        diff = _git("diff", "--cached", "--quiet")
+        if diff.returncode == 0:
+            return  # nothing changed
+        _git("commit", "-m", f"{message} ({_dt.now().strftime('%Y-%m-%d %H:%M')})")
+        _git("push", "origin", "master")
+    except Exception:
+        pass  # don't fail the UI if git push fails
+
+
+# sorted list of all known sectors for the edit dropdown
+_ALL_SECTOR_OPTIONS = [""] + sorted(
+    {s for members in _SECTOR_GROUPS.values() for s in members if s}
+)
+
+
+# ------------------------------------------------------------------ #
 # Helpers                                                              #
 # ------------------------------------------------------------------ #
 def _db_exists() -> bool:
@@ -624,8 +677,8 @@ def main():
         display_df = display_df.copy()
         display_df["Notes"] = display_df["company_id"].astype(str).map(notes).fillna("")
 
-        # Show as editable table — only Notes column is editable
-        non_note_cols = [c for c in display_df.columns if c != "Notes"]
+        # Show as editable table — Notes and Sector columns are editable
+        non_note_cols = [c for c in display_df.columns if c not in ("Notes", "Sector")]
         editor_df = display_df.drop(columns=["company_id"], errors="ignore")
 
         # Replace NaN in URL column so LinkColumn shows blank instead of "None"
@@ -655,7 +708,10 @@ def main():
                 "Rating":          st.column_config.TextColumn("Rating",            width="small"),
                 "Grade":           st.column_config.NumberColumn("Grade",           width="small", format="%d"),
                 "Outlook":         st.column_config.TextColumn("Outlook",           width="medium"),
-                "Sector":          st.column_config.TextColumn("Sector",            width="medium"),
+                "Sector":          st.column_config.SelectboxColumn(
+                    "Sector ✏️", width="medium", options=_ALL_SECTOR_OPTIONS,
+                    help="Click to change sector. Changes save automatically and sync to cloud.",
+                ),
                 "Listed":          st.column_config.TextColumn("Listed",            width="small"),
                 "Revenue (Cr)":    st.column_config.NumberColumn("Revenue (Cr)",    format="₹%,.0f", width="medium"),
                 "EBITDA (Cr)":     st.column_config.NumberColumn("EBITDA (Cr)",     format="₹%,.0f", width="medium"),
@@ -674,29 +730,51 @@ def main():
             key="main_table",
         )
 
-        # Persist note edits — only process rows the user actually changed
+        # Persist note and sector edits — only process rows the user actually changed
         edit_delta = st.session_state.get("main_table") or {}
         edited_rows = edit_delta.get("edited_rows", {})
         if edited_rows:
-            changed = False
+            notes_changed = False
+            sector_saves = []
             for row_idx, changes in edited_rows.items():
-                if "Notes" not in changes:
-                    continue
                 idx = int(row_idx)
                 if idx >= len(display_df):
                     continue
                 cid = str(display_df.iloc[idx]["company_id"])
-                note = str(changes["Notes"] or "").strip()
-                if note:
-                    if notes.get(cid) != note:
-                        notes[cid] = note
-                        changed = True
-                elif cid in notes:
-                    del notes[cid]
-                    changed = True
-            if changed:
+
+                # ---- Notes ----
+                if "Notes" in changes:
+                    note = str(changes["Notes"] or "").strip()
+                    if note:
+                        if notes.get(cid) != note:
+                            notes[cid] = note
+                            notes_changed = True
+                    elif cid in notes:
+                        del notes[cid]
+                        notes_changed = True
+
+                # ---- Sector ----
+                if "Sector" in changes:
+                    new_sector = str(changes["Sector"] or "").strip()
+                    old_sector = str(display_df.iloc[idx].get("Sector", "") or "").strip()
+                    if new_sector != old_sector:
+                        sector_saves.append((int(cid), new_sector))
+
+            if notes_changed:
                 st.session_state.notes = notes
                 _save_notes(notes)
+
+            for cid_int, new_sector in sector_saves:
+                _save_sector_override(cid_int, new_sector)
+                _cached_sectors.clear()
+            if sector_saves:
+                st.toast(
+                    f"✅ Sector updated for {len(sector_saves)} company"
+                    + ("" if len(sector_saves) == 1 else "s")
+                    + " — syncing to cloud…",
+                    icon="✏️",
+                )
+                st.rerun()
 
         # ---- Export ----
         st.divider()
