@@ -75,7 +75,8 @@ CREATE TABLE IF NOT EXISTS financials (
     net_debt_ebitda REAL,
     data_source TEXT,
     extraction_confidence REAL,
-    scraped_at TEXT DEFAULT (datetime('now'))
+    scraped_at TEXT DEFAULT (datetime('now')),
+    UNIQUE(company_id, fiscal_year, data_source)
 );
 
 CREATE TABLE IF NOT EXISTS capex_plans (
@@ -214,24 +215,15 @@ def insert_rating(conn: sqlite3.Connection, company_id: int, **kwargs) -> int:
 
 def insert_financial(conn: sqlite3.Connection, company_id: int, **kwargs) -> int:
     """
-    Insert a financials row. Skips if (company_id, fiscal_year, data_source)
-    already exists.
+    Insert a financials row. If (company_id, fiscal_year, data_source) already
+    exists, keeps whichever row has the higher extraction_confidence.
+
+    Uses INSERT OR IGNORE + the UNIQUE constraint to prevent race-condition
+    duplicates from ThreadPoolExecutor workers.
     """
     fiscal_year = kwargs.get("fiscal_year")
     data_source = kwargs.get("data_source")
-
-    if fiscal_year and data_source:
-        existing = conn.execute(
-            "SELECT id, extraction_confidence FROM financials WHERE company_id=? AND fiscal_year=? AND data_source=?",
-            (company_id, fiscal_year, data_source),
-        ).fetchone()
-        if existing:
-            new_conf = kwargs.get("extraction_confidence", 0) or 0
-            old_conf = existing["extraction_confidence"] or 0
-            if new_conf <= old_conf:
-                return existing["id"]
-            # New data is higher confidence — delete old row and re-insert
-            conn.execute("DELETE FROM financials WHERE id=?", (existing["id"],))
+    new_conf    = kwargs.get("extraction_confidence", 0) or 0
 
     allowed_cols = [
         "fiscal_year", "revenue_cr", "ebitda_cr", "ebitda_margin_pct",
@@ -240,14 +232,39 @@ def insert_financial(conn: sqlite3.Connection, company_id: int, **kwargs) -> int
         "extraction_confidence",
     ]
     columns = ["company_id"]
-    values = [company_id]
+    values  = [company_id]
     for col in allowed_cols:
         if col in kwargs and kwargs[col] is not None:
             columns.append(col)
             values.append(kwargs[col])
 
     placeholders = ", ".join("?" for _ in values)
-    col_str = ", ".join(columns)
+    col_str      = ", ".join(columns)
+
+    if fiscal_year and data_source:
+        # Atomic insert guarded by UNIQUE constraint — eliminates SELECT→INSERT race
+        cursor = conn.execute(
+            f"INSERT OR IGNORE INTO financials ({col_str}) VALUES ({placeholders})",
+            values,
+        )
+        conn.commit()
+        if cursor.rowcount == 1:
+            return cursor.lastrowid  # new row inserted successfully
+
+        # Row already existed — upgrade only if new confidence is strictly higher
+        existing = conn.execute(
+            "SELECT id, extraction_confidence FROM financials "
+            "WHERE company_id=? AND fiscal_year=? AND data_source=?",
+            (company_id, fiscal_year, data_source),
+        ).fetchone()
+        if existing:
+            old_conf = existing["extraction_confidence"] or 0
+            if new_conf <= old_conf:
+                return existing["id"]
+            # Higher confidence: replace old row
+            conn.execute("DELETE FROM financials WHERE id=?", (existing["id"],))
+            # Fall through to plain INSERT below
+
     cursor = conn.execute(
         f"INSERT INTO financials ({col_str}) VALUES ({placeholders})", values
     )
