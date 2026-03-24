@@ -516,6 +516,10 @@ def run(conn=None, limit: int = None) -> dict:
             SELECT 1 FROM ratings r
             WHERE r.company_id = c.id AND r.agency = ?
         )
+        AND NOT EXISTS (
+            SELECT 1 FROM financials f
+            WHERE f.company_id = c.id
+        )
         ORDER BY c.name
     """, (AGENCY,)).fetchall()
 

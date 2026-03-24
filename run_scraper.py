@@ -94,6 +94,14 @@ def build_parser() -> argparse.ArgumentParser:
         help="Alphabetical prefix search on CareEdge to discover and add net-new companies (aa..zz)"
     )
     parser.add_argument(
+        "--india-ratings", action="store_true",
+        help="Enumerate India Ratings issuer IDs (1-15000) and upsert companies + ratings"
+    )
+    parser.add_argument(
+        "--india-ratings-reset", action="store_true",
+        help="Reset India Ratings checkpoint and restart from ID 1"
+    )
+    parser.add_argument(
         "--all", action="store_true", help="Run ICRA + CRISIL + NSE (ratings + listed financials)"
     )
     parser.add_argument(
@@ -320,9 +328,12 @@ def main():
     care_edge = getattr(args, "care_edge", False)
     care_edge_financials = getattr(args, "care_edge_financials", False)
     care_edge_discover = getattr(args, "care_edge_discover", False)
+    india_ratings = getattr(args, "india_ratings", False)
+    india_ratings_reset = getattr(args, "india_ratings_reset", False)
     if not any([args.icra, args.crisil, args.bse, args.nse, args.icra_pdfs,
                 args.crisil_index, args.crisil_financials, args.all,
-                care_edge, care_edge_financials, care_edge_discover]):
+                care_edge, care_edge_financials, care_edge_discover,
+                india_ratings, india_ratings_reset]):
         parser.print_help()
         print("\nError: specify at least one scraper flag")
         sys.exit(1)
@@ -360,6 +371,20 @@ def main():
 
         if care_edge_discover:
             all_results["CareEdge-Discover"] = run_care_edge_discover(limit=args.limit)
+
+        if india_ratings or india_ratings_reset:
+            logger.info("=" * 60)
+            logger.info("Starting India Ratings scraper%s%s",
+                        f" (limit={args.limit})" if args.limit else "",
+                        " [RESET]" if india_ratings_reset else "")
+            logger.info("=" * 60)
+            from scrapers.india_ratings import run as run_ir
+            t0 = time.time()
+            result = run_ir(limit=args.limit, reset=india_ratings_reset)
+            elapsed = time.time() - t0
+            logger.info("India Ratings done in %.1fs: %s", elapsed,
+                        ", ".join(f"{k}={v}" for k, v in result.items()))
+            all_results["India Ratings"] = result
 
     except KeyboardInterrupt:
         logger.info("\nInterrupted by user")

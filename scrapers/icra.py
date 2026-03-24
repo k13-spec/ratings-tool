@@ -15,9 +15,9 @@ from typing import Optional
 import requests
 from tqdm import tqdm
 
-from database.models import get_connection, init_db, upsert_company, insert_rating, insert_financial, insert_capex_plan
+from database.models import get_connection, init_db, upsert_company, insert_rating, insert_financial
 from parsers.rating import normalize_rating
-from parsers.pdf import extract_financials, extract_capex_plans
+from parsers.pdf import extract_financials
 
 logger = logging.getLogger(__name__)
 
@@ -336,21 +336,6 @@ def run_pdf_pass(limit: Optional[int] = None, min_grade: int = 5) -> dict:
         except Exception as exc:
             logger.error("Financials error for %s: %s", company_name, exc)
             counts["errors"] += 1
-
-        try:
-            capex_plans = extract_capex_plans(pdf_bytes)
-            for plan in capex_plans:
-                insert_capex_plan(
-                    conn,
-                    company_id,
-                    amount_cr=plan.get("amount_cr"),
-                    timeframe_years=plan.get("timeframe_years"),
-                    description=plan.get("description"),
-                    source_text=plan.get("source_text"),
-                    fiscal_year_extracted=str(row["rating_date"] or "")[:4] or None,
-                )
-        except Exception as exc:
-            logger.error("Capex plans error for %s: %s", company_name, exc)
 
         counts["processed"] += 1
 

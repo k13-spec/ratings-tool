@@ -218,15 +218,11 @@ def get_db_stats(conn: sqlite3.Connection) -> dict:
     last_scraped = last_scraped_row[0] if last_scraped_row else None
 
     total_ratings = conn.execute("SELECT COUNT(*) FROM ratings").fetchone()[0]
-    with_capex_plans = conn.execute(
-        "SELECT COUNT(DISTINCT company_id) FROM capex_plans"
-    ).fetchone()[0]
 
     return {
         "total_companies": total_companies,
         "rated_companies": rated_companies,
         "with_financials": with_financials,
-        "with_capex_plans": with_capex_plans,
         "total_ratings": total_ratings,
         "last_scraped": last_scraped,
     }

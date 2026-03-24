@@ -79,16 +79,6 @@ CREATE TABLE IF NOT EXISTS financials (
     UNIQUE(company_id, fiscal_year, data_source)
 );
 
-CREATE TABLE IF NOT EXISTS capex_plans (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    company_id INTEGER NOT NULL REFERENCES companies(id),
-    amount_cr REAL,
-    timeframe_years INTEGER,
-    description TEXT,
-    source_text TEXT,
-    fiscal_year_extracted INTEGER
-);
-
 CREATE TABLE IF NOT EXISTS notes (
     company_id INTEGER PRIMARY KEY REFERENCES companies(id),
     note TEXT NOT NULL,
@@ -272,23 +262,3 @@ def insert_financial(conn: sqlite3.Connection, company_id: int, **kwargs) -> int
     return cursor.lastrowid
 
 
-def insert_capex_plan(conn: sqlite3.Connection, company_id: int, **kwargs) -> int:
-    """Insert a capex_plans row."""
-    allowed_cols = [
-        "amount_cr", "timeframe_years", "description",
-        "source_text", "fiscal_year_extracted",
-    ]
-    columns = ["company_id"]
-    values = [company_id]
-    for col in allowed_cols:
-        if col in kwargs and kwargs[col] is not None:
-            columns.append(col)
-            values.append(kwargs[col])
-
-    placeholders = ", ".join("?" for _ in values)
-    col_str = ", ".join(columns)
-    cursor = conn.execute(
-        f"INSERT INTO capex_plans ({col_str}) VALUES ({placeholders})", values
-    )
-    conn.commit()
-    return cursor.lastrowid
