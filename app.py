@@ -510,6 +510,14 @@ def main():
 
         st.divider()
 
+        # ---- Company Name Search ----
+        company_search = st.text_input(
+            "Search Company Name",
+            placeholder="e.g. Tata, Reliance…",
+        ).strip()
+
+        st.divider()
+
         # ---- Rating Agency ----
         available_agencies = _cached_agencies()
         selected_agencies = st.multiselect(
@@ -642,6 +650,11 @@ def main():
         if exclude_psu:
             mask = display_df["Company Name"].apply(_is_psu)
             display_df = display_df[~mask].reset_index(drop=True)
+
+        # Company name search (in-memory)
+        if company_search:
+            mask = display_df["Company Name"].str.contains(company_search, case=False, na=False)
+            display_df = display_df[mask].reset_index(drop=True)
     else:
         display_df = df if df is not None else pd.DataFrame()
 
