@@ -70,6 +70,10 @@ def build_parser() -> argparse.ArgumentParser:
         help="PDF pass: fetch ICRA rationale PDFs in-memory for unlisted companies without financials"
     )
     parser.add_argument(
+        "--icra-discover", action="store_true",
+        help="Discover ICRA-rated companies missing from the paginated listing via the search API + detail pages"
+    )
+    parser.add_argument(
         "--crisil-index", action="store_true",
         help="Build/refresh the local CRISIL listing index (run before --crisil-financials)"
     )
@@ -330,10 +334,11 @@ def main():
     care_edge_discover = getattr(args, "care_edge_discover", False)
     india_ratings = getattr(args, "india_ratings", False)
     india_ratings_reset = getattr(args, "india_ratings_reset", False)
+    icra_discover = getattr(args, "icra_discover", False)
     if not any([args.icra, args.crisil, args.bse, args.nse, args.icra_pdfs,
                 args.crisil_index, args.crisil_financials, args.all,
                 care_edge, care_edge_financials, care_edge_discover,
-                india_ratings, india_ratings_reset]):
+                india_ratings, india_ratings_reset, icra_discover]):
         parser.print_help()
         print("\nError: specify at least one scraper flag")
         sys.exit(1)
@@ -356,6 +361,20 @@ def main():
 
         if args.icra_pdfs:
             all_results["ICRA-PDFs"] = run_icra_pdfs(limit=args.limit)
+
+        if icra_discover:
+            logger.info("=" * 60)
+            logger.info(
+                "Starting ICRA discover (search API + detail pages)%s",
+                f" (limit={args.limit})" if args.limit else "",
+            )
+            logger.info("=" * 60)
+            from scrapers.icra import run_id_scan
+            t0 = time.time()
+            result = run_id_scan(limit=args.limit)
+            elapsed = time.time() - t0
+            logger.info("ICRA discover done in %.1fs: %s", elapsed, ", ".join(f"{k}={v}" for k, v in result.items()))
+            all_results["ICRA-Discover"] = result
 
         if args.crisil_index:
             all_results["CRISIL-Index"] = run_crisil_index(force_rebuild=args.force_rebuild)
