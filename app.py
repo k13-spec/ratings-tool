@@ -27,37 +27,126 @@ NOTES_PATH = PROJECT_ROOT / "data" / "notes.json"  # legacy; migrated into DB on
 # ------------------------------------------------------------------ #
 _SECTOR_GROUPS = {
     "Corporate": [
-        # CRISIL-style labels
-        "Manufacturing", "Auto", "Healthcare", "Technology", "Textile",
-        "Energy", "Retail", "Real Estate", "Telecom", "Chemicals",
-        "Pharmaceuticals", "Consumer Durables", "Media", "Education",
-        "Agriculture", "Food & Beverages", "Logistics", "Hotels",
-        "Construction", "Cement", "Metals", "Mining", "Paper", "Printing",
-        "Trading", "Services", "IT Services", "FMCG", "Diversified", "",
-        # ICRA-style labels
-        "Realty", "Textiles & Apparels", "Auto Components", "Automobiles",
+        # Basic industrials / materials
+        "Manufacturing", "Chemicals", "Chemicals & Petrochemicals",
+        "Specialty Chemicals", "Commodity Chemicals", "Basic Chemicals",
+        "Fertilizers & Agrochemicals", "Petrochemicals", "Petroleum Products",
+        "Consumable Fuels", "Carbon Black", "Dyes And Pigments", "Explosives",
+        "Metals", "Ferrous Metals", "Diversified Metals", "Metals & Minerals Trading",
+        "Minerals & Mining", "Mining", "Non - Ferrous Metals",
+        "Iron & Steel", "Iron & Steel Products", "Sponge Iron",
+        "Ferro & Silica Manganese", "Aluminium, Copper & Zinc Products",
+        "Precious Metals", "Copper", "Zinc",
+        "Cement", "Cement & Cement Products", "Other Construction Materials",
+        "Refractories", "Glass - Industrial", "Castings & Forgings",
+        "Paper", "Paper & Paper Products", "Paper, Forest & Jute Products",
+        "Forest Products", "Printing", "Printing & Publication",
+        # Auto & engineering
+        "Auto", "Auto Components", "Automobiles",
         "Agricultural, Commercial & Construction Vehicles",
-        "Chemicals & Petrochemicals", "Fertilizers & Agrochemicals",
+        "Passenger Cars & Utility Vehicles", "Commercial Vehicles",
+        "2/3 Wheelers", "Tractors", "Trading - Automobiles",
+        "Tyres & Rubber Products", "Batteries - Automobile",
+        "Bearings", "Compressors & Pumps", "Electrodes",
+        "Heavy Electrical Equipment", "Electrical Equipment", "Other Electrical Equipment",
+        "Industrial Electronics", "Industrial Equipments", "Industrial Machinery",
         "Industrial Products", "Industrial Manufacturing",
-        "Agricultural Food & other Products", "Food Products", "Beverages",
-        "Ferrous Metals", "Diversified Metals", "Metals & Minerals Trading",
-        "Minerals & Mining", "Pharmaceuticals & Biotechnology",
-        "Commercial Services & Supplies", "Other Consumer Services",
-        "Leisure Services", "Telecom - Services", "Telecom - Equipment & Accessories",
+        "Engineering & Construction products", "Engineering, Designing & Construction",
+        "Other Industrial Products", "Packaging", "Industrial Gas", "Industrial Gases",
+        "Aerospace & Defense", "Industrial",
+        # FMCG / consumer
+        "FMCG", "Diversified FMCG", "Fast Moving Consumer Goods",
+        "Consumer Durables", "Consumer Goods including FMGC",
+        "Consumer Electronics", "Household Appliances", "Household Products",
+        "Personal Care", "Personal Products", "Houseware",
+        "Furniture, Home Furnishing, Flooring", "Plastic Products - Consumer",
+        "Gems, Jewellery And Watches", "Leather And Leather Products",
+        "Toys", "Diversified Consumer Products",
+        # Food & beverages
+        "Food & Beverages", "Food Products", "Beverages",
+        "Agricultural Food & other Products", "Other Agricultural Products",
+        "Agriculture", "Dairy Products", "Packaged Foods", "Other Food Products",
+        "Edible Oil", "Sugar", "Tea & Coffee", "Other Beverages",
+        "Breweries & Distilleries", "Cigarettes & Tobacco Products",
+        "Animal Feed",
+        # Healthcare & pharma
+        "Healthcare", "Pharmaceuticals", "Pharmaceuticals & Biotechnology",
         "Healthcare Services", "Healthcare Equipment & Supplies",
-        "Paper, Forest & Jute Products", "IT - Services", "IT - Software", "IT - Hardware",
-        "Electrical Equipment", "Cement & Cement Products", "Other Construction Materials",
-        "Consumable Fuels", "Petroleum Products", "Diversified FMCG",
-        "Household Products", "Entertainment", "Cigarettes & Tobacco Products",
-        "Retailing", "Not Mapped",
+        "Medical Equipment & Supplies", "Hospital",
+        "Healthcare Research, Analytics & Technology", "Biotechnology",
+        "Pharmacy Retail", "Wellness",
+        # Technology & media
+        "Technology", "Information Technology",
+        "IT Services", "IT - Services", "IT - Software", "IT - Hardware",
+        "IT Enabled Services", "Computers - Software & Consulting",
+        "Computers Hardware & Equipments", "Software Products",
+        "Data Processing Services", "E-Learning", "Business Process Outsourcing (BPO) / Knowledge Process Outsourcing (KPO)",
+        "Digital Entertainment", "Media", "Media & Entertainment",
+        "Entertainment", "Film Production, Distribution & Exhibition",
+        "TV Broadcasting & Software Production", "Electronic Media",
+        "Advertising & Media Agencies",
+        # Retail, consumer services, education
+        "Retail", "Retailing", "Diversified Retail",
+        "Speciality Retail", "E-Retail/ E- Commerce", "Pharmacy Retail",
+        "Distributors", "Trading & Distributors",
+        "Education", "Food Storage Facilities",
+        "Other Consumer Services", "Consumer Services",
+        "Leisure Services", "Hotels", "Hotels & Resorts",
+        "Restaurants", "Amusement Parks/ Other Recreation",
+        "Tour, Travel Related Services",
+        # Construction & real estate
+        "Construction", "Civil Construction",
+        "Real Estate", "Realty", "Residential, Commercial Projects",
+        "Real Estate Investment Trusts (REITs)", "Real Estate related services",
+        # Textile
+        "Textile", "Textiles & Apparels",
+        "Garments & Apparels", "Other Textile Products",
+        "Other Textiles", "Cotton Textiles - Composite",
+        "Trading - Textile Products",
+        # Other trading
+        "Trading", "Trading - Chemicals", "Trading - Gas",
+        "Trading - Metals", "Trading - Minerals",
+        # Misc
+        "Consumer Discretionary", "Services", "Diversified",
+        "Multi-Product Companies", "Holding Company",
+        "Commodities", "Basic Materials", "Industrials",
+        "Rubber And Plastics Products", "Plastic Products - Industrial",
+        "Plywood Boards/ Laminates", "Packaging",
+        "Printing & Publication",
+        "Not Mapped", "",
     ],
     "Infrastructure": [
         "Infrastructure", "Transport Infrastructure", "Transport Services",
-        "Other Utilities", "Public Services", "Gas", "Power",
-        "Oil",
+        "Other Utilities", "Public Services", "Gas",
+        "Gas Transmission/ Marketing", "LPG/CNG/PN G/LNG Supplier",
+        "Industrial Gas", "Trading - Gas",
+        "Power", "Power Trading", "Power - Transmission",
+        "Electric Utilities", "Electricity Generation", "Utilities",
+        "Oil", "Oil Exploration & Production", "Oil Storage & Transportation",
+        "Refineries & Marketing", "Petro Products",
+        "Airport & Airport services", "Airline",
+        "Railways", "Road Transport", "Shipping",
+        "Port & Port services", "Dredging",
+        "Logistics Solution Provider", "Transport Related Services",
+        "Toll bridge operator",
+        "Waste Management", "Water Supply & Management", "Multi Utilities",
+        "Telecom", "Telecom - Services", "Telecom - Equipment & Accessories",
+        "Telecom - Cellular & Fixed line services",
+        "Telecom - Infrastructure", "Other Telecom Services",
+        "Telecommunication",
     ],
     "Financial": [
-        "Financial Sector", "Banks", "Capital Markets", "Finance", "Insurance",
+        "Financial Sector", "Financial Services",
+        "Banks", "Private Sector Bank", "Public Sector Bank", "Other Bank",
+        "Capital Markets", "Finance", "Insurance",
+        "Financial Institution", "Financial Technology (Fintech)",
+        "Non-Banking Financial Company (NBFC)", "Housing Finance Company",
+        "Investment Company", "Other Financial Services",
+        "Life Insurance", "General Insurance", "Other Insurance Companies",
+        "Insurance Distributors",
+        "Asset Management Company", "Stockbroking & Allied",
+        "Depositories, Clearing Houses and Other Intermediaries",
+        "Other Capital Market related Services",
     ],
 }
 
@@ -333,7 +422,23 @@ def _grade_color(grade) -> str:
 # ------------------------------------------------------------------ #
 # Sidebar: sector checkbox panel                                       #
 # ------------------------------------------------------------------ #
+def _is_valid_sector(s: str) -> bool:
+    """Return False for sentence fragments or obvious scrape artifacts."""
+    if not s or len(s) > 80:
+        return False
+    # Reject if it looks like a sentence (ends with full stop or contains common prose words)
+    prose_markers = (" the ", " in the ", " of the ", " is ", " are ", " have ", " has ",
+                     " remains ", " which ", " further ", " especially ", " among ")
+    sl = s.lower()
+    if any(m in sl for m in prose_markers):
+        return False
+    if s.endswith("."):
+        return False
+    return True
+
+
 def _sector_checkbox_panel(available_sectors: list) -> list:
+    available_sectors = [s for s in available_sectors if _is_valid_sector(s)]
     grouped: dict[str, list] = {"Corporate": [], "Infrastructure": [], "Financial": []}
     for s in available_sectors:
         grouped[_group_of(s)].append(s)
