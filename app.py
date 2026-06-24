@@ -14,6 +14,7 @@ from pathlib import Path
 
 import pandas as pd
 import streamlit as st
+import urllib.parse
 
 PROJECT_ROOT = Path(__file__).resolve().parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -615,10 +616,13 @@ def main():
 
         st.divider()
 
+        # Pre-fill from deep-link: ?company=Tata
+        _qp_company = st.query_params.get("company", "")
         # ---- Company Name Search ----
         company_search = st.text_input(
             "Search Company Name",
             placeholder="e.g. Tata, Reliance…",
+            value=_qp_company,
         ).strip()
 
         st.divider()
@@ -794,6 +798,10 @@ def main():
         notes = st.session_state.notes
         display_df = display_df.copy()
         display_df["Notes"] = display_df["company_id"].astype(str).map(notes).fillna("")
+        display_df["View Bonds"] = display_df["Company Name"].apply(
+            lambda x: ("https://bondtracker.streamlit.app/?issuer=" + urllib.parse.quote(str(x)))
+            if pd.notna(x) else ""
+        )
 
         # Show as editable table — Notes and Sector columns are editable
         non_note_cols = [c for c in display_df.columns if c not in ("Notes", "Sector")]
@@ -805,7 +813,7 @@ def main():
 
         # Reorder: put Rationale URL as 3rd column (after Company Name, Agency)
         _col_order = [
-            "Company Name", "Agency", "Rationale URL",
+            "Company Name", "Agency", "View Bonds", "Rationale URL",
             "Rating", "Grade", "Outlook", "Sector", "Listed",
             "Revenue (Cr)", "EBITDA (Cr)", "EBITDA Margin %",
             "Total Debt (Cr)", "Net Debt (Cr)", "Net Debt/EBITDA",
@@ -838,6 +846,7 @@ def main():
                 "Net Debt (Cr)":   st.column_config.NumberColumn("Net Debt (Cr)",   format="₹%,.0f", width="medium"),
                 "Net Debt/EBITDA": st.column_config.NumberColumn("ND/EBITDA",       format="%.1fx",  width="small"),
                 "Rating Date":     st.column_config.TextColumn("Rating Date",       width="medium"),
+                "View Bonds":      st.column_config.LinkColumn("Bonds", display_text="↗", width="small"),
                 "Rationale URL":   st.column_config.LinkColumn(
                     "Rationale", display_text="↗", width="small",
                 ),
