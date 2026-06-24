@@ -546,6 +546,104 @@ hr { border-color: #1e2130 !important; }
 """
 
 
+
+
+# ------------------------------------------------------------------ #
+# NSDL bond overlay helpers (cached, optional)                       #
+# ------------------------------------------------------------------ #
+_CO_STOP = {"limited", "ltd", "private", "pvt", "llp",
+           "corporation", "corp", "inc", "co", "bank",
+           "finance", "financial", "india", "and"}
+
+
+def _normalize_co(name: str) -> str:
+    # Strip common legal suffixes so 'HDFC Bank Ltd' matches 'HDFC BANK LIMITED'
+    words = [w.strip(".,&") for w in name.lower().split()]
+    return " ".join(w for w in words if w not in _CO_STOP).strip()
+
+
+@st.cache_data(ttl=86400, show_spinner=False)
+def _load_nsdl_bonds():
+    # Download active bond list from NSDL. Cached 24h.
+    import time as _time, warnings as _warnings, openpyxl, requests
+    try:
+        hdrs = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+            "Referer": "https://www.indiabondinfo.nsdl.com/CBDServices/",
+        }
+        s = requests.Session()
+        s.headers.update(hdrs)
+        s.get("https://www.indiabondinfo.nsdl.com/CBDServices/", timeout=15)
+        _time.sleep(0.3)
+        r = s.get(
+            "https://www.indiabondinfo.nsdl.com/bds-service/v1/public/bdsinfo"
+            "/listofsecurities?type=Active",
+            timeout=120, stream=True,
+        )
+        r.raise_for_status()
+        _warnings.filterwarnings("ignore", category=UserWarning)
+        wb = openpyxl.load_workbook(io.BytesIO(r.content), read_only=True, data_only=True)
+        ws = wb.active
+        all_rows = list(ws.iter_rows(values_only=True))
+        col = {h: i for i, h in enumerate(all_rows[0]) if h}
+        today = pd.Timestamp.today().normalize()
+        records = []
+        for row in all_rows[1:]:
+            if not row:
+                continue
+            issuer = row[col.get("Name of Issuer", 1)]
+            mat_raw = row[col.get("Date of Redemption/Conversion", 0)]
+            if not issuer or not mat_raw:
+                continue
+            issuer_str = str(issuer).strip()
+            if not issuer_str:
+                continue
+            try:
+                mat = pd.Timestamp(str(mat_raw).strip().replace("/", "-"))
+            except Exception:
+                continue
+            if mat < today:
+                continue
+            records.append({
+                "Issuer": issuer_str,
+                "Issuer_norm": _normalize_co(issuer_str),
+                "Days": int((mat - today).days),
+            })
+        return pd.DataFrame(records)
+    except Exception:
+        return pd.DataFrame(columns=["Issuer", "Issuer_norm", "Days"])
+
+
+def _add_bond_counts(display_df, bonds_df):
+    # Append Bonds 30d / 90d / 1yr columns to display_df.
+    display_df = display_df.copy()
+    zeros = [0] * len(display_df)
+    if bonds_df.empty:
+        display_df["Bonds 30d"] = zeros
+        display_df["Bonds 90d"] = zeros
+        display_df["Bonds 1yr"] = zeros
+        return display_df
+    issuer_norms = bonds_df["Issuer_norm"].values
+    days_arr = bonds_df["Days"].values
+    b30, b90, b365 = [], [], []
+    for cname in display_df["Company Name"]:
+        key = _normalize_co(str(cname))
+        if len(key) < 4:
+            b30.append(0); b90.append(0); b365.append(0)
+            continue
+        key_short = key[:18]
+        idx = [i for i, n in enumerate(issuer_norms) if key_short in n]
+        d = days_arr[idx] if idx else []
+        import numpy as np
+        d = np.array(d)
+        b30.append(int((d <= 30).sum()))
+        b90.append(int((d <= 90).sum()))
+        b365.append(int((d <= 365).sum()))
+    display_df["Bonds 30d"] = b30
+    display_df["Bonds 90d"] = b90
+    display_df["Bonds 1yr"] = b365
+    return display_df
+
 def main():
     st.set_page_config(
         page_title="Indian Credit Ratings",
@@ -716,6 +814,14 @@ def main():
             )
 
     # --------------------------------------------------------- #
+
+        st.divider()
+        # ---- Bond Maturity Overlay ----
+        show_bond_overlay = st.checkbox(
+            "Show bond maturities",
+            value=False,
+            help="Adds Bonds 30d/90d/1yr from NSDL. First load ~30s; cached 24h.",
+        )
     # Main area                                                  #
     # --------------------------------------------------------- #
     stats = _cached_stats()
@@ -767,6 +873,12 @@ def main():
     else:
         display_df = df if df is not None else pd.DataFrame()
 
+
+    # ---- Bond Maturity Overlay ----
+    if show_bond_overlay and display_df is not None and not display_df.empty:
+        with st.spinner("Loading NSDL bond data..."):
+            _bonds_df = _load_nsdl_bonds()
+        display_df = _add_bond_counts(display_df, _bonds_df)
     # Reset index so positional lookups are safe
     if display_df is not None and not display_df.empty:
         display_df = display_df.reset_index(drop=True)
@@ -813,7 +925,7 @@ def main():
 
         # Reorder: put Rationale URL as 3rd column (after Company Name, Agency)
         _col_order = [
-            "Company Name", "Agency", "View Bonds", "Rationale URL",
+            "Company Name", "Agency", "View Bonds", "Bonds 30d", "Bonds 90d", "Bonds 1yr", "Rationale URL",
             "Rating", "Grade", "Outlook", "Sector", "Listed",
             "Revenue (Cr)", "EBITDA (Cr)", "EBITDA Margin %",
             "Total Debt (Cr)", "Net Debt (Cr)", "Net Debt/EBITDA",
@@ -847,6 +959,9 @@ def main():
                 "Net Debt/EBITDA": st.column_config.NumberColumn("ND/EBITDA",       format="%.1fx",  width="small"),
                 "Rating Date":     st.column_config.TextColumn("Rating Date",       width="medium"),
                 "View Bonds":      st.column_config.LinkColumn("Bonds", display_text="↗", width="small"),
+                "Bonds 30d":    st.column_config.NumberColumn("Bonds 30d", format="%d", width="small"),
+                "Bonds 90d":    st.column_config.NumberColumn("Bonds 90d", format="%d", width="small"),
+                "Bonds 1yr":    st.column_config.NumberColumn("Bonds 1yr", format="%d", width="small"),
                 "Rationale URL":   st.column_config.LinkColumn(
                     "Rationale", display_text="↗", width="small",
                 ),
