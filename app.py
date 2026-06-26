@@ -1003,8 +1003,8 @@ def main():
             "Rating Date", "BSE Code", "ISIN", "Notes",
         ]
         _present = [c for c in _col_order if c in editor_df.columns]
-        _extra   = [c for c in editor_df.columns if c not in _present]
-        editor_df = editor_df[_present + _extra]
+        editor_df = editor_df[_present]  # only show columns in _col_order
+        non_note_cols = [c for c in editor_df.columns if c not in ("Notes", "Sector")]
         edited_df = st.data_editor(
             editor_df,
             use_container_width=True,
@@ -1138,9 +1138,9 @@ def main():
 
         # ---- Contact footer ----
         st.markdown(
-            "<div style=\'text-align:center;margin-top:32px;font-size:12px;color:#888\'>"
-            "<a href=\'https://www.linkedin.com/in/saxenakriti/\' target=\'_blank\' "
-            "style=\'color:#888;text-decoration:none\'>Contact</a></div>",
+            '<div style="text-align:center;margin-top:32px;font-size:12px;color:#888">'
+            '<a href="https://www.linkedin.com/in/saxenakriti/" target="_blank"'
+            ' style="color:#888;text-decoration:none">Contact</a></div>',
             unsafe_allow_html=True,
         )
     elif display_df is not None and display_df.empty:
