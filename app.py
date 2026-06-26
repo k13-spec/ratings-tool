@@ -499,55 +499,187 @@ def _sector_checkbox_panel(available_sectors: list) -> list:
 # ------------------------------------------------------------------ #
 _CSS = """
 <style>
+/* ── Font ── */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
 /* ── Hide Streamlit chrome ── */
 #MainMenu, footer { visibility: hidden; }
 
+/* ── Global ── */
+html, body, [data-testid="stApp"], [data-testid="stMain"] {
+    background-color: #F8F8F5 !important;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+    color: #18181B;
+}
+
+/* ── Top header bar ── */
+[data-testid="stHeader"] {
+    background-color: #F8F8F5 !important;
+    border-bottom: 1px solid #E8E8E3;
+}
+
 /* ── Sidebar ── */
 [data-testid="stSidebar"] {
-    background: #1a1d2e;
-    border-right: 1px solid #2a2d40;
+    background: #FFFFFF;
+    border-right: 1px solid #E8E8E3;
 }
-/* ensure text is readable on dark sidebar */
 [data-testid="stSidebar"] * {
-    color: #dde1f0 !important;
+    color: #18181B !important;
+    font-family: 'Inter', -apple-system, sans-serif !important;
 }
 [data-testid="stSidebar"] .stButton > button {
-    border-radius: 6px;
+    border-radius: 8px;
     font-size: 0.82rem;
-    border-color: #3a3d55 !important;
+    background: #F4F4F0;
+    border: 1px solid #E8E8E3 !important;
+    color: #18181B !important;
+    font-weight: 500;
+}
+[data-testid="stSidebar"] .stButton > button:hover {
+    background: #ECECEA;
 }
 
 /* ── Metric cards ── */
 [data-testid="stMetric"] {
-    background: #1a1d2e;
-    border: 1px solid #2a2d40;
-    border-radius: 10px;
-    padding: 0.6rem 1rem;
+    background: #FFFFFF;
+    border: 1px solid #E8E8E3;
+    border-radius: 12px;
+    padding: 0.8rem 1.2rem;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
 }
-[data-testid="stMetricLabel"] { font-size: 0.78rem; color: #9098b0; }
-[data-testid="stMetricValue"] { font-size: 1.4rem; font-weight: 600; }
+[data-testid="stMetricLabel"] {
+    font-size: 0.73rem;
+    color: #6B7280;
+    font-weight: 500;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+}
+[data-testid="stMetricValue"] {
+    font-size: 1.45rem;
+    font-weight: 700;
+    color: #18181B;
+}
 
 /* ── Expanders ── */
 [data-testid="stExpander"] details {
-    border: 1px solid #2a2d40;
-    border-radius: 8px;
-    background: #13161f;
+    border: 1px solid #E8E8E3;
+    border-radius: 10px;
+    background: #FFFFFF;
+}
+[data-testid="stExpander"] summary {
+    color: #18181B;
+    font-weight: 500;
 }
 
 /* ── Sort controls row ── */
 div[data-testid="stHorizontalBlock"] [data-testid="stSelectbox"] label,
 div[data-testid="stHorizontalBlock"] [data-testid="stToggle"] label {
     font-size: 0.8rem;
-    color: #9098b0;
+    color: #6B7280;
 }
 
 /* ── Dividers ── */
-hr { border-color: #1e2130 !important; }
+hr { border-color: #E8E8E3 !important; }
 
-/* ── Download button ── */
+/* ── Buttons ── */
 [data-testid="stDownloadButton"] > button {
     border-radius: 8px;
+    background: #18181B;
+    color: #FFFFFF !important;
+    border: none !important;
+    font-weight: 500;
 }
+[data-testid="stDownloadButton"] > button:hover {
+    background: #2D2D30 !important;
+}
+button[kind="primary"] {
+    background: #18181B !important;
+    color: #FFFFFF !important;
+    border: none !important;
+    border-radius: 8px !important;
+    font-weight: 500 !important;
+}
+button[kind="primary"]:hover {
+    background: #2D2D30 !important;
+}
+button[kind="secondary"] {
+    background: #F4F4F0 !important;
+    color: #18181B !important;
+    border: 1px solid #E8E8E3 !important;
+    border-radius: 8px !important;
+    font-weight: 500 !important;
+}
+button[kind="secondary"]:hover {
+    background: #ECECEA !important;
+}
+
+/* ── Data table ── */
+[data-testid="stDataFrame"],
+[data-testid="stDataEditor"] {
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid #E8E8E3 !important;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+}
+
+/* ── Input fields ── */
+input, textarea, select {
+    background: #FFFFFF !important;
+    border-color: #E4E4DF !important;
+    border-radius: 8px !important;
+    color: #18181B !important;
+}
+
+/* ── Code blocks ── */
+[data-testid="stCode"] {
+    background: #F4F4F0 !important;
+    border: 1px solid #E8E8E3;
+    border-radius: 8px;
+}
+
+/* ── Headings ── */
+h1, h2, h3 {
+    color: #18181B !important;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}
+h1 { font-size: 1.75rem !important; }
+
+/* ── Caption / sub-text ── */
+[data-testid="stCaptionContainer"] p,
+small, .stCaption {
+    color: #6B7280 !important;
+    font-size: 0.78rem;
+}
+
+/* ── Alerts ── */
+[data-testid="stAlert"] {
+    border-radius: 10px;
+    border: none;
+}
+
+/* ── Spinner ── */
+.stSpinner > div { border-top-color: #18181B !important; }
+
+/* ── Subheader count ── */
+[data-testid="stSubheader"] h2 {
+    font-size: 1.1rem !important;
+    font-weight: 600;
+    color: #18181B !important;
+}
+
+/* ── Checkboxes & radios ── */
+[data-testid="stCheckbox"] label,
+[data-testid="stRadio"] label {
+    color: #18181B;
+}
+
+/* ── Multiselect tags ── */
+[data-baseweb="tag"] {
+    background: #18181B !important;
+    border-radius: 6px !important;
+}
+[data-baseweb="tag"] span { color: #FFFFFF !important; }
 </style>
 """
 
@@ -668,8 +800,10 @@ def main():
         st.markdown(
             '<div style="text-align:right;padding-top:18px">'
             '<a href="https://bondtracker.streamlit.app" target="_blank" '
-            'style="font-size:13px;color:#4a9eff;border:1px solid #4a9eff;'
-            'padding:5px 11px;border-radius:6px;text-decoration:none;white-space:nowrap">'
+            'style="font-size:12px;font-family:Inter,sans-serif;font-weight:500;'
+            'color:#18181B;border:1px solid #E8E8E3;background:#FFFFFF;'
+            'padding:5px 12px;border-radius:8px;text-decoration:none;white-space:nowrap;'
+            'box-shadow:0 1px 3px rgba(0,0,0,0.06)">'
             '↗ Bond Tracker</a></div>',
             unsafe_allow_html=True,
         )
@@ -1171,9 +1305,10 @@ def main():
 
         # ---- Contact footer ----
         st.markdown(
-            '<div style="text-align:center;margin-top:32px;font-size:12px;color:#888">'
+            '<div style="text-align:center;margin-top:40px;padding-bottom:16px;'
+            'font-size:12px;font-family:Inter,sans-serif;color:#9CA3AF">'
             '<a href="https://www.linkedin.com/in/saxenakriti/" target="_blank"'
-            ' style="color:#888;text-decoration:none">Contact</a></div>',
+            ' style="color:#9CA3AF;text-decoration:none;font-weight:500">Contact</a></div>',
             unsafe_allow_html=True,
         )
     elif display_df is not None and display_df.empty:
