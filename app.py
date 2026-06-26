@@ -1300,24 +1300,9 @@ def main():
     st.subheader(f"{result_count:,} companies match your filters")
 
     if display_df is not None and not display_df.empty:
-        # ---- Sort controls ----
-        _sortable = [
-            "Grade", "Company Name", "Revenue (Cr)", "EBITDA (Cr)",
-            "Total Debt (Cr)", "Net Debt/EBITDA", "EBITDA Margin %", "Rating Date",
-        ]
-        _sort_cols_avail = [c for c in _sortable if c in display_df.columns]
-        sc1, sc2, sc3 = st.columns([3, 1, 4])
-        with sc1:
-            sort_col = st.selectbox(
-                "Sort by", options=_sort_cols_avail,
-                index=_sort_cols_avail.index("Grade") if "Grade" in _sort_cols_avail else 0,
-                key="sort_col", label_visibility="collapsed",
-            )
-        with sc2:
-            sort_asc = st.toggle("↑ Asc", value=True, key="sort_asc")
-        display_df = display_df.sort_values(
-            sort_col, ascending=sort_asc, na_position="last"
-        ).reset_index(drop=True)
+        # Default sort: Grade ascending
+        if "Grade" in display_df.columns:
+            display_df = display_df.sort_values("Grade", ascending=True, na_position="last").reset_index(drop=True)
 
         # Add Notes column from persisted store
         notes = st.session_state.notes
