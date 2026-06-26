@@ -42,7 +42,19 @@ def get_filtered_companies(
             r.*,
             ROW_NUMBER() OVER (
                 PARTITION BY r.company_id, r.agency
-                ORDER BY r.rating_date DESC NULLS LAST, r.id DESC
+                ORDER BY
+                    -- ICRA: prefer rows with a LT rating (symbol not starting with '--').
+                    -- The combined LT,ST format means '--, [ICRA]A1+' has no LT component.
+                    -- Prioritise the row that carries the actual LT rating.
+                    CASE
+                        WHEN r.agency = 'ICRA'
+                         AND r.rating_symbol NOT LIKE '--%'
+                         AND r.rating_symbol NOT LIKE 'Withdrawn%'
+                         AND r.rating_symbol NOT LIKE '*%'
+                        THEN 0 ELSE 1
+                    END,
+                    r.rating_date DESC NULLS LAST,
+                    r.id DESC
             ) AS rn
         FROM ratings r
     ),
