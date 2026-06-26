@@ -53,6 +53,12 @@ def get_filtered_companies(
                          AND r.rating_symbol NOT LIKE '*%'
                         THEN 0 ELSE 1
                     END,
+                    -- CARE Edge: prefer LT or LT/ST rows over ST-only rows.
+                    CASE
+                        WHEN r.agency = 'CARE Edge'
+                         AND r.instrument_type IN ('LT', 'LT/ST')
+                        THEN 0 ELSE 1
+                    END,
                     r.rating_date DESC NULLS LAST,
                     r.id DESC
             ) AS rn
