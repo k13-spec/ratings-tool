@@ -503,12 +503,17 @@ _CSS = """
 
 /* ── Sidebar ── */
 [data-testid="stSidebar"] {
-    background: #0f1117;
-    border-right: 1px solid #1e2130;
+    background: #1a1d2e;
+    border-right: 1px solid #2a2d40;
+}
+/* ensure text is readable on dark sidebar */
+[data-testid="stSidebar"] * {
+    color: #dde1f0 !important;
 }
 [data-testid="stSidebar"] .stButton > button {
     border-radius: 6px;
     font-size: 0.82rem;
+    border-color: #3a3d55 !important;
 }
 
 /* ── Metric cards ── */
@@ -651,8 +656,19 @@ def main():
         initial_sidebar_state="expanded",
     )
     st.markdown(_CSS, unsafe_allow_html=True)
-    st.title("Indian Credit Ratings Dashboard")
-    st.caption("ICRA · CRISIL · CARE · IND Ratings  |  Financials from NSE/yfinance & CRISIL")
+    _nt_col, _nl_col = st.columns([7, 1])
+    with _nt_col:
+        st.title("Indian Credit Ratings Dashboard")
+        st.caption("ICRA · CRISIL · CARE · IND Ratings  |  Financials from NSE/yfinance & CRISIL")
+    with _nl_col:
+        st.markdown(
+            '<div style="text-align:right;padding-top:18px">\'
+            '<a href="https://bondtracker.streamlit.app" target="_blank" \'
+            'style="font-size:13px;color:#4a9eff;border:1px solid #4a9eff;\'
+            'padding:5px 11px;border-radius:6px;text-decoration:none;white-space:nowrap">\'
+            '↗ Bond Tracker</a></div>',
+            unsafe_allow_html=True,
+        )
 
     # Load notes into session state once
     if "notes" not in st.session_state:
