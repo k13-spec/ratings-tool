@@ -1,3 +1,4 @@
+import re
 """
 Streamlit UI for the Indian Credit Ratings Tool.
 
@@ -962,7 +963,14 @@ def main():
                 display_df[_url_col] = display_df[_url_col].fillna("")
 
         # Rating + URL combined: "url##AAA / Stable" for rated, "" for not rated.
+        # Agency-name prefixes are stripped (e.g. "Crisil A-" -> "A-").
         # LinkColumn with display_text=r"##(.+)$" extracts rating text as link label.
+        _PREFIX_RE = {
+            "CRISIL":        re.compile(r"^crisil\s+", re.IGNORECASE),
+            "ICRA":          re.compile(r"^\[?icra\]?\s+", re.IGNORECASE),
+            "Care Edge":     re.compile(r"^care\s*edge\s+|^care\s+", re.IGNORECASE),
+            "India Ratings": re.compile(r"^india\s+ratings?\s+|^ind\s+", re.IGNORECASE),
+        }
         for _ag, _rat, _out, _ucol in [
             ("CRISIL",        "CRISIL Rating",        "CRISIL Outlook",       "CRISIL URL"),
             ("ICRA",          "ICRA Rating",          "ICRA Outlook",         "ICRA URL"),
@@ -970,15 +978,16 @@ def main():
             ("India Ratings", "India Ratings Rating", "India Ratings Outlook","India Ratings URL"),
         ]:
             if _rat in display_df.columns:
-                def _fmt_link_rating(row, r=_rat, o=_out, u=_ucol):
+                def _fmt_link_rating(row, r=_rat, o=_out, u=_ucol, p=_PREFIX_RE[_ag]):
                     sym = row.get(r, None)
                     if not sym or str(sym).strip() in ("", "nan", "None"):
                         return ""  # not rated -> blank
+                    sym = p.sub("", str(sym).strip())  # strip agency prefix
                     out_v = row.get(o, None)
                     if out_v and str(out_v).strip() not in ("", "nan", "None"):
-                        display = str(sym).strip() + " / " + str(out_v).strip()
+                        display = sym + " / " + str(out_v).strip()
                     else:
-                        display = str(sym).strip()
+                        display = sym
                     url_v = row.get(u, None)
                     if url_v and str(url_v).strip() not in ("", "nan", "None"):
                         return str(url_v).strip() + "##" + display
@@ -993,10 +1002,10 @@ def main():
             "Company Name",
             "View Bonds", "Bonds 30d", "Bonds 90d", "Bonds 1yr",
             "CRISIL", "ICRA", "Care Edge", "India Ratings",
-            "Grade", "Sector", "Listed",
+            "Sector",
             "Revenue (Cr)", "EBITDA (Cr)", "EBITDA Margin %",
             "Total Debt (Cr)", "Net Debt (Cr)", "ND/EBITDA",
-            "Rating Date", "BSE Code", "ISIN", "Notes",
+            "Rating Date", "Notes",
         ]
         _present = [c for c in _col_order if c in editor_df.columns]
         editor_df = editor_df[_present]  # only show columns in _col_order
@@ -1014,13 +1023,11 @@ def main():
                 "ICRA":          st.column_config.LinkColumn("ICRA",          display_text=r"##(.+)$", width="medium"),
                 "Care Edge":     st.column_config.LinkColumn("Care Edge",     display_text=r"##(.+)$", width="medium"),
                 "India Ratings": st.column_config.LinkColumn("India Ratings", display_text=r"##(.+)$", width="medium"),
-                # --- Grade + financials ---
-                "Grade":              st.column_config.NumberColumn("Grade",          width="small", format="%d"),
+                # --- Financials ---
                 "Sector":             st.column_config.SelectboxColumn(
                     "Sector 📝", width="medium", options=_ALL_SECTOR_OPTIONS,
                     help="Click to change sector. Changes save automatically and sync to company record.",
                 ),
-                "Listed":             st.column_config.TextColumn("Listed",          width="small"),
                 "Revenue (Cr)":       st.column_config.NumberColumn("Revenue (Cr)",  format="%.0f", width="small"),
                 "EBITDA (Cr)":        st.column_config.NumberColumn("EBITDA (Cr)",   format="%.0f", width="small"),
                 "EBITDA Margin %":    st.column_config.NumberColumn("EBITDA %",      format="%.1f%%", width="small"),
@@ -1032,8 +1039,6 @@ def main():
                 "Bonds 30d":          st.column_config.NumberColumn("Bonds 30d",     format="%d", width="small"),
                 "Bonds 90d":          st.column_config.NumberColumn("Bonds 90d",     format="%d", width="small"),
                 "Bonds 1yr":          st.column_config.NumberColumn("Bonds 1yr",     format="%d", width="small"),
-                "BSE Code":           st.column_config.TextColumn("BSE Code",        width="small"),
-                "ISIN":               st.column_config.TextColumn("ISIN",            width="small"),
                 "Notes":              st.column_config.TextColumn("Notes",           width="large"),
             },
             key="main_table",
