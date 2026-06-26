@@ -500,28 +500,32 @@ def _sector_checkbox_panel(available_sectors: list) -> list:
 _CSS = """
 <style>
 /* ═══════════════════════════════════════════════
-   Portal-inspired design system
-   Palette: warm off-white · near-black · clean white
+   Snazzy Indigo design system — DM Sans · Indigo · Frosted Glass
    ═══════════════════════════════════════════════ */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap');
 
 /* ── Design tokens ── */
 :root {
-    --bg:          #F9F8F6;
-    --surface:     #FFFFFF;
-    --border:      #E5E5E0;
-    --border-soft: #EEEEE9;
-    --text:        #111111;
-    --text-muted:  #717179;
-    --primary:     #111111;
-    --primary-hov: #333333;
-    --secondary:   #F2F2EF;
-    --secondary-hov:#E9E9E5;
-    --shadow-xs:   0 1px 3px rgba(0,0,0,0.05);
-    --shadow-sm:   0 2px 8px rgba(0,0,0,0.07);
-    --radius-sm:   8px;
-    --radius-md:   10px;
-    --radius-lg:   14px;
+    --bg:           #F8F9FF;
+    --surface:      #FFFFFF;
+    --surface-glass:rgba(255,255,255,0.72);
+    --border:       #E0E2EF;
+    --border-soft:  #ECEEFF;
+    --text:         #111827;
+    --text-muted:   #6B7280;
+    --accent:       #6366F1;
+    --accent-hov:   #4F46E5;
+    --accent-light: #EEF2FF;
+    --accent-dim:   rgba(99,102,241,0.12);
+    --secondary:    #F3F4F6;
+    --secondary-hov:#E5E7EB;
+    --shadow-xs:    0 1px 3px rgba(99,102,241,0.08);
+    --shadow-sm:    0 4px 16px rgba(99,102,241,0.12);
+    --shadow-md:    0 8px 32px rgba(99,102,241,0.16);
+    --radius-sm:    8px;
+    --radius-md:    12px;
+    --radius-lg:    16px;
+    --font:         'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
 /* ── Hide Streamlit chrome ── */
@@ -530,7 +534,7 @@ _CSS = """
 /* ── Global background & font ── */
 html, body {
     background-color: var(--bg) !important;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+    font-family: var(--font) !important;
     color: var(--text);
 }
 [data-testid="stApp"],
@@ -542,39 +546,40 @@ html, body {
 section.main > div,
 .stMainBlockContainer {
     background-color: var(--bg) !important;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+    font-family: var(--font) !important;
 }
 /* Markdown text */
 [data-testid="stMarkdownContainer"] p,
 [data-testid="stMarkdownContainer"] li,
 [data-testid="stMarkdownContainer"] span {
     color: var(--text) !important;
-    font-family: 'Inter', -apple-system, sans-serif !important;
+    font-family: var(--font) !important;
 }
 
 /* ── Top header bar ── */
 [data-testid="stHeader"] {
     background-color: var(--bg) !important;
     border-bottom: 1px solid var(--border);
-    backdrop-filter: blur(8px);
 }
 
-/* ═══════════════ SIDEBAR ═══════════════ */
+/* ═══════════════ SIDEBAR — FROSTED GLASS ═══════════════ */
 [data-testid="stSidebar"],
 [data-testid="stSidebarContent"],
 section[data-testid="stSidebar"] > div {
-    background: var(--surface) !important;
-    border-right: 1px solid var(--border) !important;
+    background: var(--surface-glass) !important;
+    backdrop-filter: blur(24px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
+    border-right: 1px solid rgba(99,102,241,0.15) !important;
 }
-/* Sidebar header "Filters" */
+/* Sidebar section header */
 [data-testid="stSidebar"] h1,
 [data-testid="stSidebar"] h2,
 [data-testid="stSidebar"] h3 {
-    color: var(--text) !important;
-    font-family: 'Inter', sans-serif !important;
-    font-size: 0.7rem !important;
+    color: var(--accent) !important;
+    font-family: var(--font) !important;
+    font-size: 0.68rem !important;
     font-weight: 700 !important;
-    letter-spacing: 0.08em !important;
+    letter-spacing: 0.1em !important;
     text-transform: uppercase !important;
 }
 /* All sidebar text */
@@ -582,7 +587,7 @@ section[data-testid="stSidebar"] > div {
 [data-testid="stSidebar"] span,
 [data-testid="stSidebar"] label {
     color: var(--text) !important;
-    font-family: 'Inter', sans-serif !important;
+    font-family: var(--font) !important;
 }
 /* Sidebar widget labels */
 [data-testid="stSidebar"] .stTextInput label,
@@ -593,24 +598,28 @@ section[data-testid="stSidebar"] > div {
 [data-testid="stSidebar"] .stRadio label,
 [data-testid="stSidebar"] .stCheckbox label {
     color: var(--text-muted) !important;
-    font-size: 0.75rem !important;
+    font-size: 0.73rem !important;
     font-weight: 500 !important;
     letter-spacing: 0.02em;
 }
 /* Sidebar buttons */
-[data-testid="stSidebar"] .stButton > button {
+[data-testid="stSidebar"] [data-testid="stBaseButton-secondary"],
+[data-testid="stSidebar"] button {
     border-radius: var(--radius-sm) !important;
     font-size: 0.8rem !important;
-    background: var(--secondary) !important;
+    background: rgba(255,255,255,0.8) !important;
     border: 1px solid var(--border) !important;
     color: var(--text) !important;
     font-weight: 500 !important;
-    font-family: 'Inter', sans-serif !important;
-    transition: background 0.15s ease;
+    font-family: var(--font) !important;
+    transition: all 0.15s ease;
 }
-[data-testid="stSidebar"] .stButton > button:hover {
-    background: var(--secondary-hov) !important;
-    border-color: #D8D8D3 !important;
+[data-testid="stSidebar"] [data-testid="stBaseButton-secondary"]:hover,
+[data-testid="stSidebar"] button:hover {
+    background: white !important;
+    border-color: var(--accent) !important;
+    color: var(--accent) !important;
+    box-shadow: 0 0 0 3px var(--accent-dim) !important;
 }
 /* Sidebar dividers */
 [data-testid="stSidebar"] hr { border-color: var(--border-soft) !important; }
@@ -620,27 +629,38 @@ section[data-testid="stSidebar"] > div {
     background: var(--surface) !important;
     border: 1px solid var(--border) !important;
     border-radius: var(--radius-lg) !important;
-    padding: 1rem 1.25rem !important;
+    padding: 1.1rem 1.4rem !important;
     box-shadow: var(--shadow-xs) !important;
-    transition: box-shadow 0.2s ease;
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
+    position: relative;
+    overflow: hidden;
 }
 [data-testid="stMetric"]:hover {
     box-shadow: var(--shadow-sm) !important;
+    transform: translateY(-1px);
+}
+[data-testid="stMetric"]::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px; height: 100%;
+    background: linear-gradient(180deg, var(--accent), #818CF8);
+    border-radius: 2px 0 0 2px;
 }
 [data-testid="stMetricLabel"] p {
     font-size: 0.67rem !important;
     color: var(--text-muted) !important;
     font-weight: 600 !important;
-    letter-spacing: 0.07em !important;
+    letter-spacing: 0.08em !important;
     text-transform: uppercase !important;
-    font-family: 'Inter', sans-serif !important;
+    font-family: var(--font) !important;
 }
 [data-testid="stMetricValue"] {
-    font-size: 1.55rem !important;
+    font-size: 1.6rem !important;
     font-weight: 700 !important;
     color: var(--text) !important;
-    letter-spacing: -0.02em;
-    font-family: 'Inter', sans-serif !important;
+    letter-spacing: -0.025em !important;
+    font-family: var(--font) !important;
 }
 [data-testid="stMetricDelta"] { font-size: 0.78rem; }
 
@@ -665,7 +685,7 @@ section[data-testid="stSidebar"] > div {
     color: var(--text) !important;
     font-weight: 500 !important;
     font-size: 0.83rem !important;
-    font-family: 'Inter', sans-serif !important;
+    font-family: var(--font) !important;
     padding: 0.65rem 1rem !important;
     background: var(--surface) !important;
 }
@@ -679,76 +699,64 @@ section[data-testid="stSidebar"] > div {
 hr { border-color: var(--border) !important; opacity: 1 !important; }
 [data-testid="stDivider"] hr { border-color: var(--border) !important; }
 
-/* ═══════════════ BUTTONS (Streamlit 1.35+ testid API) ═══════════════ */
-/* Primary — matches st.button(type="primary") and st.download_button() */
+/* ═══════════════ BUTTONS ═══════════════ */
+/* Primary — indigo fill */
 [data-testid="stBaseButton-primary"],
 [data-testid="stDownloadButton"] button {
     border-radius: var(--radius-sm) !important;
-    background: var(--primary) !important;
+    background: linear-gradient(135deg, var(--accent) 0%, #818CF8 100%) !important;
     color: #FFFFFF !important;
     border: none !important;
-    font-weight: 500 !important;
-    font-family: 'Inter', sans-serif !important;
-    letter-spacing: -0.01em !important;
-    box-shadow: none !important;
-    transition: background 0.15s ease, box-shadow 0.15s ease !important;
+    font-weight: 600 !important;
+    font-family: var(--font) !important;
+    letter-spacing: 0.01em !important;
+    box-shadow: 0 2px 8px var(--accent-dim) !important;
+    transition: all 0.2s ease !important;
 }
 [data-testid="stBaseButton-primary"]:hover,
 [data-testid="stDownloadButton"] button:hover {
-    background: var(--primary-hov) !important;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.18) !important;
+    background: linear-gradient(135deg, var(--accent-hov) 0%, var(--accent) 100%) !important;
+    box-shadow: 0 4px 16px rgba(99,102,241,0.35) !important;
+    transform: translateY(-1px);
 }
 /* Secondary */
 [data-testid="stBaseButton-secondary"] {
     border-radius: var(--radius-sm) !important;
-    background: var(--secondary) !important;
-    color: var(--text) !important;
-    border: 1px solid var(--border) !important;
-    font-weight: 500 !important;
-    font-family: 'Inter', sans-serif !important;
-    transition: background 0.15s ease !important;
+    background: var(--accent-light) !important;
+    color: var(--accent) !important;
+    border: 1px solid rgba(99,102,241,0.25) !important;
+    font-weight: 600 !important;
+    font-family: var(--font) !important;
+    transition: all 0.15s ease !important;
 }
 [data-testid="stBaseButton-secondary"]:hover {
-    background: var(--secondary-hov) !important;
+    background: #E0E7FF !important;
+    border-color: var(--accent) !important;
+    box-shadow: 0 0 0 3px var(--accent-dim) !important;
 }
-/* Minimal / Tertiary */
+/* Minimal */
 [data-testid="stBaseButton-minimal"],
 [data-testid="stBaseButton-borderless"] {
     border-radius: var(--radius-sm) !important;
     background: transparent !important;
-    color: var(--text) !important;
+    color: var(--accent) !important;
     border: none !important;
     font-weight: 500 !important;
-    font-family: 'Inter', sans-serif !important;
+    font-family: var(--font) !important;
 }
 [data-testid="stBaseButton-minimal"]:hover,
 [data-testid="stBaseButton-borderless"]:hover {
-    background: var(--secondary) !important;
-}
-/* Sidebar buttons specifically */
-[data-testid="stSidebar"] [data-testid="stBaseButton-secondary"],
-[data-testid="stSidebar"] [data-testid="stBaseButton-minimal"],
-[data-testid="stSidebar"] button {
-    border-radius: var(--radius-sm) !important;
-    background: var(--secondary) !important;
-    color: var(--text) !important;
-    border: 1px solid var(--border) !important;
-    font-weight: 500 !important;
-    font-family: 'Inter', sans-serif !important;
-}
-[data-testid="stSidebar"] [data-testid="stBaseButton-secondary"]:hover,
-[data-testid="stSidebar"] button:hover {
-    background: var(--secondary-hov) !important;
-    border-color: #D8D8D3 !important;
+    background: var(--accent-light) !important;
 }
 
 /* ═══════════════ DATA TABLE ═══════════════ */
 [data-testid="stDataEditor"],
 [data-testid="stDataFrame"] {
     border-radius: var(--radius-lg) !important;
-    border: 1px solid var(--border) !important;
+    border: 1px solid rgba(99,102,241,0.2) !important;
     box-shadow: var(--shadow-xs) !important;
     overflow: hidden;
+    background: var(--surface) !important;
 }
 
 /* ═══════════════ INPUTS ═══════════════ */
@@ -759,14 +767,14 @@ hr { border-color: var(--border) !important; opacity: 1 !important; }
     border: 1px solid var(--border) !important;
     border-radius: var(--radius-sm) !important;
     color: var(--text) !important;
-    font-family: 'Inter', sans-serif !important;
+    font-family: var(--font) !important;
     font-size: 0.85rem !important;
     transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 [data-testid="stTextInput"] input:focus,
 [data-testid="stNumberInput"] input:focus {
-    border-color: #999 !important;
-    box-shadow: 0 0 0 3px rgba(17,17,17,0.06) !important;
+    border-color: var(--accent) !important;
+    box-shadow: 0 0 0 3px var(--accent-dim) !important;
     outline: none;
 }
 /* Selectbox */
@@ -775,7 +783,7 @@ hr { border-color: var(--border) !important; opacity: 1 !important; }
     background: var(--surface) !important;
     border: 1px solid var(--border) !important;
     border-radius: var(--radius-sm) !important;
-    font-family: 'Inter', sans-serif !important;
+    font-family: var(--font) !important;
     font-size: 0.85rem !important;
 }
 /* Dropdown menus */
@@ -783,7 +791,7 @@ hr { border-color: var(--border) !important; opacity: 1 !important; }
 [data-baseweb="menu"],
 [data-baseweb="popover"] [data-baseweb="menu-item"] {
     background: var(--surface) !important;
-    font-family: 'Inter', sans-serif !important;
+    font-family: var(--font) !important;
     font-size: 0.83rem !important;
     color: var(--text) !important;
 }
@@ -791,12 +799,13 @@ hr { border-color: var(--border) !important; opacity: 1 !important; }
 [role="option"]:hover {
     background: var(--secondary) !important;
 }
-/* Multiselect tags */
+/* Multiselect tags — indigo pill */
 [data-baseweb="tag"] {
-    background: var(--primary) !important;
-    border-radius: 6px !important;
+    background: linear-gradient(135deg, var(--accent), #818CF8) !important;
+    border-radius: 20px !important;
+    border: none !important;
 }
-[data-baseweb="tag"] span { color: #FFFFFF !important; font-size: 0.78rem !important; }
+[data-baseweb="tag"] span { color: #FFFFFF !important; font-size: 0.78rem !important; font-weight: 500 !important; }
 
 /* ═══════════════ SLIDERS ═══════════════ */
 [data-testid="stSlider"] label,
@@ -816,13 +825,13 @@ hr { border-color: var(--border) !important; opacity: 1 !important; }
 [data-testid="stCheckbox"] span {
     color: var(--text) !important;
     font-size: 0.83rem !important;
-    font-family: 'Inter', sans-serif !important;
+    font-family: var(--font) !important;
 }
 [data-testid="stRadio"] label p,
 [data-testid="stRadio"] > div > label {
     color: var(--text) !important;
     font-size: 0.83rem !important;
-    font-family: 'Inter', sans-serif !important;
+    font-family: var(--font) !important;
 }
 [data-testid="stRadio"] > div > label > div {
     color: var(--text) !important;
@@ -833,27 +842,27 @@ hr { border-color: var(--border) !important; opacity: 1 !important; }
 [data-testid="stToggle"] p {
     color: var(--text) !important;
     font-size: 0.83rem !important;
-    font-family: 'Inter', sans-serif !important;
+    font-family: var(--font) !important;
 }
 
 /* ═══════════════ TYPOGRAPHY ═══════════════ */
 h1, h2, h3, h4 {
     color: var(--text) !important;
-    font-family: 'Inter', sans-serif !important;
+    font-family: var(--font) !important;
     font-weight: 700 !important;
     letter-spacing: -0.025em !important;
 }
 h1 { font-size: 1.65rem !important; line-height: 1.25; }
 h2 { font-size: 1.15rem !important; }
 h3 { font-size: 0.97rem !important; }
-p, li, span { font-family: 'Inter', -apple-system, sans-serif !important; }
+p, li { font-family: var(--font) !important; }
 
 /* Caption / muted text */
 [data-testid="stCaptionContainer"] p,
 .stCaption p, small {
     color: var(--text-muted) !important;
     font-size: 0.76rem !important;
-    font-family: 'Inter', sans-serif !important;
+    font-family: var(--font) !important;
 }
 
 /* ═══════════════ ALERTS / INFO ═══════════════ */
@@ -864,7 +873,7 @@ p, li, span { font-family: 'Inter', -apple-system, sans-serif !important; }
 [data-testid="stAlertContentError"],
 [data-testid="stAlertContentSuccess"] {
     border-radius: var(--radius-md) !important;
-    font-family: 'Inter', sans-serif !important;
+    font-family: var(--font) !important;
 }
 [data-testid="stAlert"] p,
 [data-testid="stAlertContentInfo"] p { color: var(--text) !important; }
@@ -873,7 +882,7 @@ p, li, span { font-family: 'Inter', -apple-system, sans-serif !important; }
 [data-testid="stSubheader"] h2,
 [data-testid="stSubheader"] p {
     color: var(--text) !important;
-    font-family: 'Inter', sans-serif !important;
+    font-family: var(--font) !important;
     font-weight: 600 !important;
     font-size: 1.0rem !important;
     letter-spacing: -0.015em !important;
@@ -893,7 +902,7 @@ p, li, span { font-family: 'Inter', -apple-system, sans-serif !important; }
     border-radius: var(--radius-md) !important;
     color: var(--text) !important;
     box-shadow: var(--shadow-sm) !important;
-    font-family: 'Inter', sans-serif !important;
+    font-family: var(--font) !important;
 }
 
 /* ═══════════════ CHART ═══════════════ */
@@ -1017,21 +1026,42 @@ def main():
         initial_sidebar_state="expanded",
     )
     st.markdown(_CSS, unsafe_allow_html=True)
-    _nt_col, _nl_col = st.columns([7, 1])
-    with _nt_col:
-        st.title("Indian Credit Ratings Dashboard")
-        st.caption("ICRA · CRISIL · CARE · IND Ratings  |  Financials from NSE/yfinance & CRISIL")
-    with _nl_col:
-        st.markdown(
-            '<div style="text-align:right;padding-top:18px">'
-            '<a href="https://bondtracker.streamlit.app" target="_blank" '
-            'style="font-size:12px;font-family:Inter,sans-serif;font-weight:500;'
-            'color:#18181B;border:1px solid #E8E8E3;background:#FFFFFF;'
-            'padding:5px 12px;border-radius:8px;text-decoration:none;white-space:nowrap;'
-            'box-shadow:0 1px 3px rgba(0,0,0,0.06)">'
-            '↗ Bond Tracker</a></div>',
-            unsafe_allow_html=True,
-        )
+    st.markdown(
+        """
+        <div style="
+            background: linear-gradient(135deg, #6366F1 0%, #818CF8 50%, #A5B4FC 100%);
+            border-radius: 16px;
+            padding: 28px 32px 22px 32px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 8px 32px rgba(99,102,241,0.22);
+        ">
+            <div>
+                <div style="font-family:'DM Sans',sans-serif;font-size:1.65rem;font-weight:700;
+                            color:#FFFFFF;letter-spacing:-0.025em;line-height:1.2;margin-bottom:6px;">
+                    Indian Credit Ratings Dashboard
+                </div>
+                <div style="font-family:'DM Sans',sans-serif;font-size:0.83rem;font-weight:400;
+                            color:rgba(255,255,255,0.8);letter-spacing:0.01em;">
+                    ICRA &middot; CRISIL &middot; CARE Edge &middot; India Ratings &nbsp;&nbsp;|&nbsp;&nbsp;
+                    Financials from NSE / yfinance &amp; CRISIL
+                </div>
+            </div>
+            <div>
+                <a href="https://bondtracker.streamlit.app" target="_blank"
+                   style="font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;
+                          color:#6366F1;background:#FFFFFF;border-radius:8px;
+                          padding:7px 16px;text-decoration:none;white-space:nowrap;
+                          box-shadow:0 2px 8px rgba(0,0,0,0.12);display:inline-block;">
+                    ↗ Bond Tracker
+                </a>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
     # Load notes into session state once
     if "notes" not in st.session_state:
@@ -1389,6 +1419,43 @@ def main():
                     return display  # rated but no URL -> plain text (rare)
                 display_df[_ag] = display_df.apply(_fmt_link_rating, axis=1)
 
+        # ── Rating badge legend ──────────────────────────────────────────
+        st.markdown(
+            """
+            <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;
+                        margin-bottom:10px;padding:10px 14px;
+                        background:#F8F9FF;border:1px solid #E0E2EF;border-radius:10px;">
+                <span style="font-family:'DM Sans',sans-serif;font-size:0.7rem;font-weight:700;
+                             color:#6B7280;letter-spacing:0.08em;text-transform:uppercase;
+                             margin-right:6px;">Rating scale →</span>
+                <span style="background:#0F766E;color:#fff;border-radius:6px;
+                             padding:2px 9px;font-size:0.72rem;font-weight:600;
+                             font-family:'DM Sans',sans-serif;">AAA</span>
+                <span style="background:#0369A1;color:#fff;border-radius:6px;
+                             padding:2px 9px;font-size:0.72rem;font-weight:600;
+                             font-family:'DM Sans',sans-serif;">AA</span>
+                <span style="background:#6366F1;color:#fff;border-radius:6px;
+                             padding:2px 9px;font-size:0.72rem;font-weight:600;
+                             font-family:'DM Sans',sans-serif;">A</span>
+                <span style="background:#7C3AED;color:#fff;border-radius:6px;
+                             padding:2px 9px;font-size:0.72rem;font-weight:600;
+                             font-family:'DM Sans',sans-serif;">BBB</span>
+                <span style="background:#B45309;color:#fff;border-radius:6px;
+                             padding:2px 9px;font-size:0.72rem;font-weight:600;
+                             font-family:'DM Sans',sans-serif;">BB</span>
+                <span style="background:#DC2626;color:#fff;border-radius:6px;
+                             padding:2px 9px;font-size:0.72rem;font-weight:600;
+                             font-family:'DM Sans',sans-serif;">B &amp; below</span>
+                <span style="background:#6B7280;color:#fff;border-radius:6px;
+                             padding:2px 9px;font-size:0.72rem;font-weight:600;
+                             font-family:'DM Sans',sans-serif;">D / NR</span>
+                <span style="font-family:'DM Sans',sans-serif;font-size:0.7rem;color:#6B7280;
+                             margin-left:auto;">Click a rating to open the agency rationale</span>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
         non_note_cols = [c for c in display_df.columns if c not in ("Notes", "Sector")]
         editor_df = display_df.drop(columns=["company_id"], errors="ignore")
 
@@ -1531,9 +1598,9 @@ def main():
         # ---- Contact footer ----
         st.markdown(
             '<div style="text-align:center;margin-top:40px;padding-bottom:16px;'
-            'font-size:12px;font-family:Inter,sans-serif;color:#9CA3AF">'
+            'font-size:12px;font-family:\'DM Sans\',sans-serif;color:var(--text-muted,#6B7280)">'
             '<a href="https://www.linkedin.com/in/saxenakriti/" target="_blank"'
-            ' style="color:#9CA3AF;text-decoration:none;font-weight:500">Contact</a></div>',
+            ' style="color:#6366F1;text-decoration:none;font-weight:500">Contact</a></div>',
             unsafe_allow_html=True,
         )
     elif display_df is not None and display_df.empty:
