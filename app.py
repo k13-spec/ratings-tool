@@ -580,8 +580,7 @@ section[data-testid="stSidebar"] > div {
 /* All sidebar text */
 [data-testid="stSidebar"] p,
 [data-testid="stSidebar"] span,
-[data-testid="stSidebar"] label,
-[data-testid="stSidebar"] div {
+[data-testid="stSidebar"] label {
     color: var(--text) !important;
     font-family: 'Inter', sans-serif !important;
 }
@@ -678,6 +677,7 @@ section[data-testid="stSidebar"] > div {
 
 /* ═══════════════ DIVIDERS ═══════════════ */
 hr { border-color: var(--border) !important; opacity: 1 !important; }
+[data-testid="stDivider"] hr { border-color: var(--border) !important; }
 
 /* ═══════════════ BUTTONS (Streamlit 1.35+ testid API) ═══════════════ */
 /* Primary — matches st.button(type="primary") and st.download_button() */
@@ -857,13 +857,27 @@ p, li, span { font-family: 'Inter', -apple-system, sans-serif !important; }
 }
 
 /* ═══════════════ ALERTS / INFO ═══════════════ */
-[data-testid="stAlert"] {
+[data-testid="stAlert"],
+[data-testid="stNotification"],
+[data-testid="stAlertContentInfo"],
+[data-testid="stAlertContentWarning"],
+[data-testid="stAlertContentError"],
+[data-testid="stAlertContentSuccess"] {
     border-radius: var(--radius-md) !important;
-    border: 1px solid var(--border) !important;
-    background: var(--surface) !important;
     font-family: 'Inter', sans-serif !important;
 }
-[data-testid="stAlert"] p { color: var(--text) !important; }
+[data-testid="stAlert"] p,
+[data-testid="stAlertContentInfo"] p { color: var(--text) !important; }
+
+/* ═══════════════ SUBHEADER ═══════════════ */
+[data-testid="stSubheader"] h2,
+[data-testid="stSubheader"] p {
+    color: var(--text) !important;
+    font-family: 'Inter', sans-serif !important;
+    font-weight: 600 !important;
+    font-size: 1.0rem !important;
+    letter-spacing: -0.015em !important;
+}
 
 /* ═══════════════ SPINNER ═══════════════ */
 .stSpinner > div { border-top-color: var(--primary) !important; }
