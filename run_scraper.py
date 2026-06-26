@@ -74,6 +74,10 @@ def build_parser() -> argparse.ArgumentParser:
         help="Discover ICRA-rated companies missing from the paginated listing via the search API + detail pages"
     )
     parser.add_argument(
+        "--icra-fix-source-ids", action="store_true",
+        help="Backfill source_id for discover-run companies: re-fetch detail pages to get real RationalIds"
+    )
+    parser.add_argument(
         "--crisil-index", action="store_true",
         help="Build/refresh the local CRISIL listing index (run before --crisil-financials)"
     )
@@ -104,6 +108,15 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--india-ratings-reset", action="store_true",
         help="Reset India Ratings checkpoint and restart from ID 1"
+    )
+    parser.add_argument(
+        "--rationale-nd-ebitda", action="store_true",
+        help="Fetch rationale pages/PDFs and extract ND/EBITDA ratio text per company "
+             "(priority: CRISIL > ICRA > India Ratings > CARE Edge)"
+    )
+    parser.add_argument(
+        "--force", action="store_true",
+        help="Force re-scrape even if nd_ebitda_text already populated (use with --rationale-nd-ebitda)"
     )
     parser.add_argument(
         "--all", action="store_true", help="Run ICRA + CRISIL + NSE (ratings + listed financials)"
@@ -335,10 +348,14 @@ def main():
     india_ratings = getattr(args, "india_ratings", False)
     india_ratings_reset = getattr(args, "india_ratings_reset", False)
     icra_discover = getattr(args, "icra_discover", False)
+    icra_fix_source_ids = getattr(args, "icra_fix_source_ids", False)
+    rationale_nd_ebitda = getattr(args, 'rationale_nd_ebitda', False)
+    force = getattr(args, 'force', False)
     if not any([args.icra, args.crisil, args.bse, args.nse, args.icra_pdfs,
                 args.crisil_index, args.crisil_financials, args.all,
                 care_edge, care_edge_financials, care_edge_discover,
-                india_ratings, india_ratings_reset, icra_discover]):
+                india_ratings, india_ratings_reset, icra_discover, icra_fix_source_ids,
+                rationale_nd_ebitda]):
         parser.print_help()
         print("\nError: specify at least one scraper flag")
         sys.exit(1)
@@ -391,6 +408,20 @@ def main():
         if care_edge_discover:
             all_results["CareEdge-Discover"] = run_care_edge_discover(limit=args.limit)
 
+        if icra_fix_source_ids:
+            logger.info("=" * 60)
+            logger.info(
+                "Starting ICRA fix source IDs%s",
+                f" (limit={args.limit})" if args.limit else "",
+            )
+            logger.info("=" * 60)
+            from scrapers.icra import run_fix_source_ids
+            t0 = time.time()
+            result = run_fix_source_ids(limit=args.limit)
+            elapsed = time.time() - t0
+            logger.info("ICRA fix source IDs done in %.1fs: %s", elapsed, ", ".join(f"{k}={v}" for k, v in result.items()))
+            all_results["ICRA-FixSourceIds"] = result
+
         if india_ratings or india_ratings_reset:
             logger.info("=" * 60)
             logger.info("Starting India Ratings scraper%s%s",
@@ -404,6 +435,23 @@ def main():
             logger.info("India Ratings done in %.1fs: %s", elapsed,
                         ", ".join(f"{k}={v}" for k, v in result.items()))
             all_results["India Ratings"] = result
+
+        if rationale_nd_ebitda:
+            logger.info('=' * 60)
+            logger.info(
+                'Starting rationale ND/EBITDA scraper%s%s',
+                f' (limit={args.limit})' if args.limit else '',
+                ' [FORCE]' if force else '',
+            )
+            logger.info('=' * 60)
+            from scrapers.rationale_nd_ebitda import run as run_nd
+            import time as _time
+            t0 = _time.time()
+            result = run_nd(limit=args.limit, force=force)
+            elapsed = _time.time() - t0
+            logger.info('Rationale ND/EBITDA done in %.1fs: %s', elapsed,
+                        ', '.join(f'{k}={v}' for k, v in result.items()))
+            all_results['Rationale-ND-EBITDA'] = result
 
     except KeyboardInterrupt:
         logger.info("\nInterrupted by user")

@@ -662,10 +662,10 @@ def main():
         st.caption("ICRA · CRISIL · CARE · IND Ratings  |  Financials from NSE/yfinance & CRISIL")
     with _nl_col:
         st.markdown(
-            '<div style="text-align:right;padding-top:18px">\'
-            '<a href="https://bondtracker.streamlit.app" target="_blank" \'
-            'style="font-size:13px;color:#4a9eff;border:1px solid #4a9eff;\'
-            'padding:5px 11px;border-radius:6px;text-decoration:none;white-space:nowrap">\'
+            '<div style="text-align:right;padding-top:18px">'
+            '<a href="https://bondtracker.streamlit.app" target="_blank" '
+            'style="font-size:13px;color:#4a9eff;border:1px solid #4a9eff;'
+            'padding:5px 11px;border-radius:6px;text-decoration:none;white-space:nowrap">'
             '↗ Bond Tracker</a></div>',
             unsafe_allow_html=True,
         )
@@ -926,25 +926,80 @@ def main():
         notes = st.session_state.notes
         display_df = display_df.copy()
         display_df["Notes"] = display_df["company_id"].astype(str).map(notes).fillna("")
-        display_df["View Bonds"] = display_df["Company Name"].apply(
-            lambda x: ("https://bondtracker.streamlit.app/?issuer=" + urllib.parse.quote(str(x)))
-            if pd.notna(x) else ""
-        )
+        # View Bonds link — only populate if company has active NSDL bonds
+        def _bonds_url(row):
+            cname = row.get("Company Name", "")
+            if not pd.notna(cname):
+                return ""
+            # If we loaded bond overlay, only show link for companies with bonds
+            if show_bond_overlay and "Bonds 1yr" in row.index:
+                if (row.get("Bonds 1yr") or 0) == 0:
+                    return ""
+            return "https://bondtracker.streamlit.app/?issuer=" + urllib.parse.quote(str(cname))
+
+        display_df["View Bonds"] = display_df.apply(_bonds_url, axis=1)
 
         # Show as editable table — Notes and Sector columns are editable
+        # ---- ND/EBITDA: prefer rationale-sourced text, fall back to numeric ----
+        def _nd_display(row):
+            txt = row.get("ND/EBITDA (Rationale)", None)
+            if txt and str(txt).strip() and str(txt).strip() != "nan":
+                src_lbl = row.get("ND/EBITDA Source", "") or ""
+                return str(txt).strip() + (" (" + src_lbl + ")" if src_lbl else "")
+            num = row.get("Net Debt/EBITDA", None)
+            if num is not None and str(num) not in ("", "nan", "None"):
+                try:
+                    return f"{float(num):.1f}x"
+                except Exception:
+                    pass
+            return ""
+
+        display_df["ND/EBITDA"] = display_df.apply(_nd_display, axis=1)
+
+        # Fill URL columns so LinkColumn shows blank instead of "None"
+        for _url_col in ["CRISIL URL", "ICRA URL", "Care Edge URL", "India Ratings URL"]:
+            if _url_col in display_df.columns:
+                display_df[_url_col] = display_df[_url_col].fillna("")
+
+        # Rating text: "<SYMBOL> / <OUTLOOK>" or "Not rated"
+        for _ag, _rat, _out in [
+            ("CRISIL",         "CRISIL Rating",         "CRISIL Outlook"),
+            ("ICRA",           "ICRA Rating",           "ICRA Outlook"),
+            ("Care Edge",      "Care Edge Rating",      "Care Edge Outlook"),
+            ("India Ratings",  "India Ratings Rating",  "India Ratings Outlook"),
+        ]:
+            if _rat in display_df.columns:
+                def _fmt_rating(row, r=_rat, o=_out):
+                    sym = row.get(r, None)
+                    if not sym or str(sym).strip() in ("", "nan", "None"):
+                        return "Not rated"
+                    out = row.get(o, None)
+                    if out and str(out).strip() not in ("", "nan", "None", "Stable", "Negative", "Positive"):
+                        pass  # already in sym for some agencies
+                    if out and str(out).strip() not in ("", "nan", "None"):
+                        return str(sym).strip() + " / " + str(out).strip()
+                    return str(sym).strip()
+                display_df[_ag] = display_df.apply(_fmt_rating, axis=1)
+
         non_note_cols = [c for c in display_df.columns if c not in ("Notes", "Sector")]
         editor_df = display_df.drop(columns=["company_id"], errors="ignore")
 
-        # Replace NaN in URL column so LinkColumn shows blank instead of "None"
-        if "Rationale URL" in editor_df.columns:
-            editor_df["Rationale URL"] = editor_df["Rationale URL"].fillna("")
-
-        # Reorder: put Rationale URL as 3rd column (after Company Name, Agency)
+        # Column order: 4 agency columns each with a link column
         _col_order = [
-            "Company Name", "Agency", "View Bonds", "Bonds 30d", "Bonds 90d", "Bonds 1yr", "Rationale URL",
-            "Rating", "Grade", "Outlook", "Sector", "Listed",
+            "Company Name",
+            "View Bonds", "Bonds 30d", "Bonds 90d", "Bonds 1yr",
+            # CRISIL
+            "CRISIL", "CRISIL URL",
+            # ICRA
+            "ICRA", "ICRA URL",
+            # Care Edge
+            "Care Edge", "Care Edge URL",
+            # India Ratings
+            "India Ratings", "India Ratings URL",
+            # Grade + financials
+            "Grade", "Sector", "Listed",
             "Revenue (Cr)", "EBITDA (Cr)", "EBITDA Margin %",
-            "Total Debt (Cr)", "Net Debt (Cr)", "Net Debt/EBITDA",
+            "Total Debt (Cr)", "Net Debt (Cr)", "ND/EBITDA",
             "Rating Date", "BSE Code", "ISIN", "Notes",
         ]
         _present = [c for c in _col_order if c in editor_df.columns]
@@ -957,33 +1012,37 @@ def main():
             hide_index=True,
             disabled=non_note_cols,
             column_config={
-                "Company Name":    st.column_config.TextColumn("Company",           width="large", pinned=True),
-                "Agency":          st.column_config.TextColumn("Agency",            width="small"),
-                "Rating":          st.column_config.TextColumn("Rating",            width="small"),
-                "Grade":           st.column_config.NumberColumn("Grade",           width="small", format="%d"),
-                "Outlook":         st.column_config.TextColumn("Outlook",           width="medium"),
-                "Sector":          st.column_config.SelectboxColumn(
-                    "Sector ✏️", width="medium", options=_ALL_SECTOR_OPTIONS,
-                    help="Click to change sector. Changes save automatically and sync to cloud.",
+                "Company Name":       st.column_config.TextColumn("Company",         width="medium"),
+                # --- Agency rating columns ---
+                "CRISIL":             st.column_config.TextColumn("CRISIL",          width="medium"),
+                "CRISIL URL":         st.column_config.LinkColumn("", display_text="↗", width="small"),
+                "ICRA":               st.column_config.TextColumn("ICRA",            width="medium"),
+                "ICRA URL":           st.column_config.LinkColumn("", display_text="↗", width="small"),
+                "Care Edge":          st.column_config.TextColumn("Care Edge",       width="medium"),
+                "Care Edge URL":      st.column_config.LinkColumn("", display_text="↗", width="small"),
+                "India Ratings":      st.column_config.TextColumn("India Ratings",   width="medium"),
+                "India Ratings URL":  st.column_config.LinkColumn("", display_text="↗", width="small"),
+                # --- Grade + financials ---
+                "Grade":              st.column_config.NumberColumn("Grade",          width="small", format="%d"),
+                "Sector":             st.column_config.SelectboxColumn(
+                    "Sector 📝", width="medium", options=_ALL_SECTOR_OPTIONS,
+                    help="Click to change sector. Changes save automatically and sync to company record.",
                 ),
-                "Listed":          st.column_config.TextColumn("Listed",            width="small"),
-                "Revenue (Cr)":    st.column_config.NumberColumn("Revenue (Cr)",    format="₹%,.0f", width="medium"),
-                "EBITDA (Cr)":     st.column_config.NumberColumn("EBITDA (Cr)",     format="₹%,.0f", width="medium"),
-                "EBITDA Margin %": st.column_config.NumberColumn("EBITDA %",        format="%.1f%%", width="small"),
-                "Total Debt (Cr)": st.column_config.NumberColumn("Total Debt (Cr)", format="₹%,.0f", width="medium"),
-                "Net Debt (Cr)":   st.column_config.NumberColumn("Net Debt (Cr)",   format="₹%,.0f", width="medium"),
-                "Net Debt/EBITDA": st.column_config.NumberColumn("ND/EBITDA",       format="%.1fx",  width="small"),
-                "Rating Date":     st.column_config.TextColumn("Rating Date",       width="medium"),
-                "View Bonds":      st.column_config.LinkColumn("Bonds", display_text="↗", width="small"),
-                "Bonds 30d":    st.column_config.NumberColumn("Bonds 30d", format="%d", width="small"),
-                "Bonds 90d":    st.column_config.NumberColumn("Bonds 90d", format="%d", width="small"),
-                "Bonds 1yr":    st.column_config.NumberColumn("Bonds 1yr", format="%d", width="small"),
-                "Rationale URL":   st.column_config.LinkColumn(
-                    "Rationale", display_text="↗", width="small",
-                ),
-                "BSE Code":        st.column_config.TextColumn("BSE Code",          width="small"),
-                "ISIN":            st.column_config.TextColumn("ISIN",              width="medium"),
-                "Notes":           st.column_config.TextColumn("Notes",             width="large"),
+                "Listed":             st.column_config.TextColumn("Listed",          width="small"),
+                "Revenue (Cr)":       st.column_config.NumberColumn("Revenue (Cr)",  format="%.0f", width="small"),
+                "EBITDA (Cr)":        st.column_config.NumberColumn("EBITDA (Cr)",   format="%.0f", width="small"),
+                "EBITDA Margin %":    st.column_config.NumberColumn("EBITDA %",      format="%.1f%%", width="small"),
+                "Total Debt (Cr)":    st.column_config.NumberColumn("Total Debt",    format="%.0f", width="small"),
+                "Net Debt (Cr)":      st.column_config.NumberColumn("Net Debt",      format="%.0f", width="small"),
+                "ND/EBITDA":          st.column_config.TextColumn("ND/EBITDA",       width="small"),
+                "Rating Date":        st.column_config.TextColumn("Rating Date",     width="small"),
+                "View Bonds":         st.column_config.LinkColumn("Bonds ↗", display_text="↗", width="small"),
+                "Bonds 30d":          st.column_config.NumberColumn("Bonds 30d",     format="%d", width="small"),
+                "Bonds 90d":          st.column_config.NumberColumn("Bonds 90d",     format="%d", width="small"),
+                "Bonds 1yr":          st.column_config.NumberColumn("Bonds 1yr",     format="%d", width="small"),
+                "BSE Code":           st.column_config.TextColumn("BSE Code",        width="small"),
+                "ISIN":               st.column_config.TextColumn("ISIN",            width="small"),
+                "Notes":              st.column_config.TextColumn("Notes",           width="large"),
             },
             key="main_table",
         )
@@ -1076,6 +1135,14 @@ def main():
                     hide_index=True,
                 )
 
+
+        # ---- Contact footer ----
+        st.markdown(
+            "<div style=\'text-align:center;margin-top:32px;font-size:12px;color:#888\'>"
+            "<a href=\'https://www.linkedin.com/in/saxenakriti/\' target=\'_blank\' "
+            "style=\'color:#888;text-decoration:none\'>Contact</a></div>",
+            unsafe_allow_html=True,
+        )
     elif display_df is not None and display_df.empty:
         st.info("No companies match the current filters. Try relaxing your criteria.")
     else:

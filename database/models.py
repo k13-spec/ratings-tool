@@ -73,6 +73,8 @@ CREATE TABLE IF NOT EXISTS financials (
     capex_cr REAL,
     interest_coverage REAL,
     net_debt_ebitda REAL,
+    nd_ebitda_text TEXT,
+    nd_ebitda_source TEXT,
     data_source TEXT,
     extraction_confidence REAL,
     scraped_at TEXT DEFAULT (datetime('now')),
