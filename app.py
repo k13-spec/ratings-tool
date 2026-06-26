@@ -628,14 +628,15 @@ def _add_bond_counts(display_df, bonds_df):
         display_df["Bonds 30d"] = zeros
         display_df["Bonds 90d"] = zeros
         display_df["Bonds 1yr"] = zeros
+        display_df["Bonds total"] = zeros
         return display_df
     issuer_norms = bonds_df["Issuer_norm"].values
     days_arr = bonds_df["Days"].values
-    b30, b90, b365 = [], [], []
+    b30, b90, b365, b_total = [], [], [], []
     for cname in display_df["Company Name"]:
         key = _normalize_co(str(cname))
         if len(key) < 4:
-            b30.append(0); b90.append(0); b365.append(0)
+            b30.append(0); b90.append(0); b365.append(0); b_total.append(0)
             continue
         key_short = key[:18]
         idx = [i for i, n in enumerate(issuer_norms) if key_short in n]
@@ -645,9 +646,11 @@ def _add_bond_counts(display_df, bonds_df):
         b30.append(int((d <= 30).sum()))
         b90.append(int((d <= 90).sum()))
         b365.append(int((d <= 365).sum()))
+        b_total.append(len(idx))
     display_df["Bonds 30d"] = b30
     display_df["Bonds 90d"] = b90
     display_df["Bonds 1yr"] = b365
+    display_df["Bonds total"] = b_total
     return display_df
 
 def main():
@@ -891,11 +894,15 @@ def main():
         display_df = df if df is not None else pd.DataFrame()
 
 
-    # ---- Bond Maturity Overlay ----
-    if show_bond_overlay and display_df is not None and not display_df.empty:
-        with st.spinner("Loading NSDL bond data..."):
+    # ---- Bond data (always load for link filtering; cached 24h) ----
+    if display_df is not None and not display_df.empty:
+        with st.spinner("Checking bond data..."):
             _bonds_df = _load_nsdl_bonds()
         display_df = _add_bond_counts(display_df, _bonds_df)
+        if not show_bond_overlay:
+            # Hide time-windowed columns; keep Bonds total for link visibility
+            display_df.drop(columns=["Bonds 30d", "Bonds 90d", "Bonds 1yr"],
+                            errors="ignore", inplace=True)
     # Reset index so positional lookups are safe
     if display_df is not None and not display_df.empty:
         display_df = display_df.reset_index(drop=True)
@@ -932,10 +939,9 @@ def main():
             cname = row.get("Company Name", "")
             if not pd.notna(cname):
                 return ""
-            # If we loaded bond overlay, only show link for companies with bonds
-            if show_bond_overlay and "Bonds 1yr" in row.index:
-                if (row.get("Bonds 1yr") or 0) == 0:
-                    return ""
+            # Only show link if company has any active NSDL bonds (any maturity)
+            if "Bonds total" in row.index and (row.get("Bonds total") or 0) == 0:
+                return ""
             return "https://bondtracker.streamlit.app/?issuer=" + urllib.parse.quote(str(cname))
 
         display_df["View Bonds"] = display_df.apply(_bonds_url, axis=1)
