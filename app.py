@@ -499,187 +499,361 @@ def _sector_checkbox_panel(available_sectors: list) -> list:
 # ------------------------------------------------------------------ #
 _CSS = """
 <style>
-/* ── Font ── */
+/* ═══════════════════════════════════════════════
+   Portal-inspired design system
+   Palette: warm off-white · near-black · clean white
+   ═══════════════════════════════════════════════ */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
-/* ── Hide Streamlit chrome ── */
-#MainMenu, footer { visibility: hidden; }
+/* ── Design tokens ── */
+:root {
+    --bg:          #F9F8F6;
+    --surface:     #FFFFFF;
+    --border:      #E5E5E0;
+    --border-soft: #EEEEE9;
+    --text:        #111111;
+    --text-muted:  #717179;
+    --primary:     #111111;
+    --primary-hov: #333333;
+    --secondary:   #F2F2EF;
+    --secondary-hov:#E9E9E5;
+    --shadow-xs:   0 1px 3px rgba(0,0,0,0.05);
+    --shadow-sm:   0 2px 8px rgba(0,0,0,0.07);
+    --radius-sm:   8px;
+    --radius-md:   10px;
+    --radius-lg:   14px;
+}
 
-/* ── Global ── */
-html, body, [data-testid="stApp"], [data-testid="stMain"] {
-    background-color: #F8F8F5 !important;
+/* ── Hide Streamlit chrome ── */
+#MainMenu, footer, .stDeployButton { visibility: hidden; }
+
+/* ── Global background & font ── */
+html, body {
+    background-color: var(--bg) !important;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
-    color: #18181B;
+    color: var(--text);
+}
+[data-testid="stApp"],
+[data-testid="stAppViewContainer"],
+[data-testid="stMain"],
+.main, .main .block-container,
+section.main > div {
+    background-color: var(--bg) !important;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
 }
 
 /* ── Top header bar ── */
 [data-testid="stHeader"] {
-    background-color: #F8F8F5 !important;
-    border-bottom: 1px solid #E8E8E3;
+    background-color: var(--bg) !important;
+    border-bottom: 1px solid var(--border);
+    backdrop-filter: blur(8px);
 }
 
-/* ── Sidebar ── */
-[data-testid="stSidebar"] {
-    background: #FFFFFF;
-    border-right: 1px solid #E8E8E3;
+/* ═══════════════ SIDEBAR ═══════════════ */
+[data-testid="stSidebar"],
+[data-testid="stSidebarContent"],
+section[data-testid="stSidebar"] > div {
+    background: var(--surface) !important;
+    border-right: 1px solid var(--border) !important;
 }
-[data-testid="stSidebar"] * {
-    color: #18181B !important;
-    font-family: 'Inter', -apple-system, sans-serif !important;
+/* Sidebar header "Filters" */
+[data-testid="stSidebar"] h1,
+[data-testid="stSidebar"] h2,
+[data-testid="stSidebar"] h3 {
+    color: var(--text) !important;
+    font-family: 'Inter', sans-serif !important;
+    font-size: 0.7rem !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.08em !important;
+    text-transform: uppercase !important;
 }
+/* All sidebar text */
+[data-testid="stSidebar"] p,
+[data-testid="stSidebar"] span,
+[data-testid="stSidebar"] label,
+[data-testid="stSidebar"] div {
+    color: var(--text) !important;
+    font-family: 'Inter', sans-serif !important;
+}
+/* Sidebar widget labels */
+[data-testid="stSidebar"] .stTextInput label,
+[data-testid="stSidebar"] .stSelectbox label,
+[data-testid="stSidebar"] .stMultiSelect label,
+[data-testid="stSidebar"] .stSlider label,
+[data-testid="stSidebar"] .stNumberInput label,
+[data-testid="stSidebar"] .stRadio label,
+[data-testid="stSidebar"] .stCheckbox label {
+    color: var(--text-muted) !important;
+    font-size: 0.75rem !important;
+    font-weight: 500 !important;
+    letter-spacing: 0.02em;
+}
+/* Sidebar buttons */
 [data-testid="stSidebar"] .stButton > button {
-    border-radius: 8px;
-    font-size: 0.82rem;
-    background: #F4F4F0;
-    border: 1px solid #E8E8E3 !important;
-    color: #18181B !important;
-    font-weight: 500;
+    border-radius: var(--radius-sm) !important;
+    font-size: 0.8rem !important;
+    background: var(--secondary) !important;
+    border: 1px solid var(--border) !important;
+    color: var(--text) !important;
+    font-weight: 500 !important;
+    font-family: 'Inter', sans-serif !important;
+    transition: background 0.15s ease;
 }
 [data-testid="stSidebar"] .stButton > button:hover {
-    background: #ECECEA;
+    background: var(--secondary-hov) !important;
+    border-color: #D8D8D3 !important;
 }
+/* Sidebar dividers */
+[data-testid="stSidebar"] hr { border-color: var(--border-soft) !important; }
 
-/* ── Metric cards ── */
+/* ═══════════════ METRIC CARDS ═══════════════ */
 [data-testid="stMetric"] {
-    background: #FFFFFF;
-    border: 1px solid #E8E8E3;
-    border-radius: 12px;
-    padding: 0.8rem 1.2rem;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    background: var(--surface) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: var(--radius-lg) !important;
+    padding: 1rem 1.25rem !important;
+    box-shadow: var(--shadow-xs) !important;
+    transition: box-shadow 0.2s ease;
 }
-[data-testid="stMetricLabel"] {
-    font-size: 0.73rem;
-    color: #6B7280;
-    font-weight: 500;
-    letter-spacing: 0.03em;
-    text-transform: uppercase;
+[data-testid="stMetric"]:hover {
+    box-shadow: var(--shadow-sm) !important;
+}
+[data-testid="stMetricLabel"] p {
+    font-size: 0.67rem !important;
+    color: var(--text-muted) !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.07em !important;
+    text-transform: uppercase !important;
+    font-family: 'Inter', sans-serif !important;
 }
 [data-testid="stMetricValue"] {
-    font-size: 1.45rem;
-    font-weight: 700;
-    color: #18181B;
+    font-size: 1.55rem !important;
+    font-weight: 700 !important;
+    color: var(--text) !important;
+    letter-spacing: -0.02em;
+    font-family: 'Inter', sans-serif !important;
 }
+[data-testid="stMetricDelta"] { font-size: 0.78rem; }
 
-/* ── Expanders ── */
+/* ═══════════════ EXPANDERS ═══════════════ */
 [data-testid="stExpander"] details {
-    border: 1px solid #E8E8E3;
-    border-radius: 10px;
-    background: #FFFFFF;
+    border: 1px solid var(--border) !important;
+    border-radius: var(--radius-md) !important;
+    background: var(--surface) !important;
+    overflow: hidden;
 }
 [data-testid="stExpander"] summary {
-    color: #18181B;
-    font-weight: 500;
+    color: var(--text) !important;
+    font-weight: 500 !important;
+    font-size: 0.83rem !important;
+    font-family: 'Inter', sans-serif !important;
+    padding: 0.65rem 1rem !important;
+    background: var(--surface) !important;
 }
+[data-testid="stExpander"] summary:hover { background: var(--secondary) !important; }
+[data-testid="stExpander"] summary > span { color: var(--text) !important; }
 
-/* ── Sort controls row ── */
-div[data-testid="stHorizontalBlock"] [data-testid="stSelectbox"] label,
-div[data-testid="stHorizontalBlock"] [data-testid="stToggle"] label {
-    font-size: 0.8rem;
-    color: #6B7280;
-}
+/* ═══════════════ DIVIDERS ═══════════════ */
+hr { border-color: var(--border) !important; opacity: 1 !important; }
 
-/* ── Dividers ── */
-hr { border-color: #E8E8E3 !important; }
-
-/* ── Buttons ── */
+/* ═══════════════ BUTTONS ═══════════════ */
+/* Primary (Export, Run, etc.) */
+.stButton > button[kind="primary"],
+button[kind="primary"],
 [data-testid="stDownloadButton"] > button {
-    border-radius: 8px;
-    background: #18181B;
+    border-radius: var(--radius-sm) !important;
+    background: var(--primary) !important;
     color: #FFFFFF !important;
     border: none !important;
-    font-weight: 500;
+    font-weight: 500 !important;
+    font-family: 'Inter', sans-serif !important;
+    letter-spacing: -0.01em !important;
+    box-shadow: none !important;
+    transition: background 0.15s ease, box-shadow 0.15s ease !important;
 }
+.stButton > button[kind="primary"]:hover,
+button[kind="primary"]:hover,
 [data-testid="stDownloadButton"] > button:hover {
-    background: #2D2D30 !important;
+    background: var(--primary-hov) !important;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.18) !important;
 }
-button[kind="primary"] {
-    background: #18181B !important;
-    color: #FFFFFF !important;
-    border: none !important;
-    border-radius: 8px !important;
-    font-weight: 500 !important;
-}
-button[kind="primary"]:hover {
-    background: #2D2D30 !important;
-}
+/* Secondary */
+.stButton > button[kind="secondary"],
 button[kind="secondary"] {
-    background: #F4F4F0 !important;
-    color: #18181B !important;
-    border: 1px solid #E8E8E3 !important;
-    border-radius: 8px !important;
+    border-radius: var(--radius-sm) !important;
+    background: var(--secondary) !important;
+    color: var(--text) !important;
+    border: 1px solid var(--border) !important;
     font-weight: 500 !important;
+    font-family: 'Inter', sans-serif !important;
+    transition: background 0.15s ease !important;
 }
+.stButton > button[kind="secondary"]:hover,
 button[kind="secondary"]:hover {
-    background: #ECECEA !important;
+    background: var(--secondary-hov) !important;
+}
+/* Tertiary (no kind attr) */
+.stButton > button:not([kind]) {
+    border-radius: var(--radius-sm) !important;
+    background: var(--secondary) !important;
+    color: var(--text) !important;
+    border: 1px solid var(--border) !important;
+    font-weight: 500 !important;
+    font-family: 'Inter', sans-serif !important;
+}
+.stButton > button:not([kind]):hover {
+    background: var(--secondary-hov) !important;
 }
 
-/* ── Data table ── */
-[data-testid="stDataFrame"],
-[data-testid="stDataEditor"] {
-    border-radius: 12px;
+/* ═══════════════ DATA TABLE ═══════════════ */
+[data-testid="stDataEditor"],
+[data-testid="stDataFrame"] {
+    border-radius: var(--radius-lg) !important;
+    border: 1px solid var(--border) !important;
+    box-shadow: var(--shadow-xs) !important;
     overflow: hidden;
-    border: 1px solid #E8E8E3 !important;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
 }
 
-/* ── Input fields ── */
-input, textarea, select {
-    background: #FFFFFF !important;
-    border-color: #E4E4DF !important;
-    border-radius: 8px !important;
-    color: #18181B !important;
+/* ═══════════════ INPUTS ═══════════════ */
+/* Text input */
+[data-testid="stTextInput"] input,
+[data-testid="stNumberInput"] input {
+    background: var(--surface) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: var(--radius-sm) !important;
+    color: var(--text) !important;
+    font-family: 'Inter', sans-serif !important;
+    font-size: 0.85rem !important;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
-
-/* ── Code blocks ── */
-[data-testid="stCode"] {
-    background: #F4F4F0 !important;
-    border: 1px solid #E8E8E3;
-    border-radius: 8px;
+[data-testid="stTextInput"] input:focus,
+[data-testid="stNumberInput"] input:focus {
+    border-color: #999 !important;
+    box-shadow: 0 0 0 3px rgba(17,17,17,0.06) !important;
+    outline: none;
 }
-
-/* ── Headings ── */
-h1, h2, h3 {
-    color: #18181B !important;
-    font-weight: 700;
-    letter-spacing: -0.02em;
+/* Selectbox */
+[data-testid="stSelectbox"] [data-baseweb="select"] > div:first-child,
+[data-testid="stMultiSelect"] [data-baseweb="select"] > div:first-child {
+    background: var(--surface) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: var(--radius-sm) !important;
+    font-family: 'Inter', sans-serif !important;
+    font-size: 0.85rem !important;
 }
-h1 { font-size: 1.75rem !important; }
-
-/* ── Caption / sub-text ── */
-[data-testid="stCaptionContainer"] p,
-small, .stCaption {
-    color: #6B7280 !important;
-    font-size: 0.78rem;
+/* Dropdown menus */
+[data-baseweb="popover"] ul,
+[data-baseweb="menu"],
+[data-baseweb="popover"] [data-baseweb="menu-item"] {
+    background: var(--surface) !important;
+    font-family: 'Inter', sans-serif !important;
+    font-size: 0.83rem !important;
+    color: var(--text) !important;
 }
-
-/* ── Alerts ── */
-[data-testid="stAlert"] {
-    border-radius: 10px;
-    border: none;
+[data-baseweb="option"]:hover,
+[role="option"]:hover {
+    background: var(--secondary) !important;
 }
-
-/* ── Spinner ── */
-.stSpinner > div { border-top-color: #18181B !important; }
-
-/* ── Subheader count ── */
-[data-testid="stSubheader"] h2 {
-    font-size: 1.1rem !important;
-    font-weight: 600;
-    color: #18181B !important;
-}
-
-/* ── Checkboxes & radios ── */
-[data-testid="stCheckbox"] label,
-[data-testid="stRadio"] label {
-    color: #18181B;
-}
-
-/* ── Multiselect tags ── */
+/* Multiselect tags */
 [data-baseweb="tag"] {
-    background: #18181B !important;
+    background: var(--primary) !important;
     border-radius: 6px !important;
 }
-[data-baseweb="tag"] span { color: #FFFFFF !important; }
+[data-baseweb="tag"] span { color: #FFFFFF !important; font-size: 0.78rem !important; }
+
+/* ═══════════════ SLIDERS ═══════════════ */
+[data-testid="stSlider"] label,
+[data-testid="stSlider"] p {
+    color: var(--text-muted) !important;
+    font-size: 0.75rem !important;
+    font-weight: 500 !important;
+}
+[data-testid="stSlider"] [data-testid="stTickBarMin"],
+[data-testid="stSlider"] [data-testid="stTickBarMax"] {
+    color: var(--text-muted) !important;
+    font-size: 0.7rem !important;
+}
+
+/* ═══════════════ CHECKBOXES & RADIOS ═══════════════ */
+[data-testid="stCheckbox"] label p,
+[data-testid="stCheckbox"] span {
+    color: var(--text) !important;
+    font-size: 0.83rem !important;
+    font-family: 'Inter', sans-serif !important;
+}
+[data-testid="stRadio"] label p,
+[data-testid="stRadio"] > div > label {
+    color: var(--text) !important;
+    font-size: 0.83rem !important;
+    font-family: 'Inter', sans-serif !important;
+}
+[data-testid="stRadio"] > div > label > div {
+    color: var(--text) !important;
+}
+
+/* ═══════════════ TOGGLE ═══════════════ */
+[data-testid="stToggle"] label,
+[data-testid="stToggle"] p {
+    color: var(--text) !important;
+    font-size: 0.83rem !important;
+    font-family: 'Inter', sans-serif !important;
+}
+
+/* ═══════════════ TYPOGRAPHY ═══════════════ */
+h1, h2, h3, h4 {
+    color: var(--text) !important;
+    font-family: 'Inter', sans-serif !important;
+    font-weight: 700 !important;
+    letter-spacing: -0.025em !important;
+}
+h1 { font-size: 1.65rem !important; line-height: 1.25; }
+h2 { font-size: 1.15rem !important; }
+h3 { font-size: 0.97rem !important; }
+p, li, span { font-family: 'Inter', -apple-system, sans-serif !important; }
+
+/* Caption / muted text */
+[data-testid="stCaptionContainer"] p,
+.stCaption p, small {
+    color: var(--text-muted) !important;
+    font-size: 0.76rem !important;
+    font-family: 'Inter', sans-serif !important;
+}
+
+/* ═══════════════ ALERTS / INFO ═══════════════ */
+[data-testid="stAlert"] {
+    border-radius: var(--radius-md) !important;
+    border: 1px solid var(--border) !important;
+    background: var(--surface) !important;
+    font-family: 'Inter', sans-serif !important;
+}
+[data-testid="stAlert"] p { color: var(--text) !important; }
+
+/* ═══════════════ SPINNER ═══════════════ */
+.stSpinner > div { border-top-color: var(--primary) !important; }
+
+/* ═══════════════ CODE BLOCKS ═══════════════ */
+[data-testid="stCode"],
+.stCode { background: var(--secondary) !important; border: 1px solid var(--border) !important; border-radius: var(--radius-sm) !important; }
+
+/* ═══════════════ TOAST ═══════════════ */
+[data-testid="stToast"] {
+    background: var(--surface) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: var(--radius-md) !important;
+    color: var(--text) !important;
+    box-shadow: var(--shadow-sm) !important;
+    font-family: 'Inter', sans-serif !important;
+}
+
+/* ═══════════════ CHART ═══════════════ */
+[data-testid="stVegaLiteChart"] { border-radius: var(--radius-md); }
+
+/* ═══════════════ SORT ROW ═══════════════ */
+div[data-testid="stHorizontalBlock"] [data-testid="stSelectbox"] label,
+div[data-testid="stHorizontalBlock"] [data-testid="stToggle"] label {
+    font-size: 0.78rem !important;
+    color: var(--text-muted) !important;
+}
 </style>
 """
 
