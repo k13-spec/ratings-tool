@@ -536,10 +536,20 @@ html, body {
 [data-testid="stApp"],
 [data-testid="stAppViewContainer"],
 [data-testid="stMain"],
+[data-testid="stMainBlockContainer"],
+[data-testid="stVerticalBlock"],
 .main, .main .block-container,
-section.main > div {
+section.main > div,
+.stMainBlockContainer {
     background-color: var(--bg) !important;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+}
+/* Markdown text */
+[data-testid="stMarkdownContainer"] p,
+[data-testid="stMarkdownContainer"] li,
+[data-testid="stMarkdownContainer"] span {
+    color: var(--text) !important;
+    font-family: 'Inter', -apple-system, sans-serif !important;
 }
 
 /* ── Top header bar ── */
@@ -636,12 +646,22 @@ section[data-testid="stSidebar"] > div {
 [data-testid="stMetricDelta"] { font-size: 0.78rem; }
 
 /* ═══════════════ EXPANDERS ═══════════════ */
+/* Streamlit 1.35+ structure */
+[data-testid="stExpander"],
+[data-testid="stExpanderDetails"] {
+    border: 1px solid var(--border) !important;
+    border-radius: var(--radius-md) !important;
+    background: var(--surface) !important;
+    overflow: hidden;
+}
+/* Legacy structure (details/summary) */
 [data-testid="stExpander"] details {
     border: 1px solid var(--border) !important;
     border-radius: var(--radius-md) !important;
     background: var(--surface) !important;
     overflow: hidden;
 }
+[data-testid="stExpanderToggle"],
 [data-testid="stExpander"] summary {
     color: var(--text) !important;
     font-weight: 500 !important;
@@ -650,17 +670,19 @@ section[data-testid="stSidebar"] > div {
     padding: 0.65rem 1rem !important;
     background: var(--surface) !important;
 }
+[data-testid="stExpanderToggle"]:hover,
 [data-testid="stExpander"] summary:hover { background: var(--secondary) !important; }
-[data-testid="stExpander"] summary > span { color: var(--text) !important; }
+[data-testid="stExpanderToggle"] p,
+[data-testid="stExpander"] summary > span,
+[data-testid="stExpander"] summary p { color: var(--text) !important; }
 
 /* ═══════════════ DIVIDERS ═══════════════ */
 hr { border-color: var(--border) !important; opacity: 1 !important; }
 
-/* ═══════════════ BUTTONS ═══════════════ */
-/* Primary (Export, Run, etc.) */
-.stButton > button[kind="primary"],
-button[kind="primary"],
-[data-testid="stDownloadButton"] > button {
+/* ═══════════════ BUTTONS (Streamlit 1.35+ testid API) ═══════════════ */
+/* Primary — matches st.button(type="primary") and st.download_button() */
+[data-testid="stBaseButton-primary"],
+[data-testid="stDownloadButton"] button {
     border-radius: var(--radius-sm) !important;
     background: var(--primary) !important;
     color: #FFFFFF !important;
@@ -671,15 +693,13 @@ button[kind="primary"],
     box-shadow: none !important;
     transition: background 0.15s ease, box-shadow 0.15s ease !important;
 }
-.stButton > button[kind="primary"]:hover,
-button[kind="primary"]:hover,
-[data-testid="stDownloadButton"] > button:hover {
+[data-testid="stBaseButton-primary"]:hover,
+[data-testid="stDownloadButton"] button:hover {
     background: var(--primary-hov) !important;
     box-shadow: 0 2px 10px rgba(0,0,0,0.18) !important;
 }
 /* Secondary */
-.stButton > button[kind="secondary"],
-button[kind="secondary"] {
+[data-testid="stBaseButton-secondary"] {
     border-radius: var(--radius-sm) !important;
     background: var(--secondary) !important;
     color: var(--text) !important;
@@ -688,12 +708,27 @@ button[kind="secondary"] {
     font-family: 'Inter', sans-serif !important;
     transition: background 0.15s ease !important;
 }
-.stButton > button[kind="secondary"]:hover,
-button[kind="secondary"]:hover {
+[data-testid="stBaseButton-secondary"]:hover {
     background: var(--secondary-hov) !important;
 }
-/* Tertiary (no kind attr) */
-.stButton > button:not([kind]) {
+/* Minimal / Tertiary */
+[data-testid="stBaseButton-minimal"],
+[data-testid="stBaseButton-borderless"] {
+    border-radius: var(--radius-sm) !important;
+    background: transparent !important;
+    color: var(--text) !important;
+    border: none !important;
+    font-weight: 500 !important;
+    font-family: 'Inter', sans-serif !important;
+}
+[data-testid="stBaseButton-minimal"]:hover,
+[data-testid="stBaseButton-borderless"]:hover {
+    background: var(--secondary) !important;
+}
+/* Sidebar buttons specifically */
+[data-testid="stSidebar"] [data-testid="stBaseButton-secondary"],
+[data-testid="stSidebar"] [data-testid="stBaseButton-minimal"],
+[data-testid="stSidebar"] button {
     border-radius: var(--radius-sm) !important;
     background: var(--secondary) !important;
     color: var(--text) !important;
@@ -701,8 +736,10 @@ button[kind="secondary"]:hover {
     font-weight: 500 !important;
     font-family: 'Inter', sans-serif !important;
 }
-.stButton > button:not([kind]):hover {
+[data-testid="stSidebar"] [data-testid="stBaseButton-secondary"]:hover,
+[data-testid="stSidebar"] button:hover {
     background: var(--secondary-hov) !important;
+    border-color: #D8D8D3 !important;
 }
 
 /* ═══════════════ DATA TABLE ═══════════════ */
