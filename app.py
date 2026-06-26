@@ -962,12 +962,42 @@ def main():
             if _url_col in display_df.columns:
                 display_df[_url_col] = display_df[_url_col].fillna("")
 
-        # Rating + URL combined: "url##AAA / Stable" for rated, "" for not rated.
-        # Agency-name prefixes are stripped (e.g. "Crisil A-" -> "A-").
-        # LinkColumn with display_text=r"##(.+)$" extracts rating text as link label.
+        # ── ICRA pre-processing ────────────────────────────────────────────────────
+        # ICRA stores combined "LT_RATING, ST_RATING" in rating_symbol.
+        # Extract only the long-term portion and parse its embedded outlook.
+        #   "[ICRA]AAA (Stable), --"       -> AAA / Stable
+        #   "--, [ICRA]A1+"                -> (blank – no LT rating)
+        #   "[ICRA]A- (Stable), [ICRA]A2+" -> A- / Stable
+        _ICRA_SKIP = {'--', 'withdrawn', '*', 'n.a.', 'na', ''}
+
+        def _parse_icra_lt(raw):
+            """Return (lt_symbol, lt_outlook) from ICRA combined rating_symbol."""
+            if not raw or str(raw).strip().lower() in ('nan', 'none', ''):
+                return '', ''
+            lt = str(raw).strip().split(', ')[0].strip()   # first token = LT
+            if lt.lower().rstrip('* ') in _ICRA_SKIP:
+                return '', ''
+            lt = re.sub(r'^\[?icra\]?\s*', '', lt, flags=re.IGNORECASE)  # strip [ICRA]
+            if re.match(r'^A[1-4]', lt, re.IGNORECASE):    # skip short-term symbols
+                return '', ''
+            lt = re.sub(r'\s*ISSUER\s+NOT\s+COOPERATING\s*', ' INC',
+                        lt, flags=re.IGNORECASE).strip()
+            m = re.search(r'\s*\(([^)]+)\)\s*$', lt)
+            if m:
+                return lt[:m.start()].strip(), m.group(1)
+            return lt, ''
+
+        if 'ICRA Rating' in display_df.columns:
+            _icra_lt = display_df['ICRA Rating'].apply(_parse_icra_lt)
+            display_df['ICRA Rating']  = _icra_lt.apply(lambda x: x[0])
+            display_df['ICRA Outlook'] = _icra_lt.apply(lambda x: x[1])
+
+        # ── Rating link formatting (all 4 agencies) ────────────────────────────────
+        # Builds "url##AAA / Stable" for rated companies, "" for not-rated.
+        # LinkColumn display_text=r"##(.+)$" shows the rating text as a hyperlink.
         _PREFIX_RE = {
             "CRISIL":        re.compile(r"^crisil\s+", re.IGNORECASE),
-            "ICRA":          re.compile(r"^\[?icra\]?\s+", re.IGNORECASE),
+            "ICRA":          re.compile(r"^\[?icra\]?\s*", re.IGNORECASE),  # \s* not \s+
             "Care Edge":     re.compile(r"^care\s*edge\s+|^care\s+", re.IGNORECASE),
             "India Ratings": re.compile(r"^india\s+ratings?\s+|^ind\s+", re.IGNORECASE),
         }
@@ -982,7 +1012,7 @@ def main():
                     sym = row.get(r, None)
                     if not sym or str(sym).strip() in ("", "nan", "None"):
                         return ""  # not rated -> blank
-                    sym = p.sub("", str(sym).strip())  # strip agency prefix
+                    sym = p.sub("", str(sym).strip())  # strip any remaining prefix
                     out_v = row.get(o, None)
                     if out_v and str(out_v).strip() not in ("", "nan", "None"):
                         display = sym + " / " + str(out_v).strip()
