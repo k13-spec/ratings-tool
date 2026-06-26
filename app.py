@@ -961,42 +961,38 @@ def main():
             if _url_col in display_df.columns:
                 display_df[_url_col] = display_df[_url_col].fillna("")
 
-        # Rating text: "<SYMBOL> / <OUTLOOK>" or "Not rated"
-        for _ag, _rat, _out in [
-            ("CRISIL",         "CRISIL Rating",         "CRISIL Outlook"),
-            ("ICRA",           "ICRA Rating",           "ICRA Outlook"),
-            ("Care Edge",      "Care Edge Rating",      "Care Edge Outlook"),
-            ("India Ratings",  "India Ratings Rating",  "India Ratings Outlook"),
+        # Rating + URL combined: "url##AAA / Stable" for rated, "" for not rated.
+        # LinkColumn with display_text=r"##(.+)$" extracts rating text as link label.
+        for _ag, _rat, _out, _ucol in [
+            ("CRISIL",        "CRISIL Rating",        "CRISIL Outlook",       "CRISIL URL"),
+            ("ICRA",          "ICRA Rating",          "ICRA Outlook",         "ICRA URL"),
+            ("Care Edge",     "Care Edge Rating",     "Care Edge Outlook",    "Care Edge URL"),
+            ("India Ratings", "India Ratings Rating", "India Ratings Outlook","India Ratings URL"),
         ]:
             if _rat in display_df.columns:
-                def _fmt_rating(row, r=_rat, o=_out):
+                def _fmt_link_rating(row, r=_rat, o=_out, u=_ucol):
                     sym = row.get(r, None)
                     if not sym or str(sym).strip() in ("", "nan", "None"):
-                        return "Not rated"
-                    out = row.get(o, None)
-                    if out and str(out).strip() not in ("", "nan", "None", "Stable", "Negative", "Positive"):
-                        pass  # already in sym for some agencies
-                    if out and str(out).strip() not in ("", "nan", "None"):
-                        return str(sym).strip() + " / " + str(out).strip()
-                    return str(sym).strip()
-                display_df[_ag] = display_df.apply(_fmt_rating, axis=1)
+                        return ""  # not rated -> blank
+                    out_v = row.get(o, None)
+                    if out_v and str(out_v).strip() not in ("", "nan", "None"):
+                        display = str(sym).strip() + " / " + str(out_v).strip()
+                    else:
+                        display = str(sym).strip()
+                    url_v = row.get(u, None)
+                    if url_v and str(url_v).strip() not in ("", "nan", "None"):
+                        return str(url_v).strip() + "##" + display
+                    return display  # rated but no URL -> plain text (rare)
+                display_df[_ag] = display_df.apply(_fmt_link_rating, axis=1)
 
         non_note_cols = [c for c in display_df.columns if c not in ("Notes", "Sector")]
         editor_df = display_df.drop(columns=["company_id"], errors="ignore")
 
-        # Column order: 4 agency columns each with a link column
+        # Column order: agency cols are now combined url##text (no separate URL col)
         _col_order = [
             "Company Name",
             "View Bonds", "Bonds 30d", "Bonds 90d", "Bonds 1yr",
-            # CRISIL
-            "CRISIL", "CRISIL URL",
-            # ICRA
-            "ICRA", "ICRA URL",
-            # Care Edge
-            "Care Edge", "Care Edge URL",
-            # India Ratings
-            "India Ratings", "India Ratings URL",
-            # Grade + financials
+            "CRISIL", "ICRA", "Care Edge", "India Ratings",
             "Grade", "Sector", "Listed",
             "Revenue (Cr)", "EBITDA (Cr)", "EBITDA Margin %",
             "Total Debt (Cr)", "Net Debt (Cr)", "ND/EBITDA",
@@ -1012,16 +1008,12 @@ def main():
             hide_index=True,
             disabled=non_note_cols,
             column_config={
-                "Company Name":       st.column_config.TextColumn("Company",         width="medium"),
-                # --- Agency rating columns ---
-                "CRISIL":             st.column_config.TextColumn("CRISIL",          width="medium"),
-                "CRISIL URL":         st.column_config.LinkColumn("", display_text="↗", width="small"),
-                "ICRA":               st.column_config.TextColumn("ICRA",            width="medium"),
-                "ICRA URL":           st.column_config.LinkColumn("", display_text="↗", width="small"),
-                "Care Edge":          st.column_config.TextColumn("Care Edge",       width="medium"),
-                "Care Edge URL":      st.column_config.LinkColumn("", display_text="↗", width="small"),
-                "India Ratings":      st.column_config.TextColumn("India Ratings",   width="medium"),
-                "India Ratings URL":  st.column_config.LinkColumn("", display_text="↗", width="small"),
+                "Company Name":  st.column_config.TextColumn("Company",       width="medium"),
+                # --- Agency rating cols: value = "url##AAA/Stable" or "" ---
+                "CRISIL":        st.column_config.LinkColumn("CRISIL",        display_text=r"##(.+)$", width="medium"),
+                "ICRA":          st.column_config.LinkColumn("ICRA",          display_text=r"##(.+)$", width="medium"),
+                "Care Edge":     st.column_config.LinkColumn("Care Edge",     display_text=r"##(.+)$", width="medium"),
+                "India Ratings": st.column_config.LinkColumn("India Ratings", display_text=r"##(.+)$", width="medium"),
                 # --- Grade + financials ---
                 "Grade":              st.column_config.NumberColumn("Grade",          width="small", format="%d"),
                 "Sector":             st.column_config.SelectboxColumn(
