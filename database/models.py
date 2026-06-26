@@ -94,12 +94,34 @@ CREATE INDEX IF NOT EXISTS idx_companies_name ON companies(name_normalized);
 """
 
 
+def _apply_migrations(conn: sqlite3.Connection) -> None:
+    """
+    Apply schema migrations for columns added after initial deployment.
+    Safe to run repeatedly -- skips columns that already exist.
+    """
+    # financials table migrations
+    fin_cols = {row[1] for row in conn.execute("PRAGMA table_info(financials)")}
+    fin_migrations = [
+        ("nd_ebitda_text",         "ALTER TABLE financials ADD COLUMN nd_ebitda_text TEXT"),
+        ("nd_ebitda_source",       "ALTER TABLE financials ADD COLUMN nd_ebitda_source TEXT"),
+        ("data_source",            "ALTER TABLE financials ADD COLUMN data_source TEXT"),
+        ("extraction_confidence",  "ALTER TABLE financials ADD COLUMN extraction_confidence REAL"),
+    ]
+    for col, sql in fin_migrations:
+        if col not in fin_cols:
+            conn.execute(sql)
+
+    conn.commit()
+
+
 def init_db(db_path: str = None) -> None:
     """Create all tables and indexes if they don't already exist."""
     conn = get_connection(db_path)
     try:
         conn.executescript(DDL)
         conn.commit()
+        # Auto-migrate: add new columns to existing tables if missing
+        _apply_migrations(conn)
     finally:
         conn.close()
 
