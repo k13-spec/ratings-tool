@@ -193,8 +193,8 @@ matched_name = ratings_df["Company"].iloc[0] if not ratings_df.empty else compan
 st.subheader(matched_name)
 
 col_hdr1, col_hdr2 = st.columns(2)
-bond_url   = f"https://bondtracker.streamlit.app/?issuer={urllib.parse.quote(matched_name)}"
-ratings_url = f"https://indianratings.streamlit.app/?company={urllib.parse.quote(matched_name)}"
+bond_url   = f"https://creditnexus-bonds.streamlit.app/?issuer={urllib.parse.quote(matched_name)}"
+ratings_url = f"https://creditnexus.streamlit.app/?company={urllib.parse.quote(matched_name)}"
 with col_hdr1:
     st.markdown(f"[View all bonds maturing →]({bond_url})")
 with col_hdr2:
