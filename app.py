@@ -1050,7 +1050,7 @@ def main():
                 </div>
             </div>
             <div>
-                <a href="https://bondtracker.streamlit.app" target="_blank"
+                <a href="https://creditnexus-bonds.streamlit.app" target="_blank"
                    style="font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;
                           color:#6366F1;background:#FFFFFF;border-radius:8px;
                           padding:7px 16px;text-decoration:none;white-space:nowrap;
@@ -1316,7 +1316,7 @@ def main():
             # Only show link if company has any active NSDL bonds (any maturity)
             if "Bonds total" in row.index and (row.get("Bonds total") or 0) == 0:
                 return ""
-            return "https://bondtracker.streamlit.app/?issuer=" + urllib.parse.quote(str(cname))
+            return "https://creditnexus-bonds.streamlit.app/?issuer=" + urllib.parse.quote(str(cname))
 
         display_df["View Bonds"] = display_df.apply(_bonds_url, axis=1)
 
