@@ -55,6 +55,7 @@
   .b-acq{background:#DBEAFE;color:#1E40AF}
   .b-capex{background:#D1FAE5;color:#065F46}
   .b-watch{background:#FEE2E2;color:#991B1B}
+  .b-pe{background:#FCE7F3;color:#9D174D}
   .opp{text-align:right}
   .opp .amt{font-size:22px;font-weight:800;color:var(--ink)}
   .opp .lbl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
@@ -109,7 +110,7 @@
   <div class="hero">
     <div>
       <h1>INR Debt Financing Ideas</h1>
-      <p>Pre-screened, priority-ranked candidates · compiled 7 Jul 2026 · auto-refreshes fortnightly · sister app to the CreditNexus suite</p>
+      <p>Pre-screened, priority-ranked candidates · compiled 7 Jul 2026 (v3) · auto-refreshes fortnightly · sister app to the CreditNexus suite</p>
     </div>
     <div>
       <a class="pill" href="https://creditnexus.streamlit.app" target="_blank">↗ Credit Ratings</a>
@@ -127,6 +128,9 @@
       <span class="chip">or Trigger 3: capex ≥ <b>₹2,000 cr</b> upcoming</span>
       <span class="chip">Excluded: <b>BFSI · PSUs</b></span>
       <span class="chip">No group-concentration caps</span>
+      <span class="chip">No thermal/coal businesses (<b>non-coal subsidiaries OK</b>)</span>
+      <span class="chip"><b>PE-backed</b> borderline names included</span>
+      <span class="chip"><b>SPV pools / restricted groups</b> eligible</span>
     </div>
   </div>
 
@@ -145,6 +149,21 @@
 
   <div id="cards"></div>
 
+  <h2 class="secTitle">Excluded — thermal/coal screen (qualifying subsidiary shown instead)</h2>
+  <div class="wl" style="border-left-color:#DC2626"><b>Adani Power</b><p>Pure coal IPP (18.3 GW thermal, 42 GW coal pipeline) — no non-coal subsidiary to substitute. Previously ranked #2 at ~₹16,000 cr.</p></div>
+  <div class="wl" style="border-left-color:#DC2626"><b>Tata Power (parent)</b><p>Mundra UMPP + coal fleet → excluded. Its RE vertical <b>TPREL</b> is on the main list.</p></div>
+  <div class="wl" style="border-left-color:#DC2626"><b>JSW Energy (parent)</b><p>Thermal fleet incl. KSK Mahanadi (coal, IBC) → excluded. Its RE platform <b>JSW Neo Energy</b> is on the main list.</p></div>
+  <div class="wl" style="border-left-color:#DC2626"><b>Adani Enterprises (parent)</b><p>Coal trading (India's largest importer) + commercial mining/MDO → excluded. Non-coal verticals <b>Adani Airport Holdings</b> and <b>Adani New Industries</b> are on the main list.</p></div>
+  <div class="wl" style="border-left-color:#DC2626"><b>Torrent Power</b><p>Gas-fired thermal fleet + Nabha Power (1,400 MW coal) acquisition → excluded. RE SPVs too small/unrated standalone so far — re-screen if a green subsidiary is carved out.</p></div>
+  <div class="wl" style="border-left-color:#DC2626"><b>Vedanta Power (demerged entity)</b><p>Coal-based commercial power → excluded. The other demerged Vedanta entities remain on the main list (card re-scoped, opportunity resized ₹20,000 → ₹18,000 cr).</p></div>
+  <p style="font-size:12.5px;color:var(--muted);margin:4px 0 0 4px">Interpretation applied: exclusion covers companies whose <i>business</i> is coal/thermal generation, coal mining or coal trading. Industrials burning captive coal as an input (steel, cement, aluminium smelting) are retained — tell Claude if you want this tightened.</p>
+
+  <h2 class="secTitle">Systematic screen queue (A+ → AAA)</h2>
+  <div class="meth">
+    <p>Universe sourced from the CreditNexus ratings DB (<b>31,043 current rating rows</b> parsed 7 Jul 2026 from <span style="font-family:monospace">ratings_current.csv</span>). Unique non-BFSI/non-PSU names by grade: <b>A+ : 653</b> · AA− : ~599 · AA : ~586 · AA+ : ~401 · AAA : ~595 (row counts, pre-dedupe, heuristic BFSI/PSU filter).</p>
+    <p style="margin-top:8px"><b>Program:</b> deep-dive the A+ cohort first, then move up the ladder (AA− → AA → AA+ → AAA). <b>Batch 1 (this run):</b> Apraava Energy ✓ and Adani New Industries ✓ promoted to the main list; Ayana Renewable screened OUT (100% acquired by ONGC-NTPC Green JV, Mar 2025 → PSU-owned). Remaining A+ names are worked through in the fortnightly refresh runs — each run regenerates the queue from the CSV, deep-dives the next tranche, and promotes qualifiers into the ranked list. Financial gates (EBITDA / revenue / gross debt) are checked during each deep dive from the DB financials and rating rationales.</p>
+  </div>
+
   <h2 class="secTitle">Watchlist — near-misses worth monitoring</h2>
   <div id="watch"></div>
 
@@ -152,11 +171,12 @@
   <div class="meth">
     <p><b>Ranking = blended score (0–10)</b> = 40% near-term addressable need (refinanceable maturities next 12–24m + committed event/capex debt draw) + 25% structural size (gross debt & EBITDA scale) + 20% event probability (announced &amp; funded vs. speculative) + 15% market fit (rating band sweet-spot for spread product + demonstrated NCD appetite). Toggle above to re-rank purely by estimated opportunity size.</p>
     <p style="margin-top:8px"><b>Size gate (widened Jul 2026):</b> a company qualifies with EBITDA ≥ ₹500 cr <i>or</i> revenue > ₹1,500 cr together with gross debt > ₹1,500 cr — the second path pulls in mid-market credits beyond the usual large-cap suspects. There is <b>no group-concentration screen</b>: multiple companies from the same conglomerate are ranked independently on their own merits. All qualifying ideas are kept — cards stream in as you scroll rather than being capped.</p>
+    <p style="margin-top:8px"><b>v3 rules (Jul 2026):</b> (1) <b>Thermal/coal screen</b> — companies whose business is coal/thermal power generation, coal mining or coal trading are excluded; their non-coal subsidiaries qualify in their own right (Tata Power is out, TPREL is in). Industrials using captive coal power as an input (steel, cement, aluminium) are tolerated — flag if you want this tightened. (2) <b>Deleveraging parents</b> — where the parent is deleveraging, the screen looks for capital-hungry verticals instead (Bharti → Nxtra). (3) <b>PE-backed borderline names</b> (Blackstone/Carlyle/KKR/ChrysCapital/Kedaara etc.) are included. (4) <b>SPV pools and restricted groups</b> are candidates in their own right where pool-level ratings clear A+. (5) <b>Systematic universe</b> — candidates are sourced from the CreditNexus ratings DB, deep-diving A+ names first and moving up the ladder (see screen queue below).</p>
     <h4>What was reviewed per company</h4>
     <p>Last 3 years of rating rationales (CRISIL / ICRA / CARE / Ind-Ra), FY24–FY26 results and earnings-call disclosures, recent NCD/bond issuance and refinancing actions, announced M&A and capex programmes, and press coverage through early July 2026. Capital-structure and lender-base entries are tagged <span class="flag">⚑ inferred</span> where they rest on typical disclosures rather than a document reviewed for this screen — verify these in the <a href="https://creditnexus.streamlit.app/Company_Deep_Dive" target="_blank" style="color:var(--indigo)">Company Deep Dive</a> before pitching.</p>
     <h4>Refreshing / adding names</h4>
     <p>This page is a compiled snapshot, not a live scraper. Ask Claude to <i>"refresh the financing ideas page"</i> or <i>"run a workup on [company]"</i> — new candidates get added to the same file. Ratings can be cross-checked live in the CreditNexus ratings dashboard (27,149 rated companies, scraped Jul 2026).</p>
-    <div class="disclaimer"><b>Data vintage &amp; caveats:</b> figures are from public FY26 disclosures and rating rationales as of 7 Jul 2026. Estimated opportunity sizes are analytical estimates, not mandates. Some ratings/figures are marked ⚑ for verification. This is idea generation, not investment advice.</div>
+    <div class="disclaimer"><b>Data vintage & caveats:</b> figures are from public FY26 disclosures and rating rationales as of 7 Jul 2026. Estimated opportunity sizes are analytical estimates, not mandates. Some ratings/figures are marked ⚑ for verification. This is idea generation, not investment advice.</div>
   </div>
 
   <footer>CreditNexus suite · <a href="https://creditnexus.streamlit.app" target="_blank">Ratings</a> · <a href="https://creditnexus-bonds.streamlit.app" target="_blank">Bond Tracker</a> · Financing Ideas</footer>
@@ -166,9 +186,9 @@
 const DATA = [
 {
   name:"Vedanta Ltd (post-demerger group)", sector:"Diversified metals & mining", rating:"CRISIL AA / Watch Developing",
-  opp:20000, scores:{nt:9.5,size:9.5,event:9,fit:9}, triggers:["mat","capex","acq"],
-  thesis:"Five-way demerger effective 1 May 2026 forces a once-in-a-decade re-banking of ~₹53,400 cr consolidated net debt across new entities — the single largest addressable INR refinancing event of FY27.",
-  rationale:"<b>Why now:</b> the demerger (entities listed 15 Jun 2026) reallocates debt to Aluminium (₹32,700 cr), Power (₹7,500 cr), Iron &amp; Steel (₹3,900 cr) and residual VEDL (₹9,300 cr). Each new balance sheet needs standalone facilities, NCD programmes and working-capital lines — existing cross-guaranteed structures must be unwound. FY26 EBITDA of ₹55,976 cr (leverage 0.95x) and a 130bps YoY drop in funding cost (9.2%) show deepening market access, while the CRISIL 'Watch Developing' tag means pricing hasn't yet settled — a window for structured lenders. Growth capex steps up to ₹17,000–19,000 cr in FY27. Holdco (VRL) has gone on the offensive: a ₹30,960 cr bond buyback launched Jul 2026 as phase 1 of a ~₹46,400 cr ($5.2bn) refinancing after rating upgrades — targeting up to 300bps funding-cost reduction.",
+  opp:18000, scores:{nt:9.5,size:9.5,event:9,fit:9}, triggers:["mat","capex","acq"],
+  thesis:"Five-way demerger effective 1 May 2026 forces a once-in-a-decade re-banking of ~₹53,400 cr consolidated net debt across new entities — the single largest addressable INR refinancing event of FY27. (Vedanta Power, the coal IPP entity, is excluded under the thermal screen; opportunity sized on the remaining entities.)",
+  rationale:"<b>Why now:</b> the demerger (entities listed 15 Jun 2026) reallocates debt to Aluminium (₹32,700 cr), Power (₹7,500 cr), Iron & Steel (₹3,900 cr) and residual VEDL (₹9,300 cr). Each new balance sheet needs standalone facilities, NCD programmes and working-capital lines — existing cross-guaranteed structures must be unwound. FY26 EBITDA of ₹55,976 cr (leverage 0.95x) and a 130bps YoY drop in funding cost (9.2%) show deepening market access, while the CRISIL 'Watch Developing' tag means pricing hasn't yet settled — a window for structured lenders. Growth capex steps up to ₹17,000–19,000 cr in FY27. Holdco (VRL) has gone on the offensive: a ₹30,960 cr bond buyback launched Jul 2026 as phase 1 of a ~₹46,400 cr ($5.2bn) refinancing after rating upgrades — targeting up to 300bps funding-cost reduction.",
   kv:{ "FY26 EBITDA":"₹55,976 cr", "Consolidated net debt":"₹53,400 cr", "Leverage":"0.95x", "FY27 growth capex":"₹17,000–19,000 cr", "Cost of debt":"9.2% (−130bps YoY)", "VRL holdco refi":"~₹46,400 cr programme incl. ₹30,960 cr buyback (Jul 2026)" },
   capstruct:"Mix of INR NCDs (recent ₹5,000 cr + ₹4,500 cr rated programmes), rupee term loans, ECBs and inter-company facilities; VRL holdco USD bonds & private credit sit above. Oil & Gas entity debt-free. ⚑ Entity-wise facility split post-demerger still being disclosed.",
   lenders:"SBI, ICICI, Axis, PNB, Union Bank led consortiums; Oaktree/PC lenders historically at holdco. ⚑ inferred from past disclosures — verify current roster in Deep Dive.",
@@ -178,36 +198,6 @@ const DATA = [
   covenants:"Watch resolution hinges on final entity leverage; historical rationale sensitivities around net debt/EBITDA ~2x and holdco refinancing. Demerged-entity covenant packages being negotiated now — chance to shape terms.",
   acquisitions:"Historically acquisitive (Electrosteel, Athena/Meenakshi power via IBC, bid interest in JAL group assets).",
   srcs:[["CRISIL rationale Feb 2026","https://www.crisil.com/mnt/winshare/Ratings/RatingList/RatingDocs/VedantaLimited_February%2025_%202026_RR_389928.html"],["Vedanta FY26 press release","https://www.vedantalimited.com/public/uploads/19191/Vedanta-Q4-&-FY26---Press-Release.pdf"],["Demerger debt allocation — Business Today","https://www.businesstoday.in/markets/stocks/story/vedanta-demerger-entities-listing-valuations-debt-allocation-expert-views-fair-values-536747-2026-06-14"],["VRL ₹30,960 cr buyback — Free Press Journal","https://www.freepressjournal.in/business/vedanta-unveils-30960-crore-debt-recast-2580-crore-buyback-move-ahead-of-demerger-listing"],["$5.2bn refi — Outlook Business","https://www.outlookbusiness.com/corporate/vedanta-resources-lines-up-52-bn-debt-refinancing-after-credit-rating-upgrades"]]
-},
-{
-  name:"Adani Power", sector:"Thermal power IPP", rating:"CareEdge AA / Stable",
-  opp:16000, scores:{nt:8.5,size:8.5,event:9,fit:9}, triggers:["capex","mat"],
-  thesis:"18.3 GW → 42 GW by FY32 with land & equipment secured and ~half the 23.7 GW pipeline PPA-backed; leverage peaks 3.4x in FY27 — the heaviest funded thermal build-out in India needs recurring ₹7,500 cr-plus domestic tranches.",
-  rationale:"<b>Why now:</b> the ₹7,500 cr Jan 2026 NCD (largest-ever Adani domestic bond, 2–5yr tranches) proved appetite and set pricing benchmarks; management explicitly intends repeat market visits as capex ramps. Net debt/EBITDA peaking at ~3.4x in FY27E before falling to ~2x by FY30 gives a defined leverage arc lenders can underwrite against PPA cashflows. CareEdge AA across ₹58,000 cr bank + ₹11,000 cr NCD limits leaves headroom for incremental programmes. Sweet-spot AA rating = real spread pickup vs AAA utilities.",
-  kv:{ "FY26 EBITDA":"~₹21,000 cr ⚑", "Installed capacity":"18.3 GW (May 2026)", "Target":"42 GW by FY32", "ND/EBITDA":"peaks ~3.4x FY27E → ~2x FY30E", "Rated limits":"₹58,000 cr bank + ₹11,000 cr NCD" },
-  capstruct:"Rupee project/term loans (bank + PFC/REC), growing NCD book, supplier credit for BTG packages. ⚑ split inferred.",
-  lenders:"SBI, PNB, REC, PFC consortium banking; domestic mutual funds/insurers via NCDs. ⚑ inferred.",
-  maturities:["₹7,500 cr NCD (Jan 2026) amortises 2028–2031 — future refi flow","Ongoing project-loan drawdowns create annual take-out/refi windows through FY32"],
-  finhist:["Jan 2026: ₹7,500 cr AA NCD, 4 tranches 2–5yr, private placement — largest Adani domestic issuance","Capacity acquisitions via IBC (see below) historically debt-funded then refinanced"],
-  ratingevo:["FY24: ratings recovering post-Hindenburg episode; group liquidity affirmed by CRISIL","2025: CareEdge reaffirms AA/Stable on expanded limits","2026: record domestic bond validates access"],
-  covenants:"CareEdge sensitivities around ND/EBITDA sustaining above ~3.5x and PPA counterparty concentration; standard project-finance DSRA/DSCR packages at SPV level.",
-  acquisitions:"Serial IBC acquirer: GMR Chhattisgarh, Essar Mahan, KSK-adjacent assets, Coastal Energen, DB Power, Lanco Amarkantak — further distressed thermal M&A likely (Trigger 2 also effectively met).",
-  srcs:[["₹7,500 cr NCD — Tribune","https://www.tribuneindia.com/news/business/adani-power-to-raise-rs-7500-crore-through-ncd-largest-domestic-bond-issuance-by-adani-group/amp"],["Q3 FY26 results","https://www.adani.com/newsroom/media-releases/adani-power-announces-q3-fy26-results"],["Jefferies on thermal capex — ANI","https://www.aninews.in/news/business/adani-energy-solutions-adani-power-set-for-over-20-growth-as-transmission-and-thermal-capex-ramp-up-jefferies20260607151944/"]]
-},
-{
-  name:"JSW Energy", sector:"Power (thermal + renewables)", rating:"ICRA AA / Ind-Ra AA / Stable",
-  opp:15000, scores:{nt:8.5,size:8,event:8.5,fit:8.5}, triggers:["mat","capex","acq"],
-  thesis:"₹65,834 cr net debt at 5.96x EBITDA with a ₹61,000 cr, 10.3 GW debt-funded build-out and a proven appetite for large M&A (O2 Power ₹12,468 cr, KSK Mahanadi) — structurally the hungriest AA borrower in the sector.",
-  rationale:"<b>Why now:</b> FY27 capex alone is ~₹20,000 cr (+3 GW RE). Leverage at ~6x means bank headroom is tightening precisely when the spend peaks — ideal conditions for NCDs, project take-outs, and hybrid/mezz structures. Rating agencies have flagged execution risk but held AA on portfolio quality and JSW group backing; every completed GW creates take-out refinancing paper. Acquisition pipeline (stressed thermal, RE platforms) adds event-driven bridge demand on top.",
-  kv:{ "FY26 EBITDA":"~₹11,050 cr (implied)", "Net debt (Mar-26)":"₹65,834 cr", "ND/EBITDA":"5.96x", "U/C pipeline":"10.3 GW / ~₹61,000 cr", "FY27 capex":"~₹20,000 cr" },
-  capstruct:"Project finance at SPVs (O2, KSK, greenfield RE), corporate NCDs, term loans; growing share of capital-markets debt as bank limits fill. ⚑ split inferred.",
-  lenders:"SBI-led consortiums, PFC/REC for thermal, NIIF-adjacent and MF/insurer NCD buyers. ⚑ inferred.",
-  maturities:["Acquisition facilities for O2 Power (Apr 2025) and KSK Mahanadi (Mar 2025) — natural 12–24m refi/repricing candidates","Rolling project-loan COD take-outs through FY29"],
-  finhist:["Apr 2025: completed O2 Power at EV ~₹12,468 cr","Mar 2025: KSK Mahanadi via IBC","FY26: continued RE project financings across 4.7 GW O2 portfolio"],
-  ratingevo:["2024: ICRA/Ind-Ra AA affirmed pre-acquisitions","2025: AA held through two major debt-funded acquisitions; execution-risk caveats added","2026: stable, but sensitivities tightening as ND/EBITDA ~6x"],
-  covenants:"ICRA sensitivity on consolidated leverage sustaining above ~5.5x and timely COD of pipeline; SPV-level DSCR/DSRA packages. Watch the deleveraging glide-path commitments in next rationale.",
-  acquisitions:"O2 Power (₹12,468 cr, 2025), KSK Mahanadi (IBC, 2025), Mytrah RE portfolio (2022), Ind-Barath (IBC) — clearly acquisitive.",
-  srcs:[["ICRA rationale","https://www.icra.in/Rating/ShowRationalReportFilePdf/137580"],["O2 completion","https://www.indianchemicalnews.com/energy/jsw-energy-completes-acquisition-of-o2-power-for-rs-12468-cr-25798"],["Debt analysis — TradeBrains","https://tradebrains.in/jsw-energy-can-it-manage-rising-debt-while-chasing-30-gw-capacity-by-2030/"]]
 },
 {
   name:"Adani Green Energy", sector:"Renewables", rating:"CRISIL AA / Stable",
@@ -223,36 +213,6 @@ const DATA = [
   covenants:"RG structures carry DSCR, FFO/net-debt and distribution-lock covenants; CRISIL sensitivity on refinancing cost spikes and regulatory/judicial actions affecting capital access.",
   acquisitions:"Growth is organic (SECI/merchant pipeline); acquisition history includes SB Energy (2021, $3.5bn).",
   srcs:[["CRISIL rationale Sep 2025","https://www.crisil.com/mnt/winshare/Ratings/RatingList/RatingDocs/AdaniGreenEnergyLimited_September%2015_%202025_RR_376984.html"],["FY26 results — SolarQuarter","https://solarquarter.com/2026/04/27/adani-green-energy-reports-22-revenue-growth-in-fy26-expands-operational-capacity-to-19-3-gw/"],["Q4 FY26 presentation","https://www.adanigreenenergy.com/-/media/project/greenenergy/investor-downloads/result-presentation-dynamic/q4-fy26.pdf"]]
-},
-{
-  name:"Tata Power", sector:"Integrated power", rating:"CRISIL AA+ / Stable",
-  opp:13000, scores:{nt:7.5,size:7.5,event:8,fit:8}, triggers:["capex","mat"],
-  thesis:"₹25,000 cr FY27 capex inside a ₹1.46 lakh cr programme to FY30 (23 GW RE target), with management's own 3.4x ND/EBITDA ceiling implying a large, pre-committed annual debt raise at AA+.",
-  rationale:"<b>Why now:</b> FY27 is the capex step-up year (2.5–3 GW additions, 5.2 GW two-year pipeline, cell/module vertical integration). With record ₹5,000 cr PAT and disciplined leverage targets (ND/EBITDA 3.4x, ND/E 1.2x), the funding plan is debt-heavy but ring-fenced — exactly the profile for programmatic NCDs, transmission/RE project debt and InvIT-adjacent structures. CRISIL AA+ reaffirmed Oct &amp; Dec 2025; S&amp;P upgraded internationally. Group halo lowers execution risk vs pure-play RE peers.",
-  kv:{ "FY26 PAT":"₹5,000 cr (record)", "FY27 capex":"~₹25,000 cr", "Programme":"₹1.46 lakh cr to FY30 (60% RE)", "Leverage targets":"ND/EBITDA 3.4x · ND/E 1.2x", "RE target":"23 GW by FY30" },
-  capstruct:"Corporate NCDs, project loans at RE/transmission SPVs, perpetuals history, ECBs; Odisha discoms & CGPL inside consolidation. ⚑ split inferred.",
-  lenders:"SBI, HDFC Bank, Axis consortiums; deep MF/insurer NCD sponsorship at AA+. ⚑ inferred.",
-  maturities:["Annual NCD maturities through FY27–FY29 from historic programmes — steady refi flow ⚑","New project drawdowns FY27 create COD take-outs FY29+"],
-  finhist:["Oct/Dec 2025: CRISIL AA+/Stable reaffirmed on expanded debt programmes","S&P upgrade (international scale)","Rooftop/Solar EPC & cell plant funded FY25–26"],
-  ratingevo:["Apr 2024: CRISIL upgrade to AA+/Stable","2025: reaffirmations with growing rated quantum","2026: stable; capex overshoot flagged by market but not by agencies"],
-  covenants:"Management-stated ND/EBITDA 3.4x and ND/E 1.2x ceilings function as de-facto covenants; rationale sensitivities on Mundra losses and discom receivables.",
-  acquisitions:"Selectively acquisitive historically (Welspun RE 2016, Odisha discoms 2020-21); current growth mostly organic.",
-  srcs:[["CRISIL rationale Oct 2025","https://www.crisil.com/mnt/winshare/Ratings/RatingList/RatingDocs/TheTataPowerCompanyLimited_October%2010_%202025_RR_380590.html"],["FY27 capex — Whalesbook","https://www.whalesbook.com/corporate-news/English/energy/Tata-Power-Hits-Record-indian-rupee5000-Cr-Profit-Plans-indian-rupee25000-Cr-Capex-for-FY27/6a0735ece125a601ebdcc781"],["Targets — ScanX","https://scanx.trade/stock-market-news/stocks/tata-power-targets-financial-ratios-of-3-4-and-1-2-plans-balanced-renewable-portfolio-by-fy27/31807368"]]
-},
-{
-  name:"Adani Enterprises", sector:"Incubator (airports, roads, new energy, data centres)", rating:"CARE AA− / ICRA AA− / Stable",
-  opp:12000, scores:{nt:7.5,size:7.5,event:7.5,fit:8.5}, triggers:["mat","capex"],
-  thesis:"The group's incubator runs India's largest private capex programme (Navi Mumbai airport ramping, PVC, data centres); already a repeat public-NCD issuer at AA− with ≥75% of each issue earmarked for refinancing — standing demand for INR duration.",
-  rationale:"<b>Why now:</b> three public NCD issues done (Jan 2026: ₹1,000 cr at up to 8.90%), each majority-refinancing — a visible, recurring INR programme. Airport holdco raised $750mn ECB + $1bn MIAL project financing offshore; the INR leg (NMIA phase 2, road HAM portfolio, Kutch copper/PVC, AdaniConneX) keeps growing. AA− pricing offers the best spread in the large-cap universe. Public-issue format also signals willingness to pay for diversified funding — private placements and structured tranches are an easy upsell.",
-  kv:{ "FY26 EBITDA":"~₹18,000 cr ⚑", "Public NCDs":"3 issues; Jan-26: ₹1,000 cr @ ≤8.90%", "Use of proceeds":"≥75% refinancing", "Airports":"NMIA opened Dec 2025; $1.75bn offshore raised", "Rating":"AA− (CARE & ICRA)" },
-  capstruct:"Corporate public + private NCDs, bank term loans, airport holdco USD notes/ECB, project debt in roads/solar/copper SPVs. ⚑ split inferred.",
-  lenders:"Domestic: SBI-led banks, retail + institutional NCD holders; Offshore: BlackRock-led privates, international bank clubs (airports). ⚑ inferred.",
-  maturities:["Public NCD series 2024–26 create ladder of 2027–2031 maturities","≥75%-refi mandate means every quarter has a take-out candidate ⚑"],
-  finhist:["Jan 2026: 3rd public NCD ₹1,000 cr (8.48–8.90%)","Oct 2025: NMIA inaugurated; Dec 2025 ops start","2025: $750mn AAHL ECB; $1bn MIAL financing (incl. $750mn 2029 notes)"],
-  ratingevo:["2024: AA− restored post-2023 volatility","2025: CARE/ICRA AA− stable through public issues","2026: stable; group liquidity called adequate by CRISIL for debt + capex"],
-  covenants:"Public NCD covenants: security cover ≥1x, listed-debt disclosure regime; rationale sensitivities on incubation-stage cash burn and group capital-market access.",
-  acquisitions:"Serial asset builder/buyer across ports-adjacent logistics, ITD Cementation (2024-25), media; incubation model itself creates recurring funding events.",
-  srcs:[["AEL NCD launch","https://www.adani.com/newsroom/media-releases/adani-enterprises-launches-its-3rd-public-issue-of-ncds-of-rs1000-crore"],["NCD details — Chittorgarh","https://www.chittorgarh.com/bond/adani-enterprises-ncd-january-2026/369/"],["MIAL $1bn — Adani","https://www.adani.com/newsroom/media-releases/adani-airports-secures-usd-1-billion-financing-from-global-investors"]]
 },
 {
   name:"Hindalco Industries", sector:"Aluminium & copper (Novelis parent)", rating:"CRISIL AAA / Stable ⚑",
@@ -375,22 +335,7 @@ const DATA = [
   srcs:[["AESL Q4/FY26 release","https://www.adani.com/newsroom/media-releases/aesl-concludes-solid-q4-and-fy26-with-robust-pipeline-of-orders-in-hand"],["Group FY26 capex/EBITDA — Business Standard","https://www.business-standard.com/companies/news/adani-group-clocks-record-1-53-trillion-capex-ebitda-tops-94-834-crore-126060200703_1.html"],["AESL Q4 FY26 presentation","https://www.adanienergysolutions.com/-/media/project/transmission/investor/documents/new-results-presentations/aesl_q4fy26_results-presentation_vf1.pdf"]]
 },
 {
-  name:"Torrent Power", sector:"Integrated power utility", rating:"CRISIL AA+ / Stable",
-  opp:9000, scores:{nt:7,size:7,event:8.5,fit:8}, triggers:["capex"],
-  thesis:"₹60,000 cr+ capex programme FY26–32 (RE, thermal, 3 GW/₹14,000 cr pumped hydro, distribution) funded 70:30 debt-equity, with CRISIL already rating a proposed ₹4,000 cr NCD and net leverage guided to peak past 4x — a multi-year debt-raise calendar at AA+.",
-  rationale:"<b>Why now:</b> FY27 capex is guided 'much, much higher' than FY26 (1.2–1.4 GW RE additions), and the Raigad 3 GW PSH (SCOD Oct 2028) enters peak spend. Management's own funding math implies ~₹40,000 cr+ of incremental debt this cycle from a company that historically ran ~0.5x D/E — a deliberate re-leveraging into AA+ paper. Agencies have pre-cleared the arc (leverage >3.5x in FY28, peaking >4x FY29-30) so supply is coming regardless; early participation locks relationship pricing. Nabha Power acquisition (NCLT-approved) adds an M&A leg.",
-  kv:{ "Programme":"₹60,000 cr+ capex FY26–32", "Funding":"70:30 debt:equity", "PSH":"3 GW Raigad, ₹14,000 cr, SCOD Oct-28", "Rated pipeline":"₹4,000 cr proposed NCDs (CRISIL AA+)", "Leverage path":">3.5x FY28, peak >4x FY29-30" },
-  capstruct:"Corporate NCDs + bank loans; distribution licence cash flows anchor; project debt for PSH/RE being layered. ⚑",
-  lenders:"SBI/PFC/REC for projects; MF/insurer NCD sponsorship at AA+. ⚑ inferred.",
-  maturities:["Modest legacy ladder; new-issue calendar is the story — ₹4,000 cr NCD assigned and more behind it","H1 FY27 already >50% of planned FY27 capex spent — drawdowns accelerating"],
-  finhist:["2026: CRISIL reaffirms AA+/Stable; assigns proposed ₹4,000 cr NCDs","Q3 FY26: profit +93%; Nabha Power deal approved, NCDs assigned for it","D/E 0.50x Mar-25 (from 0.96x Mar-24) — headroom built deliberately"],
-  ratingevo:["2024: AA+ stable, conservative balance sheet","2025-26: AA+ maintained while agencies model the >4x leverage peak — explicit tolerance disclosed"],
-  covenants:"Rationale sensitivity: net leverage sustaining above ~4x beyond the guided peak window; distribution-business regulatory covenants. ⚑",
-  acquisitions:"Nabha Power (L&T's 1,400 MW Rajpura thermal) approved 2026; historically bought Ahmedabad/Surat/Dahej distribution and gas assets.",
-  srcs:[["Q4 FY26 earnings call","https://www.torrentpower.com/public/pdf/investors/TorrentPower-Earnings-May13-2026%20Final.pdf"],["₹80K cr growth push — Whalesbook","https://www.whalesbook.com/news/English/energy/Torrent-Power-Plans-indian-rupee80K-Crore-Growth-Push-Faces-Debt-Gas-Costs/6a06fccae125a601ebdb1373"],["Nabha deal & NCDs — Whalesbook","https://www.whalesbook.com/corporate-news/English/industrial-goodsservices/Torrent-Powers-Nabha-Deal-Approved-Ratings-Stable-NCDs-Assigned/69ea2ac3bca97ee106a73e32"]]
-},
-{
-  name:"Manipal Health Enterprises", sector:"Hospitals (unlisted; TPG/Temasek-backed)", rating:"~AA range ⚑ (verify)",
+  name:"Manipal Health Enterprises", sector:"Hospitals (unlisted; TPG/Temasek-backed)", rating:"~AA range ⚑ (verify)", pe:true,
   opp:6000, scores:{nt:8.5,size:5.5,event:9,fit:6.5}, triggers:["acq","mat"],
   thesis:"₹5,900 cr Sahyadri acquisition bridged with ₹5,300 cr of 2-year FPI bonds from five foreign banks that must be taken out by the now-SEBI-approved ~₹8,000 cr IPO (targeted Jul-Aug 2026) — any slippage or soft pricing converts the stack into India's largest healthcare private-credit trade.",
   rationale:"<b>Why now:</b> the bridge clock is running and the exit is finally scheduled — SEBI approved the ~$1.2bn IPO (₹8,000 cr fresh issue + OFS) in early Jul 2026, with listing targeted by end-July/August at a $10–13bn valuation. Manipal funded Sahyadri via offshore FPI-route bonds (Deutsche, Barclays, MUFG, SMBC, DBS) because RBI bars onshore bank lending for M&A — but domestic NCDs from credit funds/AIFs face no such bar and can refinance it. Total debt to be repaid via IPO is ~₹8,000 cr. Even on-plan, the residual post-IPO structure needs term debt; if pricing softens, the whole stack is in play. India's largest hospital chain by beds post-deal, with proven sponsor support (TPG, Temasek).",
@@ -463,14 +408,164 @@ const DATA = [
   covenants:"Standard consortium covenants; rationale sensitivities on nickel-price swings and Indonesia JV exposure. ⚑",
   acquisitions:"JUSL/JSL Lifestyle consolidations; Chromeni assets; measured inorganic appetite.",
   srcs:[["FY26 capex — Business Standard topic page","https://www.business-standard.com/topic/jindal-stainless-steel"],["Company news — ScanX","https://scanx.trade/stock-news/jsl-jindal-stainless-ltd"]]
+},
+{
+  name:"Tata Power Renewable Energy (TPREL)", sector:"Renewables — Tata Power's non-coal vertical", rating:"ICRA AA+ / Stable (DB-verified)",
+  opp:12000, scores:{nt:8,size:7.5,event:8.5,fit:7.5}, triggers:["capex","mat"],
+  thesis:"Tata Power's parent fails the coal screen (Mundra, coal fleet) — but its RE vertical is where the group's money goes: 5.4 GW under development, a ₹6,500 cr ingot/wafer plant, and the bulk of ~₹20,000 cr FY26 group capex.",
+  rationale:"<b>Why now:</b> this is the deleveraging-parent playbook in action — the group's debt-funded growth is concentrated in TPREL while the parent optimises. ICRA rates TPREL AA+ on TPCL linkage and Tata Group flexibility; the vertical adds solar cell/module/ingot integration (4.3 GW cell line + new ₹6,500 cr investment) to 5.4 GW of solar/hybrid/FDRE projects under development. Funding = construction debt at SPVs, COD take-outs, TPREL-level NCDs, and manufacturing term loans — a programmatic multi-year calendar without touching the coal balance sheet.",
+  kv:{ "Rating":"ICRA AA+ (DB-verified)", "U/C + development":"5.4 GW (solar/hybrid/FDRE)", "New investment":"₹6,500 cr PV ingot & wafer", "Group FY26 capex":"~₹20,000 cr (RE, hydro, transmission)", "Parent":"TPCL AA+ — deleveraging, growth housed here" },
+  capstruct:"SPV project loans + TPREL-level NCDs; equity from TPCL and the BlackRock-Mubadala platform round (2022). ⚑",
+  lenders:"PFC/REC, SBI, DFIs; MF/insurer NCD demand at AA+. ⚑ inferred.",
+  maturities:["Construction facilities → COD take-outs across the 5.4 GW cohort","₹1,500 cr parent NCD (Jul 2026) shows the group actively in the domestic market"],
+  finhist:["2026: ₹6,500 cr ingot/wafer investment approved","Ind-Ra upgrade of TPREL; ICRA AA+ reaffirmed","2022: $525mn BlackRock-Mubadala equity into the RE platform"],
+  ratingevo:["2023: AA band standalone","2024-25: upgraded to AA+ on parent linkage & operating scale","2026: stable; watch manufacturing execution"],
+  covenants:"SPV DSCR/DSRA packages; group leverage ceilings (TPCL ND/EBITDA 3.4x) cascade down. ⚑",
+  acquisitions:"Welspun RE (2016) legacy; growth now organic + manufacturing integration.",
+  srcs:[["ICRA rationale (TPREL)","https://www.icra.in/Rating/GetRationalReportFilePdf?id=136780"],["₹6,500 cr ingot/wafer — ScanX","https://scanx.trade/stock-market-news/companies/tata-power-subsidiary-tprel-plans-6-500-crore-investment-in-solar-manufacturing/39104613"],["Ind-Ra upgrade","https://www.indiaratings.co.in/pressrelease/68190"]]
+},
+{
+  name:"JSW Neo Energy (JSW's non-coal vertical)", sector:"Renewables platform (houses O2 Power)", rating:"ICRA AA (DB-verified)", pe:false,
+  opp:12000, scores:{nt:8,size:7,event:8.5,fit:8}, triggers:["capex","mat","acq"],
+  thesis:"JSW Energy's parent fails the coal screen (thermal fleet incl. KSK Mahanadi) — but the ₹61,000 cr / 10.3 GW build-out lives overwhelmingly at Neo, the RE arm that bought O2 Power for ₹12,468 cr and carries FY27's ~₹20,000 cr capex.",
+  rationale:"<b>Why now:</b> Neo is the growth balance sheet of the group — wind/solar/hybrid/storage capacity, the O2 platform, and the 3 GW/yr addition run-rate all sit here, rated AA standalone-plus-linkage. Parent leverage near 6x makes the group hungry for structures at the sub level: project debt, COD refis of O2's portfolio, and platform-level NCDs. Every commissioned GW creates take-out paper; the acquisition appetite (O2, Mytrah legacy) adds bridge events.",
+  kv:{ "Rating":"ICRA AA (DB-verified)", "Platform":"houses O2 Power (₹12,468 cr, Apr 2025)", "Build-out":"bulk of group's 10.3 GW / ₹61,000 cr", "FY27 capex":"~₹20,000 cr, ~3 GW RE additions", "Parent":"JSW Energy — excluded (coal fleet)" },
+  capstruct:"SPV project finance + platform NCDs; parent equity infusions. ⚑",
+  lenders:"SBI-led, PFC/REC, NCD investors. ⚑ inferred.",
+  maturities:["O2 acquisition facilities (2025) — repricing candidates","Rolling COD take-outs through FY29"],
+  finhist:["Apr 2025: O2 Power completed at ₹12,468 cr EV","FY26: continued project financings across 4.7 GW O2 portfolio","Parent FY26: ND ₹65,834 cr @5.96x — growth debt concentrated at Neo"],
+  ratingevo:["2024: AA assigned/affirmed at Neo","2025-26: held through acquisitions; execution-risk caveats"],
+  covenants:"SPV DSCR/DSRA; ICRA sensitivity on consolidated leverage and timely COD. ⚑",
+  acquisitions:"O2 Power (2025), Mytrah portfolio (2022, at group) — the group's acquisition vehicle for clean assets.",
+  srcs:[["ICRA rationale (JSW Energy/Neo)","https://www.icra.in/Rating/ShowRationalReportFilePdf/137580"],["O2 completion","https://www.indianchemicalnews.com/energy/jsw-energy-completes-acquisition-of-o2-power-for-rs-12468-cr-25798"]]
+},
+{
+  name:"Adani Airport Holdings (AAHL)", sector:"Airports — AEL's non-coal vertical", rating:"Ind-Ra AA− (upgraded from A+) · CRISIL AA− (DB)",
+  opp:9000, scores:{nt:7.5,size:7,event:8,fit:9}, triggers:["capex","mat"],
+  thesis:"AEL's parent carries the group's coal trading/MDO business — excluded — but the airports platform is the incubator's biggest funding sink: 8 airports, NMIA ramping toward full capacity, $1.75bn raised offshore and INR take-outs still to come.",
+  rationale:"<b>Why now:</b> Ind-Ra's upgrade to AA− (from A+) marks the credit inflection as NMIA commissioned (Dec 2025) and Navi Mumbai + Mumbai duty-free/non-aero monetisation ramps. Offshore money led the last phase ($750mn ECB, $1bn MIAL package incl. $750mn 2029 notes); the INR leg — NMIA phase 2, city-side development, six-airport capex — is next, and AA− airports paper carries the best spread-per-risk in infra. Concession cash flows + traffic growth = upgrade-momentum trade (GMR's path shows the pull-to-par).",
+  kv:{ "Rating":"Ind-Ra AA− (upgrade Jun-26) · CRISIL AA− (DB)", "Portfolio":"8 airports incl. Mumbai + Navi Mumbai", "NMIA":"opened Dec 2025, ramping", "Offshore raised":"$750mn ECB + $1bn MIAL (2029 notes)", "Parent":"AEL — excluded (coal trading/mining)" },
+  capstruct:"Holdco NCDs + opco project debt (MIAL/NMIA), USD notes, ECBs. ⚑",
+  lenders:"Global infra credit (Apollo-type), international bank clubs; domestic NCD investors entering. ⚑ inferred.",
+  maturities:["MIAL $750mn notes due 2029 — INR take-out candidate","NMIA construction facilities → operational refi as traffic ramps"],
+  finhist:["2025: $750mn AAHL ECB (6 airports); $1bn MIAL financing","Dec 2025: NMIA operational","Jun 2026: Ind-Ra upgrade to AA−"],
+  ratingevo:["2024: A+ band post-2023 group volatility","2025: stable, NMIA de-risking","Jun 2026: AA− — upgrade cycle underway"],
+  covenants:"Concession waterfalls, DSRA, distribution locks at opcos; holdco leverage sensitivities in Ind-Ra rationale. ⚑",
+  acquisitions:"Won 6 AAI airports (2019-21), MIAL/NMIA control (2021) — concession-driven growth continues.",
+  srcs:[["Ind-Ra AAHL upgrade","https://www.indiaratings.co.in/pressrelease/79296"],["MIAL $1bn — Adani","https://www.adani.com/newsroom/media-releases/adani-airports-secures-usd-1-billion-financing-from-global-investors"],["AAHL $750mn ECB","https://www.adani.com/newsroom/media-releases/adani-airports-clinches-usd-750-mn-global-financing-to-power-next-phase-of-growth"]]
+},
+{
+  name:"Adani New Industries (ANIL)", sector:"Green hydrogen & solar/wind manufacturing — AEL's non-coal vertical", rating:"Ind-Ra A+ (DB-verified — from the A+ screen queue)",
+  opp:8000, scores:{nt:7,size:6.5,event:7.5,fit:9}, triggers:["capex"],
+  thesis:"Straight off the systematic A+ queue: AEL's green-hydrogen incubatee runs module/cell/wafer/ingot + electrolyser + wind-turbine manufacturing and the Khavda-linked hydrogen ecosystem — a multi-decade capex hopper rated exactly where spread lenders want it.",
+  rationale:"<b>Why now:</b> ANIL is the single most capital-intensive non-coal vertical inside AEL — integrated solar manufacturing (10 GW target), green H2 derivatives (ammonia, methanol) with announced multi-billion-dollar programmes, and SIGHT/PLI support improving project economics. At A+ (Ind-Ra, DB-verified), pricing is the widest in the Adani complex — early lenders get both spread and the ratings-migration ride as modules/H2 revenues season. Funding modes: manufacturing term loans, project debt per H2 phase, and eventually platform NCDs.",
+  kv:{ "Rating":"Ind-Ra A+ (DB-verified)", "Business":"solar module/cell/ingot + electrolysers + WTGs + green H2", "Manufacturing":"~10 GW integrated solar target", "Parent":"AEL (excluded — coal); ANIL qualifies standalone", "Anchor":"Khavda ecosystem + PLI/SIGHT support" },
+  capstruct:"Manufacturing term loans, project facilities per phase; heavy parent equity. ⚑",
+  lenders:"SBI-led + DFIs; export credit for equipment plausible. ⚑ inferred.",
+  maturities:["Phase-wise drawdowns FY27-FY30 — the book is being built now"],
+  finhist:["FY25-26: module/cell lines commissioned and ramping","Green ammonia offtake MoUs; electrolyser line progressing ⚑"],
+  ratingevo:["2024-25: initial ratings in A band","2026: Ind-Ra A+ — first leg of the migration story"],
+  covenants:"Facility covenants forming; expect completion support from AEL and ratings-linked pricing steps. ⚑",
+  acquisitions:"Organic build; technology JVs.",
+  srcs:[["ICRA on AEL (incubator context)","https://www.icra.in/Rating/GetRationalReportFilePdf?id=134141"],["Adani portfolio capex — Adani","https://www.adani.com/newsroom/media-releases/adani-portfolio-reports-highest-ever-capex-by-any-indian-corporate"]]
+},
+{
+  name:"Nxtra Data (Bharti's data-centre vertical)", sector:"Data centres", rating:"CRISIL AAA (DB-verified)", pe:true,
+  opp:8000, scores:{nt:7.5,size:6,event:9,fit:6}, triggers:["capex"],
+  thesis:"Bharti is deleveraging, but Nxtra is the group's capital guzzler — a $1bn PE round (Mar 2026: Alpha Wave $435mn, Carlyle $240mn at a $3.1bn valuation) funds 300 MW → 1 GW, and data-centre economics mean debt follows that equity roughly 2:1.",
+  rationale:"<b>Why now:</b> the equity just landed — debt is next. Scaling 300 MW to 1 GW implies ₹25,000-30,000 cr of total build cost (CRISIL pegs sector investment at ₹60,000 cr to FY28), of which Nxtra's share needs ₹8,000 cr+ of debt over the medium term even after the $1bn round. Rated AAA (DB-verified; upgraded from AA+/Positive), with Airtel control, Carlyle ~25% legacy stake and hyperscaler anchor tenants — the safest way to bank India's DC boom. Fine pricing, but large, repeat, long-tenor tickets suited to insurers/InvIT-style structures.",
+  kv:{ "Rating":"CRISIL AAA (DB-verified)", "Capacity":"~300 MW → 1 GW target (~25% market share goal)", "PE round":"$1bn Mar-26 — Alpha Wave $435mn, Carlyle $240mn @ $3.1bn val", "Sponsors":"Airtel control + Carlyle + Alpha Wave + Anchorage", "Sector":"₹60,000 cr DC capex to FY28 (CRISIL)" },
+  capstruct:"Term loans at opco, sponsor equity; NCD programme headroom at AAA. ⚑",
+  lenders:"HDFC/SBI/insurers; green-loan formats used in DC sector. ⚑ inferred.",
+  maturities:["Modest legacy debt; the build creates the ladder from FY27"],
+  finhist:["Mar 2026: $1bn PE round at $3.1bn valuation","Jul 2024: CRISIL AA+ outlook to Positive → since upgraded to AAA (DB)","Continuous MW additions across 12+ campuses"],
+  ratingevo:["2022: AA+ stable (CRISIL)","2024: AA+/Positive","2025-26: AAA (DB) — sponsor strength + contracted cash flows"],
+  covenants:"Covenant-light at AAA; sponsor-support and change-of-control provisions around the PE stakes. ⚑",
+  acquisitions:"Organic campus build-outs; edge DC roll-up optionality.",
+  srcs:[["$1bn raise — CNBC","https://www.cnbc.com/2026/03/31/pe-alpha-wave-carlyle-1-billion-airtel-data-center.html"],["Airtel release","https://www.airtel.in/press-release/03-2026/airtel-announces-us1-billion-investment-in-nxtra-led-by-alpha-wave-global-and-existing-investor-carlyle-bharti-airtel-will-also-participate/"],["CRISIL rationale Jul-24","https://www.crisil.com/mnt/winshare/Ratings/RatingList/RatingDocs/NxtraDataLimited_July%2022_%202024_RR_347096.html"]]
+},
+{
+  name:"ReNew — operational SPV pools / restricted groups", q:"ReNew", sector:"Renewables (pool-level candidates)", rating:"Pool-specific: A to AA− (DB) ⚑ verify per pool", pe:true,
+  opp:7000, scores:{nt:7.5,size:6.5,event:7.5,fit:6}, triggers:["mat","capex"],
+  thesis:"The parent never prints ≥A+ domestically, but under the SPV-pool rule ReNew's seasoned operational clusters qualify on their own paper — a rolling refinancing machine ($525mn notes refinanced at 6.5% vs 7.95% in Jan-26) with CPPIB/ADIA on the register.",
+  rationale:"<b>Why now:</b> with the take-private dead (Masdar exit, Dec 2025), ReNew funds as a standalone listed group — meaning continuous SPV-pool and restricted-group refinancings rather than sponsor take-outs. Domestic pool ratings in the DB run A to AA−: the AA− clusters (seasoned wind/solar with strong counterparties) clear the A+ floor individually and suit INR take-outs of USD RG bonds, repricing trades, and brownfield acquisition financings. Pool selection is the work: pick clusters by rating, counterparty mix and DSCR. ~₹13,000 cr of non-project holdco debt stays out of scope (below A+).",
+  kv:{ "Pool ratings":"A to AA− across SPVs (DB) — AA− pools qualify", "Refi print":"$525mn Jul-26 notes refinanced Jan-26 @6.5% (vs 7.95%)", "Ownership":"listed; CPPIB, ADIA on register; take-private called off Dec-25", "Holdco debt":"~₹13,000 cr non-project (out of scope, sub-A+)", "Portfolio":"~10 GW+ operational/committed ⚑" },
+  capstruct:"USD RG bonds + INR project loans per pool; holdco debt separate. ⚑",
+  lenders:"Global RG bondholders, PFC/REC/SBI at SPVs; NBFC/AIF interest in mezz. ⚑ inferred.",
+  maturities:["RG USD bonds ladder FY27-FY29 — INR take-out candidates pool by pool","Ongoing COD refis in newer clusters"],
+  finhist:["Jan 2026: $525mn refi @6.5%, structure unchanged","Dec 2025: take-private abandoned after Masdar exit","2024-25: multiple domestic SPV refis (see DB per pool)"],
+  ratingevo:["Pool-dependent — verify each cluster in Company Deep Dive before pitching (one SPV shows ICRA D issuer-not-cooperating: check hygiene per pool)"],
+  covenants:"RG structures: DSCR, distribution locks, cash sweeps; INR refis can negotiate looser terms. ⚑",
+  acquisitions:"Brownfield RE M&A historically (Ostro); pool growth mostly organic.",
+  srcs:[["Masdar exit — IJGlobal","https://www.ijglobal.com/articles/232326/masdar-withdraws-from-renew-take-private-deal-india"],["$525mn refi — Fitch/Greentech context","https://greentechlead.com/renewable-energy/fitch-ratings-low-refinancing-risk-for-india-renewable-us-dollar-bonds-despite-2-3-bn-maturities-52402"]]
+},
+{
+  name:"Serentica Renewables", sector:"Round-the-clock RE for industrials", rating:"ICRA AA (SRIPL) · pools AA− to A (DB) ⚑", pe:true,
+  opp:6000, scores:{nt:7,size:5.5,event:8.5,fit:7.5}, triggers:["capex"],
+  thesis:"KKR-majority platform building RTC renewable supply for Vedanta's smelters (BALCO ECBs from Rabobank/SocGen already done) — 4-5 GW committed pipeline whose ECB construction debt converts naturally into INR take-outs.",
+  rationale:"<b>Why now:</b> Serentica hits two of your rules at once — PE-backed (KKR majority, +$250mn top-up) and a capital-hungry vertical serving a coal-adjacent parent without being coal itself. The model (firm RTC supply to energy-intensive industrials under long-term contracts) produces utility-like cash flows; ICRA AA at SRIPL and CARE-rated project pools clear the floor (pool-level A names don't — pick clusters). Construction is currently ECB-funded ($100mn+ tranches); each COD creates an INR refinancing window, and the Vedanta group's smelter expansion keeps the pipeline growing.",
+  kv:{ "Rating":"ICRA AA (SRIPL, DB) · pools AA−/A ⚑", "Sponsor":"KKR majority (+$250mn additional), Vedanta-linked SRPL minority", "Pipeline":"~4-5 GW committed RTC ⚑", "Offtake":"BALCO/Vedanta smelters, long-term", "Recent debt":"2x $100mn+ ECBs (Rabobank, SocGen)" },
+  capstruct:"ECB construction facilities + SPV project debt; KKR equity. ⚑",
+  lenders:"Rabobank, SocGen (ECB); PFC/REC/domestic take-outs next. ⚑",
+  maturities:["ECB tranches → INR take-out at COD, FY27 onward","Pool refis as clusters season"],
+  finhist:["2025: second $100mn+ ECB (Rabobank/SocGen) for BALCO supply","KKR additional $250mn equity","CARE rating on Serentica 3 (Oct 2025)"],
+  ratingevo:["2024: A band early pools","2025-26: AA at platform, AA− spreading across pools — migration story"],
+  covenants:"Project DSCR/DSRA; offtaker-concentration (Vedanta group) is the rating sensitivity. ⚑",
+  acquisitions:"Organic; captive-conversion deals with industrials possible.",
+  srcs:[["ICRA rationale — SRIPL","https://www.icra.in/Rating/ShowRationalReportFilePdf/130519"],["KKR $250mn","https://www.serenticaglobal.com/serentica-renewables-secures-additional-250-million-investment-from-kkr/"],["2nd ECB — Serentica","https://www.serenticaglobal.com/serentica-renewables-secures-second-ecb-financing-of-usd-100-million-from-rabobank-and-societe-generale-to-power-balco-bharat-aluminium-company-limited/"]]
+},
+{
+  name:"Apraava Energy", sector:"Smart meters, transmission & RE (CLP/CDPQ-backed)", rating:"ICRA AA · Ind-Ra AA+ (DB) — smart-meter SPVs A+", pe:true,
+  opp:6000, scores:{nt:7.5,size:5.5,event:8.5,fit:7.5}, triggers:["capex"],
+  thesis:"From the A+ screen queue: ~₹12,000 cr of smart-meter capex over three years (1.16mn meters live across 6 states) is deliberately re-levering a conservatively financed CLP/CDPQ platform — ND/EBITDA already moved 2.1x → 3.2x.",
+  rationale:"<b>Why now:</b> AMISP concessions are annuity assets — DISCOM-paid, ~10-year, opex-light — being financed SPV by SPV (Apraava Kutch Saurashtra, Kolkata, etc., rated A+ with BII co-investment in some). The ₹12,000 cr programme means a steady pipeline of ₹500-1,500 cr project financings plus platform-level debt at AA/AA+. Utility-grade sponsors (CLP Holdings, CDPQ) and measured leverage guidance give credit committees comfort; the play is to become the house lender across the meter roll-out and the transmission/RE verticals beside it.",
+  kv:{ "Rating":"ICRA AA / Ind-Ra AA+ (DB); meter SPVs A+", "Programme":"~₹12,000 cr smart-meter capex over 3 yrs", "Progress":"1.16mn meters live, 6 states (Mar-25)", "Leverage":"ND/OPBDITA 2.1x (FY24) → 3.2x (FY25), rising by design", "Sponsors":"CLP Holdings + CDPQ" },
+  capstruct:"SPV project debt per AMISP concession + platform facilities; sponsor equity. ⚑",
+  lenders:"DFIs (BII co-invested), SBI/PFC/REC, insurers at platform. ⚑ inferred.",
+  maturities:["Concession-wise drawdowns FY26-FY29; refis as meter fleets commission"],
+  finhist:["FY25: leverage step-up to 3.2x funding the roll-out","ICRA assignments/reaffirmations across meter SPVs 2024-26","Transmission + wind portfolio financings ongoing"],
+  ratingevo:["2024: AA stable platform; A+ meter SPVs","2025-26: holding through the leverage build — sensitivity is DISCOM payment discipline"],
+  covenants:"SPV DSCR floors, DSRA; platform sensitivity on ND/OPBDITA beyond ~3.5x ⚑.",
+  acquisitions:"Concession wins (AMISP auctions) rather than M&A.",
+  srcs:[["ICRA — Apraava Energy","https://www.icra.in/Rating/GetRationalReportFilePdf?id=138170"],["ICRA — Apraava Smart Meter","https://www.icra.in/Rating/GetRationalReportFilePdf?id=125987"],["BII co-investment","https://www.bii.co.uk/en/our-impact/investment/apraava-kutch-saurashtra-smart-meter-private-limited-investment-01/"]]
+},
+{
+  name:"STT GDC India", sector:"Data centres (ST Telemedia/Temasek-backed)", rating:"CareEdge AA+ (DB-verified)", pe:true,
+  opp:5000, scores:{nt:6.5,size:5.5,event:8,fit:7}, triggers:["capex","mat"],
+  thesis:"India's largest carrier-neutral DC operator (30 sites) growing revenue ~18% (₹2,354 cr FY25) into a sector CRISIL expects to more than double by FY28 on ₹60,000 cr of investment — sponsor-backed, annuity-style, and structurally debt-funded.",
+  rationale:"<b>Why now:</b> hyperscaler demand has every DC platform in build mode simultaneously; STT GDC India combines the longest operating track record with Temasek-linked parentage (ST Telemedia) — the credit that banks the sector without construction-stage risk concentration. Qualifies via the widened gate (revenue >₹1,500 cr AND debt >₹1,500 cr ⚑). Expect recurring campus-level financings, green loan formats, and eventually an InvIT/ABS exit creating refi events.",
+  kv:{ "Rating":"CareEdge AA+ (DB-verified)", "FY25 revenue":"₹2,354 cr (+17.9%)", "Footprint":"~30 DCs, largest carrier-neutral in India", "Sector":"capacity to 2.3-2.5 GW by FY28, ₹60,000 cr capex (CRISIL)", "Sponsor":"ST Telemedia / Temasek-linked" },
+  capstruct:"Campus-level term debt + corporate facilities; sponsor equity. ⚑",
+  lenders:"Domestic banks + insurers; green-loan formats. ⚑ inferred.",
+  maturities:["Rolling campus financings; refis as sites stabilise"],
+  finhist:["FY25: revenue +17.9% on new DC ramp","ICRA reaffirmation (2026)","Continuous capacity additions Mumbai/Chennai/Delhi-NCR"],
+  ratingevo:["2024-26: stable AA+ band; sensitivity on debt-funded expansion pace"],
+  covenants:"Facility covenants on leverage/DSCR; sponsor-support linkages. ⚑",
+  acquisitions:"Organic campus expansion; land banking.",
+  srcs:[["ICRA rationale — STT GDC India","https://www.icra.in/Rating/GetRationalReportFilePdf?id=137820"],["Sector outlook — CRISIL via Business Standard","https://www.business-standard.com/industry/news/india-s-data-centre-capacity-to-more-than-double-by-fy27-crisil-ratings-124122300677_1.html"]]
+},
+{
+  name:"Cube Highways (Trust + holdcos)", sector:"Roads InvIT (I Squared-backed)", rating:"Trust NCDs: CRISIL AAA · Pte holdcos: AA (DB)", pe:true,
+  opp:5000, scores:{nt:7,size:5.5,event:7.5,fit:6.5}, triggers:["mat","acq"],
+  thesis:"I Squared's road platform is a repeat NCD machine — ₹1,152 cr (Apr) and ₹820 cr (Aug 2025) AAA prints at the Trust — with a live asset-acquisition pipeline that needs bridge-to-InvIT funding every time a road portfolio trades.",
+  rationale:"<b>Why now:</b> the InvIT structure makes financing programmatic: acquire operating roads at the holdco (CRISIL AA level), season, drop down into the AAA Trust, refinance cheaper — every cycle needs acquisition bridges, holdco mezz and Trust NCDs. Sponsors (I Squared, ADIA-linked Platinum Rock, Mubadala) keep buying Indian road assets (NHAI monetisation pipeline is deep), so the deal flow is structural. AAA Trust paper is thin-margin but the holdco/bridge layers pay properly.",
+  kv:{ "Trust NCDs":"CRISIL AAA; ₹1,152 cr (Apr) + ₹820 cr (Aug-25) raised", "Holdcos":"Cube I/III Pte — CRISIL/Ind-Ra AA (DB)", "Sponsors":"I Squared Capital, Platinum Rock (ADIA), Mubadala", "Pipeline":"NHAI TOT/InvIT monetisations — serial acquirer", "Model":"acquire → season → drop-down → refinance" },
+  capstruct:"Trust NCDs (AAA), holdco facilities (AA), SPV concession debt. ⚑",
+  lenders:"Insurers/pensions at Trust; banks + credit funds at holdco. ⚑ inferred.",
+  maturities:["3/7-yr Trust NCD ladder building from 2025 prints","Holdco facilities reprice on each drop-down"],
+  finhist:["Apr 2025: ₹1,152 cr AAA NCDs (3+7yr)","Aug 2025: ₹820 cr NCDs for debt repayment","Dec 2025: CRISIL reaffirms Pte holdcos at AA"],
+  ratingevo:["2024: AAA assigned at Trust","2025-26: reaffirmations across the stack; watch asset-addition leverage"],
+  covenants:"InvIT leverage cap (SEBI 70% AUM w/ AAA), DSRA, cash waterfalls; holdco covenants tighter. ",
+  acquisitions:"Serial road-portfolio acquirer (NHAI TOT bundles, developer sell-downs) — the acquisitive box is structural.",
+  srcs:[["CRISIL — Cube Highways Trust Feb-25","https://www.crisil.com/mnt/winshare/Ratings/RatingList/RatingDocs/CubeHighwaysTrust_February%2012_%202025_RR_362975.html"],["₹820 cr NCDs — Business Standard","https://www.business-standard.com/companies/start-ups/cube-highways-trust-raises-rs-820-cr-via-ncds-125082001612_1.html"],["CRISIL — Cube Pte Dec-25","https://www.crisil.com/mnt/winshare/Ratings/RatingList/RatingDocs/CubeHighwaysandInfrastructurePteLimited_December%2026_%202025_RR_381252.html"]]
 }
 ];
 
 const WATCH = [
- {n:"ReNew (RPL)", w:"Take-private is DEAD — Masdar withdrew 15 Dec 2025 and the ADIA/CPPIB/Sinha consortium abandoned the $8.15/sh offer; shares fell ~28%. ReNew is now a standalone listed refi story: $525mn Jul-26 notes already refinanced at 6.5% (vs 7.95%) in Jan-26 with unchanged structure, but non-project holdco debt (~₹13,000 cr as of Sep-25) still weighs and the parent domestic rating sits at the A+/AA− boundary. With sponsor-exit overhang gone, expect continued programmatic INR/offshore refis — re-screen the moment the parent rating prints A+ or better."},
- {n:"Greenko", w:"Replaced USD bonds with offshore yen/USD loans (2024-25) — heavy refi flow but domestic-rating visibility poor and funding remains offshore-first. Monitor for INR pivot."},
+ {n:"Greenko", w:"Not present in the CreditNexus ratings DB — no verifiable current domestic rating print, and funding remains offshore-first (yen/USD loan refis of USD bonds, 2024-25). Under the SPV-pool rule it would qualify the day a domestic pool prints A+ or better — re-screen each run."},
  {n:"Shapoorji Pallonji group", w:"Mega private-credit borrower (~$3.4bn 2025 deal) with constant refi need — fails the A+ floor. Watch for post-Afcons-monetisation upgrades."},
- {n:"Bharti Airtel / Grasim / Shree Cement", w:"Pass rating & EBITDA easily but are deleveraging or accrual-funded — no near-term structured-debt angle. Revisit if spectrum/paints/capex cycles re-lever."}
+ {n:"Grasim / Shree Cement", w:"Deleveraging or accrual-funded parents. Capital-hungry verticals tracked per the subsidiary rule: Grasim's paints (Birla Opus) capex is largely spent and B2B e-commerce is asset-light — no levered vertical yet; Shree has none. UltraTech (the group's cement vertical) is already on the main list."},
+ {n:"Ayana Renewable Power", w:"Surfaced by the A+ screen queue but screened OUT: 100% acquired by ONGC-NTPC Green JV (completed Mar 2025) — now PSU-owned. Illustrates the queue working as intended."}
 ];
 
 const fmt = n => "₹" + n.toLocaleString("en-IN") + " cr";
@@ -508,7 +603,7 @@ function render(keepCount){
           <div class="csub">${r.sector}</div>
           <div class="badges">
             <span class="badge b-rating">${r.rating}</span>
-            ${r.triggers.map(t=>`<span class="badge ${TRIG_LABEL[t][1]}">${TRIG_LABEL[t][0]}</span>`).join("")}
+            ${r.triggers.map(t=>`<span class="badge ${TRIG_LABEL[t][1]}">${TRIG_LABEL[t][0]}</span>`).join("")}${r.pe?`<span class="badge b-pe">PE-backed</span>`:``}
           </div>
         </div>
         <div class="opp">
@@ -526,7 +621,7 @@ function render(keepCount){
             <div class="sec"><h4>Key metrics</h4><dl class="kv">${Object.entries(r.kv).map(([k,v])=>`<dt>${k}</dt><dd>${v}</dd>`).join("")}</dl></div>
             <div class="sec"><h4>Capital structure</h4><p>${r.capstruct}</p></div>
             <div class="sec"><h4>Lender base</h4><p>${r.lenders}</p></div>
-            <div class="sec"><h4>Maturities &amp; refi hooks</h4><ul>${r.maturities.map(m=>`<li>${m}</li>`).join("")}</ul></div>
+            <div class="sec"><h4>Maturities & refi hooks</h4><ul>${r.maturities.map(m=>`<li>${m}</li>`).join("")}</ul></div>
           </div>
           <div>
             <div class="sec"><h4>Recent financing history</h4><ul>${r.finhist.map(m=>`<li>${m}</li>`).join("")}</ul></div>
@@ -537,8 +632,8 @@ function render(keepCount){
         </div>
         <div class="sec"><h4>Sources</h4><p class="srcs">${r.srcs.map(s=>`<a href="${s[1]}" target="_blank">${s[0]}</a>`).join(" · ")}</p></div>
         <div class="deeplinks">
-          <a href="https://creditnexus.streamlit.app/Company_Deep_Dive?company=${encodeURIComponent(r.name.split('(')[0].trim())}" target="_blank">↗ Ratings Deep Dive</a>
-          <a href="https://creditnexus-bonds.streamlit.app/?issuer=${encodeURIComponent(r.name.split('(')[0].trim())}" target="_blank">↗ Bonds maturing</a>
+          <a href="https://creditnexus.streamlit.app/Company_Deep_Dive?company=${encodeURIComponent(r.q||r.name.split('(')[0].trim())}" target="_blank">↗ Ratings Deep Dive</a>
+          <a href="https://creditnexus-bonds.streamlit.app/?issuer=${encodeURIComponent(r.q||r.name.split('(')[0].trim())}" target="_blank">↗ Bonds maturing</a>
         </div>
       </div>
     </div>`;
