@@ -110,7 +110,7 @@
   <div class="hero">
     <div>
       <h1>INR Debt Financing Ideas</h1>
-      <p>Pre-screened, priority-ranked candidates · compiled 7 Jul 2026 (v3.1 · queue 56/653) · auto-refreshes fortnightly · sister app to the CreditNexus suite</p>
+      <p>Pre-screened, priority-ranked candidates · compiled 7 Jul 2026 (v3.2 · queue 106/653) · auto-refreshes fortnightly · sister app to the CreditNexus suite</p>
     </div>
     <div>
       <a class="pill" href="https://creditnexus.streamlit.app" target="_blank">↗ Credit Ratings</a>
@@ -161,7 +161,7 @@
   <h2 class="secTitle">Systematic screen queue (A+ → AAA)</h2>
   <div class="meth">
     <p>Universe sourced from the CreditNexus ratings DB (<b>31,043 current rating rows</b> parsed 7 Jul 2026 from <span style="font-family:monospace">ratings_current.csv</span>). Unique non-BFSI/non-PSU names by grade: <b>A+ : 653</b> · AA− : ~599 · AA : ~586 · AA+ : ~401 · AAA : ~595 (row counts, pre-dedupe, heuristic BFSI/PSU filter).</p>
-    <p style="margin-top:8px"><b>Program:</b> deep-dive the A+ cohort first, then move up the ladder (AA− → AA → AA+ → AAA), at <b>50 names per run</b>. <b>Progress: 56 / 653 A+ names processed</b> (alphabetical; next run starts at #57, "Avaada Gjclean…"). Promoted so far from the queue: Apraava Energy, Adani New Industries, Aster DM Quality Care, Avaada Energy. Each run regenerates the queue from <span style="font-family:monospace">data/ratings_current.csv</span>, triages the next 50, deep-dives plausible qualifiers and logs every disposition below.</p>
+    <p style="margin-top:8px"><b>Program:</b> deep-dive the A+ cohort first, then move up the ladder (AA− → AA → AA+ → AAA), at <b>50 names per run</b>. <b>Progress: 106 / 653 A+ names processed</b> (alphabetical; next run starts at #107, "Carzonrent/Casa…"). Promoted so far from the queue: Apraava Energy, Adani New Industries, Aster DM Quality Care, Avaada Energy, CleanMax. Each run regenerates the queue from <span style="font-family:monospace">data/ratings_current.csv</span>, triages the next 50, deep-dives plausible qualifiers and logs every disposition below.</p>
     <details style="margin-top:10px"><summary style="cursor:pointer;font-weight:700;color:var(--indigo-dark)">Disposition log — names 1–56 (7 Jul 2026 run)</summary>
     <div style="font-size:12.5px;color:#374151;line-height:1.7;margin-top:8px">
     <b>Promoted (4):</b> Adani New Industries (Ind-Ra A+; green H2/solar mfg) · Apraava Energy (via meter SPVs; platform AA/AA+) · Aster DM Quality Care (Blackstone JV; merged 2-Jul-26) · Avaada Energy (Brookfield; $750mn refi live).<br>
@@ -171,6 +171,15 @@
     <b>Single SPVs of covered/known sponsors (8):</b> AISATS Noida Cargo Terminal + Logistic Park (AISATS AA−; combined project ₹1,500 cr, 3:1 D:E — fail-size today, monitor phase 2) · Apraava Kolkata / Shimla / Smart Meter SPVs (sponsor carded) · Adani Solar AP Seven + Barmer One (AGEL SPVs) · Amravati Power Transmission · Ahmednagar Ghogargaon Road · Ashoka Belgaum Khanapur Road (monitor Ashoka Concessions at pool level).<br>
     <b>Fail size gate (rest, ~38):</b> ABI-Showatech, Artson (Tata Projects), Asianet Digital, AVI Oil, Aarvee, Adcock Ingram, Advanced Performance Materials ⚑, Aether Industries (net-cash, capex &lt;₹2,000 cr), Albonair, Alf Engineering, Allengers, Alliance Dental (Clove — PE-backed ⚑, monitor under PE rule), Alpha Design (Adani Defence stake ⚑), Alyssum ⚑, Amara Raja Power Systems, Ameya Logistics, Anamudi (Godrej LLP), Aparna Constructions ⚑, Apeejay Shipping, Apeejay Surrendra Park Hotels, Apollo Fertility / Specialty / Spectra (Apollo group — parent AA+ accrual-funded, no card), Apollo Pipes, Arjas Steel + Arjas Modern Steel (rev ~₹1,000 cr, debt ₹753 cr; acquired by Sandur Nov-24, no longer PE), Artisan Spirits, Arvind SmartSpaces, Arya Vaidya Sala, Asclepius, Ashok Iron Works, Ashok Leyland Defence ⚑ (monitor defence capex cycle), Asianet Satellite, Associated Road Carriers, Autotech, Avaada Clean Project (platform carded).<br>
     ⚑ = judgment on partial data — re-verify if any of these grow into the gate.</div></details>
+    <details style="margin-top:8px"><summary style="cursor:pointer;font-weight:700;color:var(--indigo-dark)">Disposition log — names 57–106 (7 Jul 2026, batch 2)</summary>
+    <div style="font-size:12.5px;color:#374151;line-height:1.7;margin-top:8px">
+    <b>Promoted (1):</b> CleanMax — platform behind queue SPVs Clean Max Mercury / Photovoltaic / Pluto Solar / Power 3 (3.1 GW op + 2.6 GW U/C; post-IPO re-leveraging; Brookfield ~21%).<br>
+    <b>Single SPVs of covered/known platforms (19):</b> Avaada Gjclean / Gjsolar / Solar Energy / Sunrise / Sustainable (platform carded) · CleanMax ×4 (promoted) · Axis Wind Farms Anantapur + Rayalaseema (Axis Energy group — monitor platform ⚑) · BEEMPOW · Ballupur Solar · Belgaum RE · Bhagwanpur Solar · Bindookhadak Solar · Bothe Windfarm · CMES Infinity · Chennai Enviro Package-6.<br>
+    <b>Excluded — PSU/state-linked (2):</b> Bridge and Roof Co. (GoI EPC) · CIAL Infrastructures (Kerala-govt-promoted CIAL subsidiary ⚑).<br>
+    <b>Out of scope (2):</b> Bayes 09 2025 (securitisation trust) · Bapuji Education Association (trust).<br>
+    <b>Near-gate — monitor (2):</b> CMR Green complex (CMR Aluminium / NLM Eco / Toyotsu): revenue ₹6,666 cr FY25 ✓ but borrowings ₹1,303 cr — just under the ₹1,500 cr debt gate, rising fast on debt-funded Andhra/Odisha capex and negative OCF (−₹388 cr 9M-FY26); likely crosses in FY27 · Bamboo Hotel &amp; Global Centre Delhi (Bharti Realty Aerocity SPV — sizable single asset ⚑).<br>
+    <b>Fail size/trigger (rest, ~24):</b> Avadh Sugar (rev ~₹3,600 cr ⚑ passes revenue but seasonal WC debt ~₹1,600 cr with no ₹2,000 cr capex programme and gross debt &lt; ₹3,000 cr — fail-trigger), Avana Logistek, Avon Cycles, Awfis (asset-light), Bansal Steel &amp; Power, Bansal Wire (debt ~₹700 cr), Barmalt, Beetel Teletech (Bharti distribution, low debt), Berry Alloys, Beumer India, Bhilwara Energy (hydro holdco ⚑), Bikanervala, Bolas Agro, Brigade Hotel Ventures (post-IPO debt ~₹600 cr — monitor hotel capex cycle), Bull Machines, C.L. Enterprises, CCL Foods, CJ Darcl Logistics (revenue-rich, debt-light ⚑), CPM India, CTR Manufacturing, Canary Hotels, Carbon Resources.<br>
+    ⚑ = judgment on partial data — re-verify next run.</div></details>
   </div>
 
   <h2 class="secTitle">Watchlist — near-misses worth monitoring</h2>
@@ -597,6 +606,21 @@ const DATA = [
   covenants:"OCD terms (Brookfield) and project DSCR/DSRA packages; refi will reset offshore covenants. ⚑",
   acquisitions:"Organic; land-bank + manufacturing build-out.",
   srcs:[["$750mn loan — Business Standard","https://www.business-standard.com/companies/news/brookfield-backed-avaada-seeks-750-million-loan-from-global-lenders-126070700132_1.html"],["Brookfield $1bn — PRNewswire","https://www.prnewswire.com/il/news-releases/avaada-group-raises-us-1-billion-funding-for-manufacturing-of-green-hydrogen-solar-pv-modules-and-growth-of-renewable-energy-platform-from-brookfield-301814418.html"],["ICRA rationale Jan 2026","https://www.icra.in/Rating/GetRationalReportFilePdf?id=140120"],["Electro IPO — EQ Mag","https://www.eqmagpro.com/avaada-energy-sparks-inr-4000-cr-ipo-for-solar-arm-backed-by-brookfield-eq/"]]
+},
+{
+  name:"CleanMax (Clean Max Enviro Energy Solutions)", sector:"C&I renewables (listed Nov-25; Brookfield ~21%)", rating:"SPVs A+ (DB) · platform CareEdge May-26 ⚑ verify level", pe:true, q:"Clean Max",
+  opp:5000, scores:{nt:7,size:6,event:8,fit:7.5}, triggers:["mat","capex"],
+  thesis:"From the A+ screen queue (via its Mercury/Photovoltaic/Pluto/Power-3 SPVs): India's C&I renewables leader — 3.1 GW operational + 2.6 GW contracted under construction — reset its balance sheet with a $586mn IPO (Nov 2025) and now re-levers into the build.",
+  rationale:"<b>Why now:</b> the IPO was a deleveraging event (net debt was ₹7,645 cr at ~2.39x D/E in FY25), which means the next leg of the 2.6 GW contracted build is financed fresh — construction facilities, COD take-outs and platform NCDs on a cleaner base. C&I PPAs with corporate offtakers (vs SECI-heavy peers) diversify counterparty risk and support pricing; hybrid solar-wind projects raise per-MW tickets. Brookfield monetised from ~43% to ~21% but remains a sponsor, and CareEdge's May-26 review flags the stake change — worth reading before structuring. Listed-company disclosure makes pool selection easier than for private RE platforms.",
+  kv:{ "Portfolio":"3.1 GW op + 2.6 GW contracted U/C (Mar-26)", "Net debt":"₹7,645 cr FY25 @ ~2.39x D/E (pre-IPO)", "IPO":"$586mn Nov-2025 — primarily debt repayment", "Sponsor":"Brookfield GTF ~21% (from ~43%)", "Model":"C&I PPAs — corporate offtake, hybrid solar-wind" },
+  capstruct:"SPV project loans across ~30+ entities, platform facilities; IPO proceeds deleveraged holdco. ⚑",
+  lenders:"Domestic project lenders + DFIs; NCD investors post-listing. ⚑ inferred.",
+  maturities:["Construction facilities on 2.6 GW cohort — rolling COD refis FY27-FY29","Legacy SPV loans — repricing candidates post-IPO deleveraging"],
+  finhist:["Nov 2025: $586mn IPO, debt repayment priority","2023: $360mn Brookfield-led round for C&I expansion","May 2026: CareEdge review post stake-moderation"],
+  ratingevo:["Pre-IPO: A/A+ band with leverage flags","2025-26: deleveraging + listing = upgrade-bias; CareEdge watching sponsor-linkage dilution ⚑"],
+  covenants:"SPV DSCR/DSRA; platform covenants reset post-IPO; sponsor-linkage clauses diluting as Brookfield sells down ⚑.",
+  acquisitions:"Organic C&I pipeline; open-access & hybrid auctions.",
+  srcs:[["CareEdge PR May-26","https://www.careratings.com/upload/CompanyFiles/PR/202605120525_Clean_Max_Enviro_Energy_Solutions_Limited.pdf"],["$360mn round — Mercom","https://www.mercomindia.com/cleanmax-360-million-funding-expand-ci-portfolio"],["IPO analysis — Arihant","https://www.arihantplus.com/blogs/ipo/clean-max-enviro-ipo-review-price-band-analysis-and-risks"]]
 }
 ];
 
