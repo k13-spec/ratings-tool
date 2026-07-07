@@ -110,7 +110,7 @@
   <div class="hero">
     <div>
       <h1>INR Debt Financing Ideas</h1>
-      <p>Pre-screened, priority-ranked candidates · compiled 7 Jul 2026 (v3.2 · queue 106/653) · auto-refreshes fortnightly · sister app to the CreditNexus suite</p>
+      <p>Pre-screened, priority-ranked candidates · compiled 7 Jul 2026 (v4.0 · A+ cohort complete 653/653) · auto-refreshes fortnightly · sister app to the CreditNexus suite</p>
     </div>
     <div>
       <a class="pill" href="https://creditnexus.streamlit.app" target="_blank">↗ Credit Ratings</a>
@@ -161,7 +161,7 @@
   <h2 class="secTitle">Systematic screen queue (A+ → AAA)</h2>
   <div class="meth">
     <p>Universe sourced from the CreditNexus ratings DB (<b>31,043 current rating rows</b> parsed 7 Jul 2026 from <span style="font-family:monospace">ratings_current.csv</span>). Unique non-BFSI/non-PSU names by grade: <b>A+ : 653</b> · AA− : ~599 · AA : ~586 · AA+ : ~401 · AAA : ~595 (row counts, pre-dedupe, heuristic BFSI/PSU filter).</p>
-    <p style="margin-top:8px"><b>Program:</b> deep-dive the A+ cohort first, then move up the ladder (AA− → AA → AA+ → AAA), at <b>50 names per run</b>. <b>Progress: 106 / 653 A+ names processed</b> (alphabetical; next run starts at #107, "Carzonrent/Casa…"). Promoted so far from the queue: Apraava Energy, Adani New Industries, Aster DM Quality Care, Avaada Energy, CleanMax. Each run regenerates the queue from <span style="font-family:monospace">data/ratings_current.csv</span>, triages the next 50, deep-dives plausible qualifiers and logs every disposition below.</p>
+    <p style="margin-top:8px"><b>Program:</b> deep-dive the A+ cohort first, then move up the ladder (AA− → AA → AA+ → AAA), at <b>50 names per run</b>. <b>Progress: A+ COHORT COMPLETE — 653 / 653 processed (7 Jul 2026).</b> Promoted from the queue: Apraava Energy, Adani New Industries, Aster DM Quality Care, Avaada Energy, CleanMax, Haldia Petrochemicals, Juniper Green Energy, GreenCell Mobility, J M Baxi Ports. <b>Next: the AA− cohort (grade 4, ~599 rating rows)</b> begins with the next fortnightly run, same 50-name cadence and logging. Each run regenerates the queue from <span style="font-family:monospace">data/ratings_current.csv</span>, triages the next 50, deep-dives plausible qualifiers and logs every disposition below.</p>
     <details style="margin-top:10px"><summary style="cursor:pointer;font-weight:700;color:var(--indigo-dark)">Disposition log — names 1–56 (7 Jul 2026 run)</summary>
     <div style="font-size:12.5px;color:#374151;line-height:1.7;margin-top:8px">
     <b>Promoted (4):</b> Adani New Industries (Ind-Ra A+; green H2/solar mfg) · Apraava Energy (via meter SPVs; platform AA/AA+) · Aster DM Quality Care (Blackstone JV; merged 2-Jul-26) · Avaada Energy (Brookfield; $750mn refi live).<br>
@@ -180,6 +180,20 @@
     <b>Near-gate — monitor (2):</b> CMR Green complex (CMR Aluminium / NLM Eco / Toyotsu): revenue ₹6,666 cr FY25 ✓ but borrowings ₹1,303 cr — just under the ₹1,500 cr debt gate, rising fast on debt-funded Andhra/Odisha capex and negative OCF (−₹388 cr 9M-FY26); likely crosses in FY27 · Bamboo Hotel &amp; Global Centre Delhi (Bharti Realty Aerocity SPV — sizable single asset ⚑).<br>
     <b>Fail size/trigger (rest, ~24):</b> Avadh Sugar (rev ~₹3,600 cr ⚑ passes revenue but seasonal WC debt ~₹1,600 cr with no ₹2,000 cr capex programme and gross debt &lt; ₹3,000 cr — fail-trigger), Avana Logistek, Avon Cycles, Awfis (asset-light), Bansal Steel &amp; Power, Bansal Wire (debt ~₹700 cr), Barmalt, Beetel Teletech (Bharti distribution, low debt), Berry Alloys, Beumer India, Bhilwara Energy (hydro holdco ⚑), Bikanervala, Bolas Agro, Brigade Hotel Ventures (post-IPO debt ~₹600 cr — monitor hotel capex cycle), Bull Machines, C.L. Enterprises, CCL Foods, CJ Darcl Logistics (revenue-rich, debt-light ⚑), CPM India, CTR Manufacturing, Canary Hotels, Carbon Resources.<br>
     ⚑ = judgment on partial data — re-verify next run.</div></details>
+    <details style="margin-top:8px"><summary style="cursor:pointer;font-weight:700;color:var(--indigo-dark)">Disposition log — names 107–653 (7 Jul 2026, batch 3 — A+ cohort completed)</summary>
+    <div style="font-size:12.5px;color:#374151;line-height:1.7;margin-top:8px">
+    <b>Method:</b> 547 names classified by pattern (platform-SPV, generic single-asset SPV, securitisation, trust, BFSI/PSU misses) with every unmatched name (439) individually reviewed; plausible qualifiers search-verified. Grouped dispositions below; ask Claude for any single name's reasoning.<br>
+    <b>Promoted (4):</b> Haldia Petrochemicals (Ind-Ra AA−; ₹5,651 cr phenol capex + ₹6,272 cr debt) · Juniper Green Energy (AT Capital/Vitol; 3 GWp by Jun-26; ₹1,550 cr bridge to refi; via 4 queue SPVs) · GreenCell Mobility (NIIF/GGEF e-bus; ₹3,000 cr REC + ₹800 cr DFI mezz) · J M Baxi Ports (Hapag-Lloyd equity; Tuticorin/JNPT terminals).<br>
+    <b>Platform SPVs (42):</b> JSW Neo family ×~20 (Vayu/Wind/Renew/Aadhya etc. — platform carded) · Juniper Green ×4 (promoted) · ReNew Agni/Saur/Solar/Wind ×~6 (pools carded) · Hero Future, Mahindra Susten (Ontario Teachers — <b>monitor, deep-dive in AA− run</b>), Continuum ⚑, Vena Energy Patan, GMR Airports (carded), Sembcorp/others.<br>
+    <b>Single-asset SPVs (~50 incl. classifier + review finds):</b> solar/wind/transmission/road/waste singles (Dakshin Odisha Urja, UP Koraun/Mehrauni/Sarila Urja, First Energy 7/9/TN1, DJ Energy, Flexirural, Dundigal W2E, H.G Raipur-Vizag AP-1, GVR Ashoka Chennai ORR, KNR Guruvayur/Somwarpet, KEC Spur, Epic Concesiones 2, PRS Tolls, Kutch Railway, Visakha Container (DP World), NTT GDC Del2 + Digital Edge DC (<b>DC platforms — monitor</b>), real-estate singles: Classic Mall (Phoenix), Palava Induslogic 4 (Lodha), Panchshil Techpark + Salarpuria/Sattva + Prestige BKC/Falcon/Garden/Mulund/Office (Blackstone-linked groups — <b>group-level AA− names due next cohort</b>), Lulu Cyber/Tech Park ⚑, Pallazzio Hotels ⚑, TRIL Infopark (Tata), Tellapur Technocity.<br>
+    <b>Excluded — coal/thermal (9):</b> DBL-Siarmal Coal Mines, Subhadra Coal Mining, JMS Mining, Thriveni Sainik Mining (coal MDOs), Dhariwal Infrastructure (CESC thermal), Lalitpur Power (Bajaj thermal), OPG Power Generation, MEIL Energy, Meil Anpara.<br>
+    <b>Excluded — PSU/state (10 heuristic misses):</b> Delhi Transco, Haryana Power Generation, Haryana Vidyut Prasaran, Power Company of Karnataka, Tamil Nadu Newsprint, Electronics Technology Parks Kerala, IHB (IOCL-HPCL-BPCL JV), MMTC-PAMP ⚑, StockHolding DMS, Karnataka Milk Federation.<br>
+    <b>Excluded — BFSI misses (4):</b> Edelweiss Rural &amp; Corporate ×2, ECAP Equities/Ecap ×2.<br>
+    <b>Securitisation/structured (20):</b> 16 classifier hits + Eldora 2W 2025, Hermes 2W 2023, Hilton LAP May 2022, Manticore 2024, Platinum Trust 2017, Tatva 24.<br>
+    <b>Trusts/education (10):</b> incl. Maharishi Markandeshwar, Bapuji-style associations, LightHouse Learning (PE-backed but asset-light ⚑).<br>
+    <b>Notable fail-trigger (pass size, no trigger — monitor):</b> Suzlon Energy (net cash post-deleveraging; 6.5 GW orderbook — revisit if re-levers), Malabar Gold (large gold WC, no term event ⚑), Patanjali Foods ⚑, Lemon Tree Hotels (EBITDA ✓, capex modest), MSN Laboratories complex ⚑, Haldiram entities ×4 (Temasek/IHC-backed, near-zero debt — PE rule noted but no financing need), Mylan/Viatris India ⚑, Prism Johnson ⚑, Rain CII Carbon (parent refi story sits offshore at Rain Industries — <b>monitor</b>), OFB Tech (commerce arm; lending sits in Oxyzo=BFSI ⚑), Gleneagles Healthcare (IHH sale process ⚑), Epsilon Carbon/Advanced Materials complex (anode-materials capex programme — <b>could not verify size; priority deep-dive next run</b> ⚑), Sandur Manganese (owns Arjas; capex ⚑), Vodafone Mobile Services (stale A+ row suspected — verify ⚑).<br>
+    <b>Fail size (~380):</b> small/mid corporates across auto components, textiles, chemicals, food, jewellery WC, hotels singles, print/packaging, EPC — none within reach of the gate on available data ⚑. Full name-level reasoning available on request.<br>
+    ⚑ = judgment on partial data.</div></details>
   </div>
 
   <h2 class="secTitle">Watchlist — near-misses worth monitoring</h2>
@@ -621,6 +635,66 @@ const DATA = [
   covenants:"SPV DSCR/DSRA; platform covenants reset post-IPO; sponsor-linkage clauses diluting as Brookfield sells down ⚑.",
   acquisitions:"Organic C&I pipeline; open-access & hybrid auctions.",
   srcs:[["CareEdge PR May-26","https://www.careratings.com/upload/CompanyFiles/PR/202605120525_Clean_Max_Enviro_Energy_Solutions_Limited.pdf"],["$360mn round — Mercom","https://www.mercomindia.com/cleanmax-360-million-funding-expand-ci-portfolio"],["IPO analysis — Arihant","https://www.arihantplus.com/blogs/ipo/clean-max-enviro-ipo-review-price-band-analysis-and-risks"]]
+},
+{
+  name:"Haldia Petrochemicals", sector:"Petrochemicals (TCG/Chatterjee group)", rating:"Ind-Ra AA− / Stable",
+  opp:5000, scores:{nt:7,size:6.5,event:8.5,fit:8}, triggers:["mat","capex"],
+  thesis:"From the A+ screen queue: consolidated debt of ~₹6,272 cr plus a sanctioned ₹5,651 cr phenol-acetone downstream project funded 75:25 debt:equity — a rare petchem credit where the next leg of leverage is already announced and rated through.",
+  rationale:"<b>Why now:</b> the balance sheet was just cleaned for exactly this build — the HTS stake sale transferred SBLC debt out of HPL and cut consolidated debt, with sale proceeds staggered into 2028-29. The phenol-acetone project (~₹4,200 cr of fresh project debt at 75:25) diversifies away from naphtha-cracker cyclicality into import-substituting downstream chemistry. Ind-Ra AA− with ICRA reaffirmations gives structuring headroom; TCG group depth and the Lummus technology ownership add strategic angles. Cyclical margins are the risk — structure with completion support and cash-sweep toggles.",
+  kv:{ "Rating":"Ind-Ra AA−/Stable; ICRA reaffirmed", "Consolidated debt":"~₹6,272 cr (post HTS stake sale)", "Project":"phenol-acetone, ~₹5,651 cr @ 75:25 D:E", "Deleveraging aid":"HTS sale proceeds due 2028-29", "Group":"TCG (Purnendu Chatterjee); owns Lummus" },
+  capstruct:"Term loans + NCDs at HPL; SBLC debt moved to TCG affiliate; new project debt layering in. ⚑",
+  lenders:"SBI-led consortium historically; project lenders being assembled — entry window. ⚑ inferred.",
+  maturities:["Existing term ladder post-cleanup — refi candidates as project reaches COD","Project drawdowns FY27-FY29 (~₹4,200 cr debt)"],
+  finhist:["2025: HTS stake sale cuts consolidated debt; ICRA notes lower servicing burden","Phenol-acetone capex sanctioned ~₹5,651 cr","Earlier ICRA downgrade cycle reversed — Ind-Ra AA− stable now"],
+  ratingevo:["2023-24: downgrade pressure on margin trough (ICRA)","2025: stabilisation post asset-sale deleveraging","2025-26: Ind-Ra AA−/Stable with capex modelled"],
+  covenants:"Project facilities: completion support, DSRA, leverage tests; rationale sensitivity on petchem spreads and project execution. ⚑",
+  acquisitions:"TCG bought Lummus Technology (2020, with Rhône); HPL itself grows organic.",
+  srcs:[["ICRA rationale","https://www.icra.in/Rating/GetRationalReportFilePdf?id=136407"],["Ind-Ra release","https://www.indiaratings.co.in/pressrelease/79475"],["HPL credit rating page","https://www.haldiapetrochemicals.com/credit-rating-details"]]
+},
+{
+  name:"Juniper Green Energy", sector:"Renewables IPP (AT Capital 75% / Vitol 25%)", rating:"ICRA — outlook revised up; SPVs A+ (DB) ⚑", pe:true,
+  opp:5000, scores:{nt:7.5,size:6,event:8.5,fit:8}, triggers:["capex","mat"],
+  thesis:"From the A+ screen queue (4 SPVs): portfolio scaling past 3 GWp by June 2026 with ₹3,300 cr of promoter equity already in, a ₹1,550 cr ATH-guaranteed bridge holdco loan sitting there waiting to be refinanced, and an IPO on the runway.",
+  rationale:"<b>Why now:</b> Juniper is at the classic inflection — operational portfolio tripling into 3+ GWp means cash generation steps up materially (ICRA's stated reason for the outlook revision), while the funding stack still carries construction-phase instruments: the ₹1,550 cr bridge loan is an explicit take-out trade, construction facilities across SPVs roll to COD refis, and the planned IPO (~₹3,000 cr) would trigger a full capital-structure reset. Vitol's 25% adds commodity-house credibility; ATH (Singapore) guarantees the bridge — sponsor support is demonstrated, not assumed.",
+  kv:{ "Portfolio":">3 GWp operational by Jun 2026", "Promoter equity":"~₹3,300 cr infused (Dec-25)", "Bridge":"₹1,550 cr holdco loan, ATH-guaranteed — refi target", "Sponsors":"AT Capital 75% · Vitol 25%", "Next event":"IPO planned (~₹3,000 cr) ⚑" },
+  capstruct:"SPV project loans, holdco bridge, promoter equity; pre-IPO structure. ⚑",
+  lenders:"Domestic project lenders, PFC/REC; bridge lenders await take-out. ⚑ inferred.",
+  maturities:["₹1,550 cr bridge holdco loan — the near-term trade","COD refis across the commissioning cohort FY27"],
+  finhist:["Dec 2025: promoter infusion cumulative ~₹3,300 cr","2025-26: ICRA outlook revision on 3 GWp scale-up; Ind-Ra affirms bank loans","IPO preparation underway"],
+  ratingevo:["2024: A/A+ band SPVs","2025-26: outlook improvements as portfolio commissions — migration trade intact"],
+  covenants:"SPV DSCR/DSRA; bridge carries ATH support/guarantee — refi would re-set covenants on standalone strength. ⚑",
+  acquisitions:"Organic (SECI/state auctions, C&I).",
+  srcs:[["ICRA — JGEL reaffirmed","https://www.icra.in/Rating/GetRationalReportFilePdf?id=141319"],["Ind-Ra bank loans","https://www.indiaratings.co.in/pressrelease/78898"],["IPO details — m.Stock","https://www.mstock.com/articles/juniper-green-energy-ipo"]]
+},
+{
+  name:"GreenCell Mobility", sector:"Electric bus platform (NIIF/GGEF flagship)", rating:"ICRA reaffirmed — A+ band (DB) ⚑", pe:true,
+  opp:3000, scores:{nt:7,size:4.5,event:8.5,fit:7.5}, triggers:["capex"],
+  thesis:"From the A+ screen queue: the GGEF (NIIF + UK govt anchored) e-bus flagship has ₹3,000 cr of REC debt sanctioned for 3,000 buses plus ₹800 cr of mezzanine from IFC/BII/Tata Capital — contracted GCC revenues make this annuity paper in a sector most lenders haven't priced yet.",
+  rationale:"<b>Why now:</b> e-bus concessions (gross-cost contracts with state transport undertakings) behave like availability-based infra — 10-12 year contracted revenues, opex-light, counterparty risk mitigated by payment security mechanisms. GreenCell is the platform with sovereign-adjacent sponsorship (NIIF GGEF), DFI mezz already in (IFC $37mn tranche, BII, Tata Cap ₹800 cr round), and REC anchoring senior debt. Each new tender win is a ₹500-1,000 cr financing event; early domestic NCD/structured lenders establish pricing for the whole sector. Watch STU payment discipline — the key sensitivity ICRA flags.",
+  kv:{ "Sponsor":"GGEF — NIIF + UK govt anchored; EverSource managed", "Senior debt":"₹3,000 cr REC sanction (3,000 e-buses)", "Mezzanine":"₹800 cr — IFC, BII, Tata Capital", "Model":"gross-cost contracts (GCC) with STUs, 10-12 yr", "Rating":"ICRA reaffirmed; A+ band ⚑" },
+  capstruct:"REC senior project debt + DFI mezz + GGEF equity. ⚑",
+  lenders:"REC, IFC, BII, Tata Capital — domestic capital-markets debt is the white space.",
+  maturities:["Fleet drawdowns tender-by-tender FY26-FY29","Mezz refinancing once fleets season — structured take-out candidate"],
+  finhist:["2025: ₹800 cr mezz (IFC/BII/Tata Cap); IFC partnership expanded","₹3,000 cr REC facility for 3,000 buses","ICRA reaffirmation citing GGEF flagship status"],
+  ratingevo:["2023-24: initial A band","2025-26: reaffirmations as fleet scales; upgrade hinges on STU receivable behaviour"],
+  covenants:"Project-style: DSRA, payment-security mechanisms per concession; sponsor-support undertakings. ⚑",
+  acquisitions:"Organic tender wins (NueGo intercity brand + STU concessions).",
+  srcs:[["ICRA rationale","https://www.icra.in/Rating/ShowRationalReportFilePdf/142004"],["₹3,000 cr REC — Inc42","https://inc42.com/buzz/greencell-mobility-bags-inr-3000-cr-debt-funding-from-rec-to-acquire-3000-e-buses/"],["₹800 cr mezz — EVreporter","https://evreporter.com/greencell-mobility-secures-inr-8-billion-mezzanine-funding-from-ifc-bii-and-tata-capital/"]]
+},
+{
+  name:"J M Baxi Ports & Logistics", sector:"Ports, terminals & logistics (Hapag-Lloyd-invested)", rating:"ICRA — upgraded post HLAG equity; ~AA−/A+ ⚑", pe:true,
+  opp:3000, scores:{nt:6.5,size:5,event:8,fit:7.5}, triggers:["capex"],
+  thesis:"From the A+ screen queue: Hapag-Lloyd's equity infusion (stake since increased) earned a ratings upgrade and fully funds the equity leg of container-terminal builds at Tuticorin and JNPT — leaving a clean, sponsor-backed project-debt and refi pipeline.",
+  rationale:"<b>Why now:</b> financial closure is achieved on all projects under execution and ICRA explicitly notes the HLAG money covers equity commitments (liquidity ₹1,108 cr, Mar-25) — so the story is execution, drawdown and eventual COD refinancing rather than funding risk. A strategic shipping-line parent (not a financial sponsor) means cargo commitment to the terminals, de-risking ramp-up. Terminal concessions (Paradip ICT, Tuticorin, JNPT) each carry their own facilities — repricing and take-out opportunities as they commission; the logistics/CFS legacy business adds steady WC banking.",
+  kv:{ "Strategic investor":"Hapag-Lloyd (stake increased)", "Projects":"container terminals — Tuticorin, JNPT; Paradip ICT", "Status":"financial closure done; equity covered by HLAG infusion", "Liquidity":"₹1,108 cr free cash (Mar-25)", "Rating":"ICRA upgrade post-infusion ⚑ verify level" },
+  capstruct:"Concession-level project debt + corporate facilities; HLAG equity. ⚑",
+  lenders:"Domestic project lenders; ICRA/CARE rated across subs. ⚑ inferred.",
+  maturities:["Terminal drawdowns through FY27; COD refis follow","Paradip ICT seasoned — repricing candidate"],
+  finhist:["2023-24: HLAG initial ~40% stake; later increased","Ratings upgraded on equity infusion","All under-execution projects financially closed"],
+  ratingevo:["2023: standalone family-group credit","2024-25: upgrade on HLAG partnership; execution risk the residual flag"],
+  covenants:"Concession waterfalls, DSRA; sponsor-support expectations built into ratings. ⚑",
+  acquisitions:"Concession wins rather than M&A; HLAG relationship may bring more terminal bids.",
+  srcs:[["ICRA rationale Sep-25","https://www.icra.in/Rating/ShowRationalReportFilePdf/138128"],["Stake increase — Container News","https://container-news.com/hapag-lloyd-increases-stake-in-jm-baxi/"],["Paradip ICT — CARE","https://www.careratings.com/upload/CompanyFiles/PR/202510141008_Paradip_International_Cargo_Terminal_Private_Limited.pdf"]]
 }
 ];
 
