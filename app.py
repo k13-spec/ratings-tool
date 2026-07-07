@@ -1050,7 +1050,14 @@ def main():
                 </div>
             </div>
             <div>
-                <a href="https://creditnexus-bonds.streamlit.app" target="_blank"
+                <a href="https://creditnexus.streamlit.app/Financing_Ideas" target="_self"
+                   style="font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;
+                          color:#6366F1;background:#FFFFFF;border-radius:8px;
+                          padding:7px 16px;text-decoration:none;white-space:nowrap;
+                          box-shadow:0 2px 8px rgba(0,0,0,0.12);display:inline-block;
+                          margin-right:8px;">
+                    💡 Financing Ideas
+                </a><a href="https://creditnexus-bonds.streamlit.app" target="_blank"
                    style="font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;
                           color:#6366F1;background:#FFFFFF;border-radius:8px;
                           padding:7px 16px;text-decoration:none;white-space:nowrap;
