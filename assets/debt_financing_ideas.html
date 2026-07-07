@@ -110,7 +110,7 @@
   <div class="hero">
     <div>
       <h1>INR Debt Financing Ideas</h1>
-      <p>Pre-screened, priority-ranked candidates · compiled 7 Jul 2026 (v4.1 · A+ done · AA− 50/525) · auto-refreshes fortnightly · sister app to the CreditNexus suite</p>
+      <p>Pre-screened, priority-ranked candidates · compiled 7 Jul 2026 (v4.2 · A+ done · AA− 125/525) · auto-refreshes fortnightly · sister app to the CreditNexus suite</p>
     </div>
     <div>
       <a class="pill" href="https://creditnexus.streamlit.app" target="_blank">↗ Credit Ratings</a>
@@ -161,7 +161,7 @@
   <h2 class="secTitle">Systematic screen queue (A+ → AAA)</h2>
   <div class="meth">
     <p>Universe sourced from the CreditNexus ratings DB (<b>31,043 current rating rows</b> parsed 7 Jul 2026 from <span style="font-family:monospace">ratings_current.csv</span>). Unique non-BFSI/non-PSU names by grade: <b>A+ : 653</b> · AA− : ~599 · AA : ~586 · AA+ : ~401 · AAA : ~595 (row counts, pre-dedupe, heuristic BFSI/PSU filter).</p>
-    <p style="margin-top:8px"><b>Program:</b> deep-dive the A+ cohort first, then move up the ladder (AA− → AA → AA+ → AAA), at <b>50 names per run</b>. <b>A+ COHORT COMPLETE — 653/653.</b> Promoted: Apraava, ANIL, Aster DM Quality Care, Avaada, CleanMax, Haldia Petro, Juniper Green, GreenCell, J M Baxi. User overrides added 7-Jul: Suzlon Energy and Rain Group (both fail triggers/rating-level strictly — included at Kriti\u2019s direction, flagged on their cards). <b>AA− COHORT (grade 4): 525 unique non-BFSI/PSU names; progress 50/525</b> — promoted: AMPIN Energy Transition, Afcons Infrastructure. Next run starts at #51. Each run regenerates the queue from <span style="font-family:monospace">data/ratings_current.csv</span>, triages the next 50, deep-dives plausible qualifiers and logs every disposition below.</p>
+    <p style="margin-top:8px"><b>Program:</b> deep-dive the A+ cohort first, then move up the ladder (AA− → AA → AA+ → AAA), at <b>50 names per run</b>. <b>A+ COHORT COMPLETE — 653/653.</b> Promoted: Apraava, ANIL, Aster DM Quality Care, Avaada, CleanMax, Haldia Petro, Juniper Green, GreenCell, J M Baxi. User overrides added 7-Jul: Suzlon Energy and Rain Group (both fail triggers/rating-level strictly — included at Kriti\u2019s direction, flagged on their cards). <b>AA− COHORT (grade 4): 525 unique non-BFSI/PSU names; progress 125/525</b> — promoted: AMPIN Energy Transition, Afcons Infrastructure, Deepak Fertilisers, Chalet Hotels, Gentari India (Amplus). Cube Highways card updated with the live ~₹4,000 cr Athaang (NIIF roads) acquisition. Next run starts at #126. Each run regenerates the queue from <span style="font-family:monospace">data/ratings_current.csv</span>, triages the next 50, deep-dives plausible qualifiers and logs every disposition below.</p>
     <details style="margin-top:10px"><summary style="cursor:pointer;font-weight:700;color:var(--indigo-dark)">Disposition log — names 1–56 (7 Jul 2026 run)</summary>
     <div style="font-size:12.5px;color:#374151;line-height:1.7;margin-top:8px">
     <b>Promoted (4):</b> Adani New Industries (Ind-Ra A+; green H2/solar mfg) · Apraava Energy (via meter SPVs; platform AA/AA+) · Aster DM Quality Care (Blackstone JV; merged 2-Jul-26) · Avaada Energy (Brookfield; $750mn refi live).<br>
@@ -202,6 +202,16 @@
     <b>Securitisation (3):</b> 2024 PL Iceland, 2024 PL Indigo, 2025 MFI Hormuz.<br>
     <b>Monitor (2):</b> Air India SATS (AA− parent; Noida cargo phase 2) · Alivira/SeQuent (Carlyle-backed animal pharma — PE rule, size fails today ⚑).<br>
     <b>Fail size/trigger (~20):</b> A.G. Industries ×2, ADAMA India ⚑, Advanced Enzyme (net cash), API Ispat, Aarti Drugs, Aarti Pharmalabs, Aditya Birla Digital Fashion (equity-funded), Airoli ITP (K Raheja SPV), Alembic, Alkyl Amines, Amar Ujala, others small.<br>
+    ⚑ = judgment on partial data.</div></details>
+    <details style="margin-top:8px"><summary style="cursor:pointer;font-weight:700;color:var(--indigo-dark)">Disposition log — AA− names 51–125 (7 Jul 2026, batch 5)</summary>
+    <div style="font-size:12.5px;color:#374151;line-height:1.7;margin-top:8px">
+    <b>Promoted (3):</b> Deepak Fertilisers (AA−/Positive; TAN build) · Chalet Hotels (AA−; ₹3,000 cr capex to FY29) · Gentari India/Amplus (Petronas; 2.4 GW pools).<br>
+    <b>Event fed to existing card:</b> Athaang Infrastructure — NIIF roads platform being acquired by Cube Highways (~₹4,000 cr equity): financing opportunity logged on the Cube card.<br>
+    <b>Monitor (8):</b> Dr Agarwal\u2019s Eye (Temasek/TPG, acquisitive roll-up ⚑) · Aragen (Goldman-backed CRDMO ⚑) · AIG Hospitals (Hyderabad capex ⚑) · Asahi India Glass (near-trigger: greenfield float-glass capex ⚑) · Craftsman Automation (DR Axion acquirer ⚑) · Best Smart Metering ⚑ · BirlaNu (ex-HIL, CK Birla ⚑) · Chandigarh Power Distribution (privatised discom ⚑).<br>
+    <b>PSU/state & JV misses (6):</b> AP Maritime Board, Cauvery Neeravari Nigama, Chennai Port Authority, Bengal Gas, C-Edge (TCS-SBI JV ⚑), Delhi Aviation Fuel Facility (JV).<br>
+    <b>BFSI misses (2):</b> Angel One, ARCIL. <b>Coal (1):</b> Bajaj Energy. <b>Securitisation (5):</b> Anusha 11 Sep 25, Arlong 04 25, Astoria 2023, Bentley 07, Dialga Trust Sep-25.<br>
+    <b>Platform/single SPVs (~17):</b> Amplus ×2 (→ Gentari card), Avaada ×4, Amun + Avighna Solarfarms, Anantapur Solar Parks, Ananth Solar, Ashoka roads ×3, Baharampore-Farakka, Ceigall Bathinda-Dabwali, DAK Package I, Aqua Space, Darshita Southern (Foxconn housing SPV).<br>
+    <b>Fail size/trigger (~30):</b> Andritz, Anmol, Anthem Biosciences (net cash), Apcotex, Apollo Health &amp; Lifestyle (sponsor-funded), Aptiv, Ascent Circuits, Ashirvad (Aliaxis), Astec, Automotive Axles, Avanti ×2, B.G. Shirke, Bajaj Electricals, Belrise (post-IPO delevered), Bengaluru Airport Services, Borosil, Campus, Calderys, Cargill India, Clean Science, Clover Energy, Concord Biotech, Cyient DLM, DOMS, DR Axion, Dhampur Sugar, Dhoot Transmission, Deepak Globalchem/Mining (DFPCL subs), Coimbatore Polytex.<br>
     ⚑ = judgment on partial data.</div></details>
   </div>
 
@@ -588,13 +598,13 @@ const DATA = [
 {
   name:"Cube Highways (Trust + holdcos)", sector:"Roads InvIT (I Squared-backed)", rating:"Trust NCDs: CRISIL AAA · Pte holdcos: AA (DB)", pe:true,
   opp:5000, scores:{nt:7,size:5.5,event:7.5,fit:6.5}, triggers:["mat","acq"],
-  thesis:"I Squared's road platform is a repeat NCD machine — ₹1,152 cr (Apr) and ₹820 cr (Aug 2025) AAA prints at the Trust — with a live asset-acquisition pipeline that needs bridge-to-InvIT funding every time a road portfolio trades.",
+  thesis:"I Squared's road platform is a repeat NCD machine — ₹1,152 cr (Apr) and ₹820 cr (Aug 2025) AAA prints at the Trust — and it is LIVE: Cube is closing the ~₹4,000 cr (equity) acquisition of NIIF's Athaang road portfolio (5 assets, 230 km), a textbook bridge-to-InvIT financing event.",
   rationale:"<b>Why now:</b> the InvIT structure makes financing programmatic: acquire operating roads at the holdco (CRISIL AA level), season, drop down into the AAA Trust, refinance cheaper — every cycle needs acquisition bridges, holdco mezz and Trust NCDs. Sponsors (I Squared, ADIA-linked Platinum Rock, Mubadala) keep buying Indian road assets (NHAI monetisation pipeline is deep), so the deal flow is structural. AAA Trust paper is thin-margin but the holdco/bridge layers pay properly.",
   kv:{ "Trust NCDs":"CRISIL AAA; ₹1,152 cr (Apr) + ₹820 cr (Aug-25) raised", "Holdcos":"Cube I/III Pte — CRISIL/Ind-Ra AA (DB)", "Sponsors":"I Squared Capital, Platinum Rock (ADIA), Mubadala", "Pipeline":"NHAI TOT/InvIT monetisations — serial acquirer", "Model":"acquire → season → drop-down → refinance" },
   capstruct:"Trust NCDs (AAA), holdco facilities (AA), SPV concession debt. ⚑",
   lenders:"Insurers/pensions at Trust; banks + credit funds at holdco. ⚑ inferred.",
   maturities:["3/7-yr Trust NCD ladder building from 2025 prints","Holdco facilities reprice on each drop-down"],
-  finhist:["Apr 2025: ₹1,152 cr AAA NCDs (3+7yr)","Aug 2025: ₹820 cr NCDs for debt repayment","Dec 2025: CRISIL reaffirms Pte holdcos at AA"],
+  finhist:["2026: nearing ~₹4,000 cr equity-value acquisition of Athaang (NIIF roads, 5 assets/230 km) — bridge + drop-down financing event live","Apr 2025: ₹1,152 cr AAA NCDs (3+7yr)","Aug 2025: ₹820 cr NCDs for debt repayment","Dec 2025: CRISIL reaffirms Pte holdcos at AA"],
   ratingevo:["2024: AAA assigned at Trust","2025-26: reaffirmations across the stack; watch asset-addition leverage"],
   covenants:"InvIT leverage cap (SEBI 70% AUM w/ AAA), DSRA, cash waterfalls; holdco covenants tighter. ",
   acquisitions:"Serial road-portfolio acquirer (NHAI TOT bundles, developer sell-downs) — the acquisitive box is structural.",
@@ -764,6 +774,51 @@ const DATA = [
   covenants:"WC consortium covenants, large-corporate borrowing disclosures; group-exposure caps post-IPO. ⚑",
   acquisitions:"Project-driven; overseas EPC JVs rather than M&A.",
   srcs:[["ICRA rationale","https://www.icra.in/Rating/GetRationalReportFilePdf?id=136443"],["Orderbook — TradeBrains","https://tradebrains.in/infra-stock-revenue-breakdown-of-afcons-infrastructures-32681-cr-orderbook/"],["Financial insights — Afcons","https://www.afcons.com/en/financial-insights"]]
+},
+{
+  name:"Deepak Fertilisers & Petrochemicals", sector:"Industrial chemicals, TAN & crop nutrition", rating:"CRISIL AA− / Positive",
+  opp:3500, scores:{nt:6.5,size:6,event:8,fit:7.5}, triggers:["mat","capex"],
+  thesis:"AA− cohort promotion: net debt ₹4,824 cr at 2.86x during a deliberate investment phase — TAN Gopalpur (₹2,200 cr, 75% built, ₹1,541 cr debt) and Dahej nitric acid (48%) — with CRISIL already on Positive outlook as the projects de-risk.",
+  rationale:"<b>Why now:</b> this is mid-build financing with the upgrade visible — CRISIL moved to Positive while leverage peaks, because commissioning converts capex into contracted TAN/nitric-acid cash flows (mining + pharma demand). Residual project drawdowns, a CP programme, and post-COD refinancing of the ₹1,541 cr Gopalpur debt at better pricing are the entry points; the group restructure (Mahadhan AgriTech split) cleans the credit story. Ammonia-price pass-through improves margin stability vs legacy trading mix.",
+  kv:{ "Rating":"CRISIL AA−/Positive (from Stable)", "Net debt":"₹4,824 cr @ 2.86x ND/EBITDA (FY26)", "TAN Gopalpur":"₹2,200 cr, 75% progress, ₹1,541 cr debt", "Dahej nitric acid":"48% progress", "FY26 capex":"₹1,569 cr" },
+  capstruct:"Project debt + corporate facilities + CP programme; NCD headroom. ⚑",
+  lenders:"Consortium banks, CP investors; ICRA/CRISIL dual-rated. ⚑ inferred.",
+  maturities:["Project drawdowns to COD, then take-out refis FY27-FY28","CP rolls — term-out candidates"],
+  finhist:["FY26: capex ₹1,569 cr; ND up to ₹4,824 cr by design","May 2026: CRISIL outlook to Positive","2024-25: Mahadhan AgriTech reorganisation"],
+  ratingevo:["2024: AA− stable (CRISIL/ICRA)","May 2026: Positive outlook — upgrade on commissioning is the trade"],
+  covenants:"Project DSRA/DSCR; rationale sensitivity on leverage sustaining >3x through the build. ⚑",
+  acquisitions:"Organic; backward integration (ammonia) completed 2023.",
+  srcs:[["CRISIL rationale Sep-25","https://www.crisilratings.com/mnt/winshare/Ratings/RatingList/RatingDocs/DeepakFertilisersAndPetrochemicalsCorporationLimited_September%2026_%202025_RR_377536.html"],["ICRA rationale","https://www.icra.in/Rating/ShowRationalReportFilePdf/142104"],["Capex tracker — TradeBrains","https://tradebrains.in/deepak-fertilisers-and-3-other-stocks-with-capex-of-up-to-4658-cr-for-fy26-to-keep-an-eye/"]]
+},
+{
+  name:"Chalet Hotels", sector:"Hotels & annuity offices (K Raheja)", rating:"CRISIL AA− / Stable / A1+",
+  opp:2500, scores:{nt:6,size:5.5,event:7.5,fit:7.5}, triggers:["capex"],
+  thesis:"AA− cohort promotion: ₹1,900 cr of growth capex deployed in two years with ₹3,000 cr more planned through FY29 (hotels + annuity offices), on net debt of ₹1,900 cr that management is actively repricing — its debut CP printed at 6.30%.",
+  rationale:"<b>Why now:</b> Chalet runs the most bond-market-ready model in Indian hospitality — luxury/upper-upscale hotels cross-collateralised with Powai/BKC-adjacent office annuities, giving lenders REIT-like cash-flow visibility on a hotel-cycle upside. The FY26-FY29 build (Airoli, Delhi aerocity expansion, Dukes Retreat additions) is guided accrual-funded, which in practice means refinancing headroom rather than balance-sheet strain: NCD take-outs of construction debt, CP laddering (6.3% debut showed the appetite), and asset-level structures. K Raheja sponsorship adds a deep asset pool for security packages.",
+  kv:{ "Rating":"CRISIL AA−/Stable/A1+", "Net debt":"₹1,900 cr (Mar-26, down from ₹2,500 cr)", "Capex":"₹1,900 cr spent 2 yrs; ~₹3,000 cr through FY29", "CP debut":"₹100 cr @ 6.30% (A1+)", "Model":"hotels + annuity offices, K Raheja group" },
+  capstruct:"Asset-backed term loans, CP, NCD headroom; office annuities support coverage. ⚑",
+  lenders:"HDFC/ICICI/Axis asset lenders; CP/NCD investors post-debut. ⚑ inferred.",
+  maturities:["Construction facilities on pipeline hotels — COD refis FY27-FY29","CP ladder building"],
+  finhist:["FY26: net debt cut ₹2,500 → ₹1,900 cr; record EBITDA","Debut CP @6.30%","Aug 2024: CRISIL AA− assigned"],
+  ratingevo:["2023: A+ band","Aug 2024: CRISIL AA−/Stable","2025-26: stable; RevPAR cycle supportive"],
+  covenants:"Asset-level security packages, DSCR floors; covenant-light at corporate level. ⚑",
+  acquisitions:"Dukes Retreat (2023), Courtyard Aravali — selective; K Raheja pipeline drop-ins recur.",
+  srcs:[["CRISIL rationale","https://www.crisil.com/mnt/winshare/Ratings/RatingList/RatingDocs/ChaletHotelsLimited_August%2007_%202024_RR_349858.html"],["Q4 FY26 call — InvestyWise","https://www.investywise.com/chalet-hotels-limited-q4-fy26-earnings-conference-call-transcript"],["IDBI Capital note May-26","https://idbicapital.com/InstitutionReports/Uploads/CHALET-RR-18052026.pdf"]]
+},
+{
+  name:"Gentari India (Amplus)", sector:"Distributed/C&I renewables (Petronas 100%)", rating:"SPV pools AA− (DB) · ICRA reaffirmed", pe:true, q:"Amplus",
+  opp:3000, scores:{nt:6.5,size:5.5,event:7,fit:7}, triggers:["capex","mat"],
+  thesis:"AA− cohort promotion: Petronas's clean-energy arm absorbed Amplus (rebranded Gentari, May 2025) with 2.4 GW+ of operational and under-construction distributed assets — sovereign-oil-major sponsorship behind rated SPV pools with ~1.30x DSCRs.",
+  rationale:"<b>Why now:</b> the integration into Gentari signals permanence and growth capital from Petronas, while the India financing remains INR project debt pool by pool (ICRA notes cash flows adequately cover FY26-27 servicing; unencumbered cash ₹35 cr in the rated pool). C&I/distributed assets carry corporate offtakers and shorter build cycles — repeat mid-ticket financings (₹300-800 cr pools) with repricing on seasoning. The whole Malaysian-sovereign complex (Gentari targets 30-40 GW by 2030 regionally) makes India the volume market: expect green loans, pool refis and possibly an InvIT-style aggregation.",
+  kv:{ "Sponsor":"Petronas 100% (via Gentari)", "Portfolio":"2.4 GW+ op + U/C distributed/C&I", "Pool DSCR":"~1.30x (ICRA-rated pool)", "Rebrand":"Amplus → Gentari, May 2025", "Model":"C&I rooftop/open-access + utility hybrid" },
+  capstruct:"SPV pool project loans; sponsor equity from Petronas/Gentari. ⚑",
+  lenders:"Domestic project lenders, green-loan formats; DFI history. ⚑ inferred.",
+  maturities:["Pool-level refis as assets season — rolling calendar","U/C drawdowns FY26-FY28"],
+  finhist:["May 2025: Gentari integration/rebrand","Mar 2026: ICRA rationale on rated pool (DSCR ~1.30x, cash ₹34.9 cr)","Petronas acquired Amplus 2019; continuous portfolio growth since"],
+  ratingevo:["2019-24: A+/AA− pools under Petronas ownership","2025-26: AA− pools reaffirmed; sponsor integration positive"],
+  covenants:"Pool DSRA/DSCR, cash traps; sponsor-support assumptions in ratings. ⚑",
+  acquisitions:"Organic C&I contracting; platform itself was the acquisition (Petronas 2019).",
+  srcs:[["ICRA rationale Mar-26","https://www.icra.in/Rating/ShowRationalReportFilePdf/141889"],["Gentari integration — SolarQuarter","https://solarquarter.com/2025/05/13/gentari-integrates-amplus-solar-to-streamline-india-renewable-energy-operations/"],["Rebrand — PV Magazine","https://www.pv-magazine-india.com/2025/05/05/amplus-solar-rebrands-to-gentari/"]]
 }
 ];
 
