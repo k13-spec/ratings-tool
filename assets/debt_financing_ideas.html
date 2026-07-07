@@ -110,7 +110,7 @@
   <div class="hero">
     <div>
       <h1>INR Debt Financing Ideas</h1>
-      <p>Pre-screened, priority-ranked candidates · compiled 7 Jul 2026 (v3) · auto-refreshes fortnightly · sister app to the CreditNexus suite</p>
+      <p>Pre-screened, priority-ranked candidates · compiled 7 Jul 2026 (v3.1 · queue 56/653) · auto-refreshes fortnightly · sister app to the CreditNexus suite</p>
     </div>
     <div>
       <a class="pill" href="https://creditnexus.streamlit.app" target="_blank">↗ Credit Ratings</a>
@@ -161,7 +161,16 @@
   <h2 class="secTitle">Systematic screen queue (A+ → AAA)</h2>
   <div class="meth">
     <p>Universe sourced from the CreditNexus ratings DB (<b>31,043 current rating rows</b> parsed 7 Jul 2026 from <span style="font-family:monospace">ratings_current.csv</span>). Unique non-BFSI/non-PSU names by grade: <b>A+ : 653</b> · AA− : ~599 · AA : ~586 · AA+ : ~401 · AAA : ~595 (row counts, pre-dedupe, heuristic BFSI/PSU filter).</p>
-    <p style="margin-top:8px"><b>Program:</b> deep-dive the A+ cohort first, then move up the ladder (AA− → AA → AA+ → AAA). <b>Batch 1 (this run):</b> Apraava Energy ✓ and Adani New Industries ✓ promoted to the main list; Ayana Renewable screened OUT (100% acquired by ONGC-NTPC Green JV, Mar 2025 → PSU-owned). Remaining A+ names are worked through in the fortnightly refresh runs — each run regenerates the queue from the CSV, deep-dives the next tranche, and promotes qualifiers into the ranked list. Financial gates (EBITDA / revenue / gross debt) are checked during each deep dive from the DB financials and rating rationales.</p>
+    <p style="margin-top:8px"><b>Program:</b> deep-dive the A+ cohort first, then move up the ladder (AA− → AA → AA+ → AAA), at <b>50 names per run</b>. <b>Progress: 56 / 653 A+ names processed</b> (alphabetical; next run starts at #57, "Avaada Gjclean…"). Promoted so far from the queue: Apraava Energy, Adani New Industries, Aster DM Quality Care, Avaada Energy. Each run regenerates the queue from <span style="font-family:monospace">data/ratings_current.csv</span>, triages the next 50, deep-dives plausible qualifiers and logs every disposition below.</p>
+    <details style="margin-top:10px"><summary style="cursor:pointer;font-weight:700;color:var(--indigo-dark)">Disposition log — names 1–56 (7 Jul 2026 run)</summary>
+    <div style="font-size:12.5px;color:#374151;line-height:1.7;margin-top:8px">
+    <b>Promoted (4):</b> Adani New Industries (Ind-Ra A+; green H2/solar mfg) · Apraava Energy (via meter SPVs; platform AA/AA+) · Aster DM Quality Care (Blackstone JV; merged 2-Jul-26) · Avaada Energy (Brookfield; $750mn refi live).<br>
+    <b>Excluded — PSU (3):</b> Ayana Renewable Four (ONGC-NTPC owned) · Assam Gas (state-owned) · Anand Rathi Share &amp; Stock Brokers + Auxilo Finserve (BFSI, heuristic misses).<br>
+    <b>Excluded — coal (1):</b> Amelia Coal Mining.<br>
+    <b>Out of scope (2):</b> Adani Infra (India) — promoter/intra-group financing vehicle (group needs covered via AAHL/ANIL/AESL/AGEL cards) · Amalthea 09 2025 — securitisation trust.<br>
+    <b>Single SPVs of covered/known sponsors (8):</b> AISATS Noida Cargo Terminal + Logistic Park (AISATS AA−; combined project ₹1,500 cr, 3:1 D:E — fail-size today, monitor phase 2) · Apraava Kolkata / Shimla / Smart Meter SPVs (sponsor carded) · Adani Solar AP Seven + Barmer One (AGEL SPVs) · Amravati Power Transmission · Ahmednagar Ghogargaon Road · Ashoka Belgaum Khanapur Road (monitor Ashoka Concessions at pool level).<br>
+    <b>Fail size gate (rest, ~38):</b> ABI-Showatech, Artson (Tata Projects), Asianet Digital, AVI Oil, Aarvee, Adcock Ingram, Advanced Performance Materials ⚑, Aether Industries (net-cash, capex &lt;₹2,000 cr), Albonair, Alf Engineering, Allengers, Alliance Dental (Clove — PE-backed ⚑, monitor under PE rule), Alpha Design (Adani Defence stake ⚑), Alyssum ⚑, Amara Raja Power Systems, Ameya Logistics, Anamudi (Godrej LLP), Aparna Constructions ⚑, Apeejay Shipping, Apeejay Surrendra Park Hotels, Apollo Fertility / Specialty / Spectra (Apollo group — parent AA+ accrual-funded, no card), Apollo Pipes, Arjas Steel + Arjas Modern Steel (rev ~₹1,000 cr, debt ₹753 cr; acquired by Sandur Nov-24, no longer PE), Artisan Spirits, Arvind SmartSpaces, Arya Vaidya Sala, Asclepius, Ashok Iron Works, Ashok Leyland Defence ⚑ (monitor defence capex cycle), Asianet Satellite, Associated Road Carriers, Autotech, Avaada Clean Project (platform carded).<br>
+    ⚑ = judgment on partial data — re-verify if any of these grow into the gate.</div></details>
   </div>
 
   <h2 class="secTitle">Watchlist — near-misses worth monitoring</h2>
@@ -558,6 +567,36 @@ const DATA = [
   covenants:"InvIT leverage cap (SEBI 70% AUM w/ AAA), DSRA, cash waterfalls; holdco covenants tighter. ",
   acquisitions:"Serial road-portfolio acquirer (NHAI TOT bundles, developer sell-downs) — the acquisitive box is structural.",
   srcs:[["CRISIL — Cube Highways Trust Feb-25","https://www.crisil.com/mnt/winshare/Ratings/RatingList/RatingDocs/CubeHighwaysTrust_February%2012_%202025_RR_362975.html"],["₹820 cr NCDs — Business Standard","https://www.business-standard.com/companies/start-ups/cube-highways-trust-raises-rs-820-cr-via-ncds-125082001612_1.html"],["CRISIL — Cube Pte Dec-25","https://www.crisil.com/mnt/winshare/Ratings/RatingList/RatingDocs/CubeHighwaysandInfrastructurePteLimited_December%2026_%202025_RR_381252.html"]]
+},
+{
+  name:"Aster DM Quality Care", sector:"Hospitals (Blackstone + Aster promoters, jointly controlled)", rating:"A+ (DB, pre-merger Aster) — merged-entity re-rating due ⚑", pe:true, q:"Aster",
+  opp:5000, scores:{nt:6.5,size:6,event:8.5,fit:7.5}, triggers:["acq","capex"],
+  thesis:"From the A+ screen queue: the Aster–Quality Care merger completed 2 Jul 2026, creating a top-3 chain (39 hospitals, 10,600+ beds, 28 cities) jointly controlled by Blackstone (30.7%) and Aster promoters (24%) — integration, bed-addition capex and legacy-debt refis all land in the next 24 months.",
+  rationale:"<b>Why now:</b> the ink is barely dry — operations as a merged entity began 3 Jul 2026. QCIL's own roll-up history (CARE Hospitals, Evercare, KIMSHEALTH) came with acquisition debt to rationalise ⚑, four brands need integration capex, and Blackstone-controlled platforms habitually keep buying (this is the sponsor that lost Sahyadri to Manipal). The pre-merger Aster print in the ratings DB is A+ — the combined entity's scale argues for upgrades, giving early lenders the ratings-migration ride. Expect NCD programmes to replace scattered facility debt as the capital structure is unified.",
+  kv:{ "Merged":"2 Jul 2026 — Aster + Quality Care India", "Scale":"39 hospitals · 10,600+ beds · 28 cities · top-3 in India", "Control":"Blackstone 30.7% + Aster promoters 24% (joint)", "Brands":"Aster, CARE, Evercare, KIMSHEALTH", "Rating":"A+ pre-merger (DB) — re-rating catalyst ⚑" },
+  capstruct:"Legacy Aster facilities + QCIL acquisition debt being unified post-merger ⚑; strong FCF from mature clusters.",
+  lenders:"Legacy relationship banks on both sides; capital-markets debt likely as structure unifies. ⚑ inferred.",
+  maturities:["QCIL roll-up debt — consolidation/refi candidate ⚑","Integration/bed-addition capex draws FY27-FY29"],
+  finhist:["Jul 2026: merger completed; combined operations begin","Mar 2026: 96.68% shareholder approval","2024-25: QCIL assembled CARE/Evercare/KIMSHEALTH under Blackstone"],
+  ratingevo:["Pre-merger: Aster ~A+/AA− band (DB shows A+) ⚑","2026-27: merged-entity rating assignment is the event to trade around"],
+  covenants:"Merger scheme conditions; facility covenants being re-papered ⚑.",
+  acquisitions:"Serial on both sides: Aster (Middle-East separation, India build-out) and QCIL (CARE, Evercare, KIMSHEALTH); Blackstone control implies continued M&A.",
+  srcs:[["Merger completed — Aster newsroom","https://www.asterdmhealthcare.in/newsroom/detail/aster-and-blackstone-backed-quality-care-have-merged-establish-one-of-top-3-hospital-chains-india"],["Operations begin — HealthcareMEA","https://www.healthcaremea.com/2026/07/03/aster-dm-quality-care-begins-operations-post-merger-with-over-10600-beds/"],["Merger structure — Whalesbook","https://www.whalesbook.com/news/English/healthcarebiotech/Aster-DM-and-Blackstone-Backed-QCIL-Merge-Into-New-Hospital-Giant/6a465819bfe8447456fadc81"]]
+},
+{
+  name:"Avaada Energy (group)", sector:"Renewables, solar manufacturing & green ammonia (Brookfield-backed)", rating:"A+/AA− band across entities (DB: A+) ⚑ verify per entity", pe:true, q:"Avaada",
+  opp:7000, scores:{nt:8,size:6,event:8.5,fit:8}, triggers:["capex","mat"],
+  thesis:"From the A+ screen queue: Brookfield's $1bn OCD commitment ($400mn drawn) funds an 11 GWp RE platform, a 5 GW Greater Noida cell/module plant and a 1,500 TPD Gopalpur green-ammonia project — and a $750mn global refinancing (Barclays/DBS underwriting) is live THIS month.",
+  rationale:"<b>Why now:</b> Avaada is mid-transformation on three fronts simultaneously — IPP scale-up toward 11 GWp, manufacturing (Avaada Electro; ₹4,000 cr IPO planned), and green ammonia (Casale tech; $1.8bn REC-supported Gopalpur facility). The live $750mn offshore refi (Jul 2026) shows the debt stack churning; INR take-outs of refinanced facilities, project debt for each ammonia/manufacturing phase, and pre-IPO structured capital at Electro are all near-term entry points. A+/AA− entity ratings pay real spread while Brookfield sponsorship and REC anchoring cap downside — the classic PE-backed migration trade.",
+  kv:{ "Sponsor":"Brookfield ETF ~$1bn OCDs ($400mn drawn) + GPSC/PTT", "Live refi":"$750mn global loan — Barclays/DBS mandated (Jul 2026)", "Platform":"→ 11 GWp RE; 5 GW cell/module Greater Noida", "Green ammonia":"1,500 TPD Gopalpur; $1.8bn REC-backed", "Next event":"Avaada Electro ₹4,000 cr IPO" },
+  capstruct:"SPV project loans, platform OCDs (Brookfield), offshore loans being refinanced; Electro pre-IPO structure. ⚑",
+  lenders:"Barclays, DBS (live mandate), REC, PFC; domestic take-outs next. ⚑",
+  maturities:["$750mn refi closing 2026 — INR take-out candidates follow","Project drawdowns across RE + ammonia phases FY27-FY30"],
+  finhist:["Jul 2026: $750mn loan mandate (Barclays/DBS) to refinance existing debt","2023: $1.3bn Brookfield + GPSC round","REC $1.8bn support for Gopalpur ammonia; ICRA reaffirmations across entities (Jan 2026)"],
+  ratingevo:["2024-25: A/A+ entity prints","Jan 2026: ICRA reaffirmations; upgrade momentum as assets commission ⚑"],
+  covenants:"OCD terms (Brookfield) and project DSCR/DSRA packages; refi will reset offshore covenants. ⚑",
+  acquisitions:"Organic; land-bank + manufacturing build-out.",
+  srcs:[["$750mn loan — Business Standard","https://www.business-standard.com/companies/news/brookfield-backed-avaada-seeks-750-million-loan-from-global-lenders-126070700132_1.html"],["Brookfield $1bn — PRNewswire","https://www.prnewswire.com/il/news-releases/avaada-group-raises-us-1-billion-funding-for-manufacturing-of-green-hydrogen-solar-pv-modules-and-growth-of-renewable-energy-platform-from-brookfield-301814418.html"],["ICRA rationale Jan 2026","https://www.icra.in/Rating/GetRationalReportFilePdf?id=140120"],["Electro IPO — EQ Mag","https://www.eqmagpro.com/avaada-energy-sparks-inr-4000-cr-ipo-for-solar-arm-backed-by-brookfield-eq/"]]
 }
 ];
 
