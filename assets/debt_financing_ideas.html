@@ -110,7 +110,7 @@
   <div class="hero">
     <div>
       <h1>INR Debt Financing Ideas</h1>
-      <p>Pre-screened, priority-ranked candidates · compiled 7 Jul 2026 (v4.0 · A+ cohort complete 653/653) · auto-refreshes fortnightly · sister app to the CreditNexus suite</p>
+      <p>Pre-screened, priority-ranked candidates · compiled 7 Jul 2026 (v4.1 · A+ done · AA− 50/525) · auto-refreshes fortnightly · sister app to the CreditNexus suite</p>
     </div>
     <div>
       <a class="pill" href="https://creditnexus.streamlit.app" target="_blank">↗ Credit Ratings</a>
@@ -161,7 +161,7 @@
   <h2 class="secTitle">Systematic screen queue (A+ → AAA)</h2>
   <div class="meth">
     <p>Universe sourced from the CreditNexus ratings DB (<b>31,043 current rating rows</b> parsed 7 Jul 2026 from <span style="font-family:monospace">ratings_current.csv</span>). Unique non-BFSI/non-PSU names by grade: <b>A+ : 653</b> · AA− : ~599 · AA : ~586 · AA+ : ~401 · AAA : ~595 (row counts, pre-dedupe, heuristic BFSI/PSU filter).</p>
-    <p style="margin-top:8px"><b>Program:</b> deep-dive the A+ cohort first, then move up the ladder (AA− → AA → AA+ → AAA), at <b>50 names per run</b>. <b>Progress: A+ COHORT COMPLETE — 653 / 653 processed (7 Jul 2026).</b> Promoted from the queue: Apraava Energy, Adani New Industries, Aster DM Quality Care, Avaada Energy, CleanMax, Haldia Petrochemicals, Juniper Green Energy, GreenCell Mobility, J M Baxi Ports. <b>Next: the AA− cohort (grade 4, ~599 rating rows)</b> begins with the next fortnightly run, same 50-name cadence and logging. Each run regenerates the queue from <span style="font-family:monospace">data/ratings_current.csv</span>, triages the next 50, deep-dives plausible qualifiers and logs every disposition below.</p>
+    <p style="margin-top:8px"><b>Program:</b> deep-dive the A+ cohort first, then move up the ladder (AA− → AA → AA+ → AAA), at <b>50 names per run</b>. <b>A+ COHORT COMPLETE — 653/653.</b> Promoted: Apraava, ANIL, Aster DM Quality Care, Avaada, CleanMax, Haldia Petro, Juniper Green, GreenCell, J M Baxi. User overrides added 7-Jul: Suzlon Energy and Rain Group (both fail triggers/rating-level strictly — included at Kriti\u2019s direction, flagged on their cards). <b>AA− COHORT (grade 4): 525 unique non-BFSI/PSU names; progress 50/525</b> — promoted: AMPIN Energy Transition, Afcons Infrastructure. Next run starts at #51. Each run regenerates the queue from <span style="font-family:monospace">data/ratings_current.csv</span>, triages the next 50, deep-dives plausible qualifiers and logs every disposition below.</p>
     <details style="margin-top:10px"><summary style="cursor:pointer;font-weight:700;color:var(--indigo-dark)">Disposition log — names 1–56 (7 Jul 2026 run)</summary>
     <div style="font-size:12.5px;color:#374151;line-height:1.7;margin-top:8px">
     <b>Promoted (4):</b> Adani New Industries (Ind-Ra A+; green H2/solar mfg) · Apraava Energy (via meter SPVs; platform AA/AA+) · Aster DM Quality Care (Blackstone JV; merged 2-Jul-26) · Avaada Energy (Brookfield; $750mn refi live).<br>
@@ -193,6 +193,15 @@
     <b>Trusts/education (10):</b> incl. Maharishi Markandeshwar, Bapuji-style associations, LightHouse Learning (PE-backed but asset-light ⚑).<br>
     <b>Notable fail-trigger (pass size, no trigger — monitor):</b> Suzlon Energy (net cash post-deleveraging; 6.5 GW orderbook — revisit if re-levers), Malabar Gold (large gold WC, no term event ⚑), Patanjali Foods ⚑, Lemon Tree Hotels (EBITDA ✓, capex modest), MSN Laboratories complex ⚑, Haldiram entities ×4 (Temasek/IHC-backed, near-zero debt — PE rule noted but no financing need), Mylan/Viatris India ⚑, Prism Johnson ⚑, Rain CII Carbon (parent refi story sits offshore at Rain Industries — <b>monitor</b>), OFB Tech (commerce arm; lending sits in Oxyzo=BFSI ⚑), Gleneagles Healthcare (IHH sale process ⚑), Epsilon Carbon/Advanced Materials complex (anode-materials capex programme — <b>could not verify size; priority deep-dive next run</b> ⚑), Sandur Manganese (owns Arjas; capex ⚑), Vodafone Mobile Services (stale A+ row suspected — verify ⚑).<br>
     <b>Fail size (~380):</b> small/mid corporates across auto components, textiles, chemicals, food, jewellery WC, hotels singles, print/packaging, EPC — none within reach of the gate on available data ⚑. Full name-level reasoning available on request.<br>
+    ⚑ = judgment on partial data.</div></details>
+    <details style="margin-top:8px"><summary style="cursor:pointer;font-weight:700;color:var(--indigo-dark)">Disposition log — AA− cohort names 1–50 (7 Jul 2026, batch 4)</summary>
+    <div style="font-size:12.5px;color:#374151;line-height:1.7;margin-top:8px">
+    <b>Promoted (2):</b> AMPIN Energy Transition (8 AA− SPVs → platform; AIIB/ICG/SMBC/CIP roster) · Afcons Infrastructure (CRISIL AA−; ₹33k cr+ orderbook; SP group window).<br>
+    <b>Already carded — AA− prints consistent (3):</b> ACME Solar Holdings · Adani Airport Holdings · Adani Enterprises (parent — stays excluded on coal trading; AA− print noted).<br>
+    <b>Platform/single SPVs (~20):</b> ACME ×9 (Aklera, Chittorgarh, Dhaulpur ×2, Heergarh, Phalodi, Sikar, Deoghar, Raisar) · Adani solar/wind/RE/transmission ×8 · ABC Renewable RJ-01, Adept, Adyah, Airpower Windfarms.<br>
+    <b>Securitisation (3):</b> 2024 PL Iceland, 2024 PL Indigo, 2025 MFI Hormuz.<br>
+    <b>Monitor (2):</b> Air India SATS (AA− parent; Noida cargo phase 2) · Alivira/SeQuent (Carlyle-backed animal pharma — PE rule, size fails today ⚑).<br>
+    <b>Fail size/trigger (~20):</b> A.G. Industries ×2, ADAMA India ⚑, Advanced Enzyme (net cash), API Ispat, Aarti Drugs, Aarti Pharmalabs, Aditya Birla Digital Fashion (equity-funded), Airoli ITP (K Raheja SPV), Alembic, Alkyl Amines, Amar Ujala, others small.<br>
     ⚑ = judgment on partial data.</div></details>
   </div>
 
@@ -695,6 +704,66 @@ const DATA = [
   covenants:"Concession waterfalls, DSRA; sponsor-support expectations built into ratings. ⚑",
   acquisitions:"Concession wins rather than M&A; HLAG relationship may bring more terminal bids.",
   srcs:[["ICRA rationale Sep-25","https://www.icra.in/Rating/ShowRationalReportFilePdf/138128"],["Stake increase — Container News","https://container-news.com/hapag-lloyd-increases-stake-in-jm-baxi/"],["Paradip ICT — CARE","https://www.careratings.com/upload/CompanyFiles/PR/202510141008_Paradip_International_Cargo_Terminal_Private_Limited.pdf"]]
+},
+{
+  name:"Suzlon Energy", sector:"Wind OEM & services (USER OVERRIDE — no current trigger)", rating:"A+ band (DB) — upgrade trajectory ⚑",
+  opp:2500, scores:{nt:4,size:5,event:6,fit:6.5}, triggers:["capex"],
+  thesis:"Included on Kriti's override: net cash ₹2,384 cr and only ~₹600 cr/yr capex today — but a 5.9 GW orderbook, 8-10 GW sector installs coming in FY27-28, and a nascent Devco model that will eventually need project-style capital.",
+  rationale:"<b>Why now (the override case):</b> Suzlon fails every trigger as it stands — that is exactly why the entry point is interesting. FY26 delivered ₹16,679 cr revenue (+54%), ₹3,022 cr EBITDA and a clean balance sheet after a decade of distress; the credit is on an upgrade trajectory with structural wind-sector tailwinds. The re-leveraging paths: (1) the Devco build-own-transfer model absorbs ₹300-350 cr now and scales with wins, (2) working-capital/LC-BG lines grow with the 5.9 GW execution ramp, (3) any inorganic move (blade/forging capacity) would be debt-funded. Early relationship = first call when the balance sheet turns. Flagged honestly: no near-term mandate visible.",
+  kv:{ "FY26":"Revenue ₹16,679 cr (+54%) · EBITDA ₹3,022 cr · PAT ₹3,163 cr", "Net CASH":"₹2,384 cr (Mar-26)", "Orderbook":"~5.9 GW (66% PSU + C&I)", "Capex":"~₹600 cr/yr; ₹300-350 cr to Devco", "Sector":"installs → 8 GW FY27, 10 GW FY28E" },
+  capstruct:"Effectively unlevered post-restructuring; large non-fund-based limits (LC/BG) for execution. ⚑",
+  lenders:"Consortium banks on NFB lines; capital-markets debt absent — white space when re-levering starts.",
+  maturities:["None material — the watch item is when that changes"],
+  finhist:["FY26: record results; net cash maintained","Legacy: 2020 restructuring, 2023 rights-issue deleveraging, ratings rebuilt from D to A+ band","Devco model launched — future project-capital consumer"],
+  ratingevo:["2020: default-era legacy","2023-24: upgrades on deleveraging","2025-26: A+ band with positive bias ⚑ — verify latest print in Deep Dive"],
+  covenants:"NFB facility covenants; minimal term-debt documentation outstanding. ⚑",
+  acquisitions:"Renom (O&M, 2024) majority — services roll-up possible.",
+  srcs:[["FY26 results — ScanX","https://scanx.trade/stock-market-news/companies/suzlon-energy-q4-results-revenue-surges-to-54-7b-rupees-net-profit-beats-estimates/41248548"],["Capex/Devco — Sahi","https://www.sahi.com/news/suzlon-energy-outlines-600-crore-yearly-capex-plan-for-expansion-and-devco-growth-2961-PE1_COR"],["Orderbook — DSIJ","https://insights.dsij.in/dsijarticledetail/suzlon-energy-reports-strong-fy26-results-revenue-jumps-54-order-book-nears-59-gw-id021-57321"]]
+},
+{
+  name:"Rain Group (Rain Industries / Rain CII Carbon)", sector:"Carbon products — CPC/CTP (USER OVERRIDE — parent prints IND A)", rating:"RCCVL: IND A+/Stable · RIL parent: IND A/Stable ⚑", q:"Rain",
+  opp:3000, scores:{nt:5.5,size:5,event:6.5,fit:7}, triggers:["mat"],
+  thesis:"Included on Kriti's override: the domestic anchor (Rain CII Carbon Vizag, IND A+) guarantees parent borrowings while the real balance-sheet event sits offshore — Rain Carbon's USD term loan (Ba3/B+ complex) — making an India-anchored refinancing of the global stack the trade to build toward.",
+  rationale:"<b>Why now (the override case):</b> domestically the group has cleaned up — Ind-Ra affirmed RIL at A/Stable noting long-term debt fully repaid by Nov 2025, with RCCVL (A+) guaranteeing facilities. Offshore, Rain Carbon's amended-and-extended first-lien TLB (Moody's Ba3, CFR B2; S&P B+/Negative 2024) prices wide — the arbitrage is bringing debt onshore against Indian cash flows (Vizag CPC assets) via RCCVL-guaranteed INR structures, a route the group already uses for bank lines. Cyclical CPC/CTP margins are the risk; the aluminium-cycle recovery is the catalyst. Parent sub-A+ print is why this needed an override — the qualifying paper is at RCCVL level.",
+  kv:{ "Domestic anchor":"RCCVL IND A+/Stable (guarantees RIL debt)", "Parent":"RIL IND A/Stable; LT debt repaid by Nov-25", "Offshore":"Rain Carbon TLB — Moody's Ba3 (A&E), CFR B2; S&P B+", "Business":"top-2 global CPC + coal-tar pitch", "Trade":"onshore INR take-out of offshore stack, RCCVL-anchored" },
+  capstruct:"India: near debt-free post Nov-25 + RCCVL guarantees; Offshore: USD TLB/notes at Rain Carbon Inc/GmbH. ⚑",
+  lenders:"Offshore TLB investors; Indian banks on guaranteed lines — domestic capital-markets absent. ⚑",
+  maturities:["Rain Carbon TLB maturity wall (post A&E) — the refinancing event ⚑ verify current schedule","Domestic: clean slate = fresh capacity"],
+  finhist:["Nov 2025: domestic LT debt fully repaid","2024-25: TLB amended & extended (Ba3 assigned)","Jul 2025: Ind-Ra affirms RIL A/Stable, RCCVL A+/Stable"],
+  ratingevo:["2023-24: S&P outlook Negative on weak carbon spreads","2025: domestic affirmations; offshore stabilising — cycle-turn upgrade optionality"],
+  covenants:"TLB first-lien package offshore; domestic guaranteed-facility covenants. ⚑",
+  acquisitions:"Historic serial acquirer (CII Carbon 2007, Rutgers 2013) — currently consolidating.",
+  srcs:[["Ind-Ra — RIL/RCCVL","https://www.indiaratings.co.in/pressrelease/69633"],["RIL credit rating report Jul-25","https://www.rain-industries.com/assets/pdf/creditratingreport_20250724073259.pdf"],["Moody's Ba3 TLB","https://www.moodys.com/credit-ratings/Rain-CII-Carbon-LLC-credit-rating-820569127"]]
+},
+{
+  name:"AMPIN Energy Transition", sector:"C&I renewables platform (AIIB/ICG/SMBC/CIP-backed)", rating:"SPVs AA− (DB, ×8) · platform ⚑ verify", pe:true,
+  opp:4000, scores:{nt:7,size:5.5,event:8,fit:7.5}, triggers:["capex","mat"],
+  thesis:"First promotion of the AA− cohort: eight AMPIN SPVs at AA− in the ratings DB reveal a C&I platform backed by the heaviest institutional roster in the sector — AIIB, ICG, SMBC, CIP, Siemens, Sumitomo, CBRE Caledon — with $448mn raised (latest a Dec-2025 debt round) and a multi-GW build.",
+  rationale:"<b>Why now:</b> AMPIN (ex-Amp Energy India) is the AA− mirror of CleanMax — C&I and utility hybrid projects financed SPV-by-SPV, with the rating already a notch above where CleanMax's SPVs sat pre-IPO. The investor base is debt-friendly (SMBC on the register; AIIB anchor), the Dec-2025 debt raise shows live appetite, and responsAbility's $35mn mezz signals openness to structured layers. Each commissioning cluster creates COD refis; platform-level NCDs and an eventual IPO/InvIT are the events. Priority verify: platform-level rating and consolidated leverage ⚑.",
+  kv:{ "SPVs in DB":"8 at AA− (Clean Power, Evolution, Urja, Systems…)", "Investors":"AIIB, ICG, SMBC, CIP, Siemens, Sumitomo, CBRE Caledon, Kotak/CIIF", "Raised":"$448mn cumulative; Dec-2025 debt round", "Mezz precedent":"$35mn responsAbility", "Pipeline":"multi-GW C&I + hybrid ⚑" },
+  capstruct:"SPV project debt (the 8 rated entities), platform equity from institutional roster, mezz layers appearing. ⚑",
+  lenders:"SMBC-adjacent, domestic project lenders, DFIs; NCD investors untapped. ⚑ inferred.",
+  maturities:["Construction→COD refis across SPV clusters FY26-FY28","Dec-25 debt round instruments — future repricing candidates ⚑"],
+  finhist:["Dec 2025: debt round closed","2024-25: responsAbility $35mn; continued AIIB/ICG equity support","Rebrand Amp Energy India → AMPIN; 8 SPVs rated AA−"],
+  ratingevo:["2023-24: A/A+ SPV prints","2025-26: AA− across 8 SPVs — portfolio seasoning; platform print is the next catalyst ⚑"],
+  covenants:"SPV DSCR/DSRA; mezz terms (responsAbility) suggest cash-trap structures. ⚑",
+  acquisitions:"Organic C&I contracting; open-access growth.",
+  srcs:[["Investor roster — AMPIN","https://ampin.energy/about-us/investors/"],["$35mn — responsAbility","https://www.responsability.com/en/press-releases/responsability-to-invest-up-to-usd-35-million-in-ampin-energy-transition-one-of-india-s-largest-renewable-energy-c-and-i-developers"],["Funding history — Tracxn","https://tracxn.com/d/companies/ampin-energy-transition/__VGSNZGIK0DjJ2V3S1cji7oxwjdUkYZ8Q35XiqAvYt-Q"]]
+},
+{
+  name:"Afcons Infrastructure", sector:"EPC — marine, tunnels, transport (Shapoorji group, listed)", rating:"CRISIL AA− / Stable (upgraded)",
+  opp:3000, scores:{nt:6,size:5.5,event:7,fit:7.5}, triggers:["mat","capex"],
+  thesis:"AA− cohort promotion: the SP group's crown-jewel EPC — ₹33,000 cr+ orderbook, post-IPO balance sheet, CRISIL upgrade to AA− — runs a structurally WC-heavy book with CP/NCD programmes and ~₹1,100 cr FY26 equipment capex, inside a group that monetises everything.",
+  rationale:"<b>Why now:</b> Afcons is the investable window into the Shapoorji complex (the parent fails the A+ floor; Afcons doesn't). EPC economics mean permanent working-capital appetite — CP programmes, NCDs, BG/LC-heavy structures — growing with an orderbook at ₹33,000-37,000 cr and marquee wins (metros, marine, overseas). The Oct-2024 IPO cleaned leverage and the CRISIL upgrade re-rates its funding cost; equipment capex (~₹1,100 cr FY26) is part debt-funded. Group angle: SP monetisation pressure historically reaches into Afcons receivables/stakes — structured trades appear with little notice. Trigger check honest: gross debt hovers near the ₹3,000 cr line ⚑ and capex is below ₹2,000 cr — this is a programmatic-issuer inclusion, not an event one.",
+  kv:{ "Rating":"CRISIL AA−/Stable (upgrade from A)", "Orderbook":"₹33,000-37,000 cr", "FY26 capex":"~₹1,100 cr (debt + accruals)", "Listed":"Oct-2024 IPO (₹5,430 cr)", "Group":"Shapoorji Pallonji — monetisation events recur" },
+  capstruct:"Working-capital consortium + CP + NCDs; equipment loans; BG/LC-dominant. ⚑",
+  lenders:"ICICI/SBI-led WC consortium; CP/NCD investors (ICRA-rated programmes). ⚑ inferred.",
+  maturities:["CP rolls + NCD ladder — programmatic refi flow","Equipment-loan amortisation"],
+  finhist:["Oct 2024: ₹5,430 cr IPO","2025-26: CRISIL upgrade to AA−; ICRA reaffirmations on CP/NCD","Orderbook compounding ~10% CAGR"],
+  ratingevo:["2023: A band (CARE/ICRA)","2024: IPO deleveraging","2025-26: CRISIL AA−/Stable — group-linkage discount narrowing"],
+  covenants:"WC consortium covenants, large-corporate borrowing disclosures; group-exposure caps post-IPO. ⚑",
+  acquisitions:"Project-driven; overseas EPC JVs rather than M&A.",
+  srcs:[["ICRA rationale","https://www.icra.in/Rating/GetRationalReportFilePdf?id=136443"],["Orderbook — TradeBrains","https://tradebrains.in/infra-stock-revenue-breakdown-of-afcons-infrastructures-32681-cr-orderbook/"],["Financial insights — Afcons","https://www.afcons.com/en/financial-insights"]]
 }
 ];
 
