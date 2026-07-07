@@ -437,4 +437,8 @@ function togTrig(btn){ const t=btn.dataset.t;
 }
 document.getElementById("q").addEventListener("input",e=>{ q=e.target.value.toLowerCase(); render(); });
 
-document.getElementById("watch").innerHTML = WATCH.map(w=>`<div class="wl"><b>${w.
+document.getElementById("watch").innerHTML = WATCH.map(w=>`<div class="wl"><b>${w.n}</b> <span class="badge b-watch">watch</span><p>${w.w}</p></div>`).join("");
+render();
+</script>
+</body>
+</html>
