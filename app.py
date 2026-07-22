@@ -1,4 +1,3 @@
-import re
 """
 Streamlit UI for the Indian Credit Ratings Tool.
 
@@ -6,6 +5,7 @@ Run with:
     streamlit run app.py --server.headless true --browser.gatherUsageStats false
 """
 
+import re
 import io
 import json
 import os
