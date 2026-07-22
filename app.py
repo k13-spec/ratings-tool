@@ -192,7 +192,10 @@ _PSU_FRAGMENTS = [
     "oil india", "mrpl", "bpcl", "hpcl",
 ]
 
-def _is_psu(name: str) -> bool:
+def _is_psu(name) -> bool:
+    # NaN / None / non-string company names must not crash the filter
+    if not isinstance(name, str):
+        return False
     n = (" " + name.lower() + " ")
     return any(frag in n for frag in _PSU_FRAGMENTS)
 
@@ -1168,6 +1171,27 @@ def main():
         )
         min_grade, max_grade = grade_options[grade_choice]
 
+        # ---- Exact ratings (tick to include only these grades) ----
+        _SYM2GRADE = {
+            "AAA": 1, "AA+": 2, "AA": 3, "AA-": 4,
+            "A+": 5, "A": 6, "A-": 7,
+            "BBB+": 8, "BBB": 9, "BBB-": 10,
+            "BB+": 11, "BB": 12, "BB-": 13,
+            "B+": 14, "B": 15, "B-": 16,
+            "C+": 17, "C": 18, "C-": 19, "D": 20,
+        }
+        exact_ratings = st.multiselect(
+            "Exact Ratings (tick to include only these)",
+            options=list(_SYM2GRADE.keys()),
+            default=[],
+            placeholder="e.g. AA-",
+            help="Show only companies whose best grade is one of the ticked "
+                 "grades (e.g. tick just AA-). Overrides Minimum Rating.",
+        )
+        if exact_ratings:
+            # Query the full grade range, then filter to the ticked grades
+            min_grade, max_grade = 1, 20
+
         # ---- Outlook ----
         outlook_options = ["Stable", "Positive", "Negative", "Watch",
                            "Watch Negative", "Watch Positive", "Watch Developing"]
@@ -1277,9 +1301,17 @@ def main():
         if "Listed" in display_df.columns:
             display_df["Listed"] = display_df["Listed"].map(lambda x: "Yes" if x == 1 else "No")
 
+        # Exact-ratings filter (in-memory) — only ticked grades
+        if exact_ratings and "Grade" in display_df.columns:
+            _sel_grades = {_SYM2GRADE[s] for s in exact_ratings}
+            display_df = display_df[
+                display_df["Grade"].isin(_sel_grades)
+            ].reset_index(drop=True)
+
         # Sovereign filter (in-memory) — exclude PSUs when checked
+        # (astype(bool) keeps the mask boolean even on empty results)
         if exclude_psu:
-            mask = display_df["Company Name"].apply(_is_psu)
+            mask = display_df["Company Name"].apply(_is_psu).astype(bool)
             display_df = display_df[~mask].reset_index(drop=True)
 
         # Company name search (in-memory)
