@@ -937,6 +937,22 @@ div[data-testid="stHorizontalBlock"] [data-testid="stToggle"] label {
     font-size: 0.78rem !important;
     color: var(--text-muted) !important;
 }
+
+/* ═══════════════ MATERIAL ICON GLYPHS ═══════════════
+   Streamlit renders expander arrows / widget icons via the Material Symbols
+   ligature font. The DM Sans overrides above must NOT apply to them, or the
+   ligature text ("keyboard_arrow_right", …) renders as literal characters
+   overlapping the labels. */
+[data-testid="stIconMaterial"],
+span[data-testid="stIconMaterial"],
+[data-testid="stExpanderToggleIcon"],
+span[class*="material-symbols"],
+i[class*="material-symbols"] {
+    font-family: "Material Symbols Rounded" !important;
+    font-weight: normal !important;
+    letter-spacing: normal !important;
+    text-transform: none !important;
+}
 </style>
 """
 

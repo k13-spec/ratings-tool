@@ -10,6 +10,7 @@ Usage via run_scraper.py:
     python run_scraper.py --india-ratings --limit 200   # test run
 """
 
+import hashlib
 import logging
 import time
 from pathlib import Path
@@ -167,11 +168,22 @@ def run(conn=None, limit: int = None, reset: bool = False) -> dict:
 
                 norm    = normalize_rating(raw_symbol)
                 outlook = raw_outlook or norm.get("outlook")
+                symbol  = norm.get("base") or raw_symbol
+
+                # Content-hash source_id: the old positional "{issuer_id}_{idx}"
+                # was stable regardless of rating content, so re-scans could
+                # never record a rating CHANGE (dedupe skipped the new state).
+                # Hashing instrument+symbol+outlook means unchanged rows dedupe
+                # and changed ratings insert a fresh row.
+                # Must stay in sync with the backfill formula in db_maintenance.py.
+                _sid = f"{issuer_id}_h" + hashlib.sha1(
+                    f"{instrument_name}|{symbol}|{outlook or ''}".encode()
+                ).hexdigest()[:10]
 
                 insert_rating(
                     conn, company_id,
                     agency          = AGENCY,
-                    rating_symbol   = norm.get("base") or raw_symbol,
+                    rating_symbol   = symbol,
                     rating_grade    = norm.get("grade"),
                     outlook         = outlook,
                     instrument_type = _instrument_type(instrument_name, raw_symbol),
@@ -181,7 +193,7 @@ def run(conn=None, limit: int = None, reset: bool = False) -> dict:
                     sector          = sector,
                     sub_sector      = sub_sector,
                     rationale_url   = f"{BASE_URL}/Issuers?issuerID={issuer_id}",
-                    source_id       = f"{issuer_id}_{idx}",
+                    source_id       = _sid,
                 )
                 stats["ratings_added"] += 1
 

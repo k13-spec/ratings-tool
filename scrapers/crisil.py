@@ -9,6 +9,7 @@ Usage:
     python run_scraper.py --crisil --limit 100
 """
 
+import hashlib
 import json
 import logging
 import re
@@ -365,6 +366,15 @@ def run(limit: Optional[int] = None, dry_run: bool = False) -> dict:
             counts["companies_upserted"] += 1
 
             fname = _fname_map.get(_norm(parsed["company_name"]))
+            # Content-hash source_id: unchanged ratings dedupe on re-runs,
+            # changed ratings insert a fresh row (which "latest per agency"
+            # ordering then picks up). Without this, every full re-run of the
+            # suggest dump inserted ~38k duplicate rows.
+            # Must stay in sync with the backfill formula in db_maintenance.py.
+            _sid = "h" + hashlib.sha1(
+                f"{parsed['raw_rating']}|{parsed['outlook'] or ''}|"
+                f"{parsed['rating_date'] or ''}".encode()
+            ).hexdigest()[:12]
             insert_rating(
                 conn,
                 company_id,
@@ -374,6 +384,7 @@ def run(limit: Optional[int] = None, dry_run: bool = False) -> dict:
                 outlook=parsed["outlook"],
                 rating_date=parsed["rating_date"],
                 sector=parsed["sector"],
+                source_id=_sid,
                 rationale_url=(
                     RATIONALE_BASE + urllib.parse.quote(fname) if fname else GENERIC_URL
                 ),

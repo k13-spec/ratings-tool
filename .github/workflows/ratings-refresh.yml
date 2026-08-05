@@ -1,0 +1,92 @@
+# Fortnightly ratings refresh — scrapes the rating agencies, normalizes the
+# DB, re-exports ratings_current.csv (the bond tracker's rating source), and
+# rebuilds the ISIN issuer-prefix map.
+#
+# Runs on the 7th & 22nd (09:00 IST) — two days after the MF-yields refresh.
+#
+# Pipeline per run:
+#   run_scraper.py --icra                 ICRA paginated listing (RationaleId dedupe)
+#   run_scraper.py --crisil               CRISIL suggest dump (content-hash dedupe)
+#   run_scraper.py --india-ratings-reset  full issuer-ID rescan (content-hash dedupe)
+#   run_scraper.py --care-edge --limit 200  incremental CARE Edge discovery
+#   db_maintenance.py                     backfill/dedupe, grade realign, outlook
+#                                         artifact, Renewable Energy reclass,
+#                                         export ratings_current.csv (guarded)
+#   build_isin_map.py                     NSDL issuer-prefix -> company map
+#   commit + push                         live apps pick it up on redeploy/cache
+#
+# Individual scrapers are allowed to fail (an agency blocking runner IPs
+# mustn't kill the run) — db_maintenance.py's export guards protect the CSV,
+# and the job summary lists what succeeded. If an agency consistently blocks
+# GitHub runners, run refresh_ratings.bat on a normal machine instead.
+
+name: Ratings fortnightly refresh
+
+on:
+  schedule:
+    - cron: "30 3 7,22 * *"   # 09:00 IST on the 7th & 22nd
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ratings-refresh
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install requests pandas openpyxl tqdm pdfplumber rapidfuzz
+
+      - name: ICRA
+        run: python run_scraper.py --icra 2>&1 | tee icra_log.txt || echo "ICRA FAILED" | tee -a icra_log.txt
+
+      - name: CRISIL
+        run: python run_scraper.py --crisil 2>&1 | tee crisil_log.txt || echo "CRISIL FAILED" | tee -a crisil_log.txt
+
+      - name: India Ratings (full rescan)
+        run: python run_scraper.py --india-ratings-reset 2>&1 | tail -50 | tee ir_log.txt || echo "INDIA RATINGS FAILED" | tee -a ir_log.txt
+
+      - name: CARE Edge (incremental discovery)
+        run: python run_scraper.py --care-edge --limit 200 2>&1 | tail -30 | tee care_log.txt || echo "CARE EDGE FAILED" | tee -a care_log.txt
+
+      - name: Normalize DB and export ratings_current.csv
+        run: python db_maintenance.py 2>&1 | tee maint_log.txt
+
+      - name: Rebuild ISIN issuer-prefix map
+        run: python build_isin_map.py 2>&1 | tee map_log.txt || echo "MAP REBUILD FAILED" | tee -a map_log.txt
+
+      - name: Commit and push
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/ratings.db data/ratings_current.csv data/issuer_prefix_map.csv
+          if git diff --cached --quiet; then
+            echo "No data changes — nothing to commit."
+            exit 0
+          fi
+          N_ROWS=$(grep -oP 'export rows: \K\d+' maint_log.txt || echo "?")
+          FAILS=$(grep -hl 'FAILED' icra_log.txt crisil_log.txt ir_log.txt care_log.txt 2>/dev/null | wc -l)
+          git commit -m "Auto-refresh ratings: ${N_ROWS} current rows (${FAILS} scraper failures)"
+          git push
+
+      - name: Job summary
+        if: always()
+        run: |
+          {
+            echo "## Ratings refresh"
+            echo '```'
+            grep -hE 'FAILED|ABORT|complete\.|export rows|grade fixes|duplicate rows|wrote ' \
+              icra_log.txt crisil_log.txt ir_log.txt care_log.txt maint_log.txt map_log.txt 2>/dev/null || true
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
