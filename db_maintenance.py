@@ -211,17 +211,25 @@ def step4_export(cur):
     print("STEP 4 — export data/ratings_current.csv (latest per company/agency)")
     print("=" * 62)
     out = cur.execute(EXPORT_QUERY).fetchall()
-    print(f"  export rows: {len(out)}")
+    n_graded = sum(1 for r in out if r[3] is not None)
+    print(f"  export rows: {len(out)} ({n_graded} with grade)")
     if len(out) < MIN_ROWS:
         print(f"  ABORT: fewer than {MIN_ROWS} rows — leaving existing CSV untouched.",
               file=sys.stderr)
         return False
+    # Shrink guard compares GRADED rows — total row count legitimately drops
+    # when noise rows are cleaned, but graded content shrinking >20% means a
+    # scrape went wrong.
     if os.path.exists(CSV_OUT):
-        with open(CSV_OUT, encoding="utf-8") as f:
-            existing = max(sum(1 for _ in f) - 1, 0)
-        if existing and len(out) < existing * 0.8:
-            print(f"  ABORT: export shrank {existing} -> {len(out)} (>20%) — "
-                  "leaving existing CSV untouched.", file=sys.stderr)
+        try:
+            import pandas as _pd
+            _old = _pd.read_csv(CSV_OUT)
+            existing_graded = int(_old["grade"].notna().sum())
+        except Exception:
+            existing_graded = 0
+        if existing_graded and n_graded < existing_graded * 0.8:
+            print(f"  ABORT: graded rows shrank {existing_graded} -> {n_graded} "
+                  "(>20%) — leaving existing CSV untouched.", file=sys.stderr)
             return False
     if DRY:
         print("  (dry run — CSV not written)")
