@@ -119,6 +119,8 @@ _SECTOR_GROUPS = {
     ],
     "Infrastructure": [
         "Infrastructure", "Transport Infrastructure", "Transport Services",
+        "Renewable Energy", "Renewables", "Solar", "Wind", "Green Energy",
+        "Power - Renewable", "Energy",
         "Other Utilities", "Public Services", "Gas",
         "Gas Transmission/ Marketing", "LPG/CNG/PN G/LNG Supplier",
         "Industrial Gas", "Trading - Gas",
@@ -137,12 +139,14 @@ _SECTOR_GROUPS = {
         "Telecom - Infrastructure", "Other Telecom Services",
         "Telecommunication",
     ],
-    "Financial": [
+    "Financial Institutions": [
         "Financial Sector", "Financial Services",
         "Banks", "Private Sector Bank", "Public Sector Bank", "Other Bank",
         "Capital Markets", "Finance", "Insurance",
-        "Financial Institution", "Financial Technology (Fintech)",
-        "Non-Banking Financial Company (NBFC)", "Housing Finance Company",
+        "Financial Institution",
+        "Financial Technology (Fintech)", "Financial Technology", "Fintech",
+        "Non-Banking Financial Company (NBFC)", "Non-Banking Financial Company",
+        "NBFC", "Housing Finance Company", "Housing Finance",
         "Investment Company", "Other Financial Services",
         "Life Insurance", "General Insurance", "Other Insurance Companies",
         "Insurance Distributors",
@@ -182,7 +186,7 @@ _PSU_FRAGMENTS = [
     "state bank of india", "punjab national bank",
     "bank of baroda", "bank of india", "bank of maharashtra",
     "canara bank", "union bank of india", "central bank of india",
-    "indian bank ", "uco bank",
+    "indian bank ", "uco bank", "jammu and kashmir bank",
     "life insurance corporation",
     "power finance corp", "rural electrification corp",
     "housing and urban development", "national bank for agriculture",
@@ -190,6 +194,21 @@ _PSU_FRAGMENTS = [
     "rec limited", "pfc limited",
     "food corporation of india",
     "oil india", "mrpl", "bpcl", "hpcl",
+    # verified against NSDL's Type of Issuer-Ownership field, 2026-08-05
+    "power grid", "indian railway finance", "india infrastructure finance",
+    "indian renewable energy development", "nuclear power corporation",
+    "national housing bank", "financing infrastructure and development",
+    "thdc ", "bharat sanchar", "mahanagar telephone", "pnb housing",
+    "solar energy corporation",
+    # state-government entities: discoms/transcos, state FIs, civic bodies
+    "power corporation", "energy corporation", "electricity board",
+    "state electricity", "rajya vidyut", "prasaran nigam", "vidyut nigam",
+    "power distribution company", "power generation co",
+    "municipal corporation", "nagar nigam",
+    "metropolitan development authority", "capital region development",
+    "infrastructure development board", "state beverages",
+    "kerala financial corporation", "kerala infrastructure investment",
+    "mineral development corporation", "industrial infrastructure corporation",
 ]
 
 def _is_psu(name) -> bool:
@@ -444,7 +463,8 @@ def _is_valid_sector(s: str) -> bool:
 
 def _sector_checkbox_panel(available_sectors: list) -> list:
     available_sectors = [s for s in available_sectors if _is_valid_sector(s)]
-    grouped: dict[str, list] = {"Corporate": [], "Infrastructure": [], "Financial": []}
+    grouped: dict[str, list] = {"Corporate": [], "Infrastructure": [],
+                                "Financial Institutions": []}
     for s in available_sectors:
         grouped[_group_of(s)].append(s)
 
@@ -471,7 +491,7 @@ def _sector_checkbox_panel(available_sectors: list) -> list:
         st.rerun()
 
     selected = []
-    for grp in ["Corporate", "Infrastructure", "Financial"]:
+    for grp in ["Corporate", "Infrastructure", "Financial Institutions"]:
         members = grouped.get(grp, [])
         if not members:
             continue
