@@ -59,6 +59,11 @@ def get_filtered_companies(
                          AND r.instrument_type IN ('LT', 'LT/ST')
                         THEN 0 ELSE 1
                     END,
+                    -- Prefer rows that actually carry a parsed grade: the
+                    -- CRISIL suggest feed is a rolling ACTIONS feed and some
+                    -- entries have no parseable rating — without this, an
+                    -- ungraded newer row shadows the real graded rating.
+                    r.rating_grade IS NULL,
                     r.rating_date DESC NULLS LAST,
                     r.id DESC
             ) AS rn

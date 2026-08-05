@@ -68,6 +68,7 @@ WITH ranked AS (
                        OR r.rating_symbol LIKE 'Withdrawn%'
                        OR r.rating_symbol LIKE '*%') THEN 1 ELSE 0 END,
                  CASE WHEN r.agency='CARE Edge' AND r.instrument_type NOT IN ('LT','LT/ST') THEN 1 ELSE 0 END,
+                 r.rating_grade IS NULL,
                  r.rating_date IS NULL, r.rating_date DESC, r.id DESC
            ) AS rn
     FROM ratings r JOIN companies c ON c.id = r.company_id
@@ -104,6 +105,31 @@ def step0_backfill_source_ids(cur):
     print(f"  India Ratings rows to backfill: {len(ir)}")
     if not DRY:
         cur.executemany("UPDATE ratings SET source_id=? WHERE id=?", cr + ir)
+
+    # CRISIL noise rows: the suggest feed is a rolling ACTIONS feed and some
+    # entries carry no parseable rating at all — such rows hold no information
+    # (the scraper no longer inserts them; this cleans up past runs).
+    noise = cur.execute(
+        "SELECT COUNT(*) FROM ratings WHERE agency='CRISIL' "
+        "AND (rating_symbol IS NULL OR rating_symbol='')").fetchone()[0]
+    print(f"  CRISIL empty-symbol noise rows to delete: {noise}")
+    if not DRY and noise:
+        cur.execute("DELETE FROM ratings WHERE agency='CRISIL' "
+                    "AND (rating_symbol IS NULL OR rating_symbol='')")
+    # Orphan companies (created for noise records): no ratings, no financials,
+    # no notes — safe to remove.
+    orphans = cur.execute(
+        "SELECT COUNT(*) FROM companies c WHERE "
+        "NOT EXISTS (SELECT 1 FROM ratings r WHERE r.company_id=c.id) "
+        "AND NOT EXISTS (SELECT 1 FROM financials f WHERE f.company_id=c.id) "
+        "AND NOT EXISTS (SELECT 1 FROM notes n WHERE n.company_id=c.id)").fetchone()[0]
+    print(f"  orphan companies to delete: {orphans}")
+    if not DRY and orphans:
+        cur.execute(
+            "DELETE FROM companies WHERE id IN (SELECT c.id FROM companies c WHERE "
+            "NOT EXISTS (SELECT 1 FROM ratings r WHERE r.company_id=c.id) "
+            "AND NOT EXISTS (SELECT 1 FROM financials f WHERE f.company_id=c.id) "
+            "AND NOT EXISTS (SELECT 1 FROM notes n WHERE n.company_id=c.id))")
 
     # Dedupe: identical (company_id, agency, source_id) — keep newest id
     dup = cur.execute(

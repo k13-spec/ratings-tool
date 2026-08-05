@@ -361,6 +361,14 @@ def run(limit: Optional[int] = None, dry_run: bool = False) -> dict:
             counts["errors"] += 1
             continue
 
+        # The suggest feed is a rolling rating-ACTIONS feed; entries whose
+        # action text carries no parseable rating symbol hold no information —
+        # skip them entirely (no company upsert, no rating row). Otherwise an
+        # ungraded row can shadow the company's real graded rating.
+        if not parsed["raw_rating"]:
+            counts["skipped_unparsed"] = counts.get("skipped_unparsed", 0) + 1
+            continue
+
         try:
             company_id = upsert_company(conn, parsed["company_name"])
             counts["companies_upserted"] += 1
