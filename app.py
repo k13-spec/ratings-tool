@@ -1409,16 +1409,17 @@ def main():
                 name = (f"<a href='{_html.escape(a['url'], quote=True)}' target='_blank' "
                         f"style='color:#1F2937;text-decoration:none;'>{name}</a>")
             return (
-                f"<div style='display:flex;justify-content:space-between;gap:10px;"
-                f"padding:7px 12px;border-radius:8px;background:{bg};"
-                f"border:1px solid {bd};margin-bottom:6px;font-family:DM Sans,sans-serif;"
-                f"font-size:0.82rem;'>"
+                f"<div style='padding:7px 12px;border-radius:8px;background:{bg};"
+                f"border:1px solid {bd};margin-bottom:6px;"
+                f"font-family:DM Sans,sans-serif;font-size:0.82rem;'>"
+                f"<div style='display:flex;justify-content:space-between;gap:8px;'>"
                 f"<span style='min-width:0;overflow:hidden;text-overflow:ellipsis;"
                 f"white-space:nowrap;'><span style='color:{col};font-weight:700;'>{arrow}</span> "
-                f"<b>{name}</b> <span style='color:#6B7280;'>· {_html.escape(a['agency'])}</span></span>"
-                f"<span style='white-space:nowrap;color:#374151;'>"
-                f"{_html.escape(a['from'])} → <b>{_html.escape(a['to'])}</b> "
-                f"<span style='color:#6B7280;'>· {a['date'].strftime('%d %b')}</span></span>"
+                f"<b>{name}</b></span>"
+                f"<span style='white-space:nowrap;color:#6B7280;'>"
+                f"{_html.escape(a['agency'])} · {a['date'].strftime('%d %b')}</span></div>"
+                f"<div style='color:#374151;margin-top:2px;'>"
+                f"{_html.escape(a['from'])} → <b>{_html.escape(a['to'])}</b></div>"
                 f"</div>")
 
         _cu, _cd = st.columns(2)
