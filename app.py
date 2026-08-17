@@ -1058,6 +1058,82 @@ def _add_bond_counts(display_df, bonds_df):
     display_df["Bonds total"] = b_total
     return display_df
 
+@st.cache_data(ttl=3600, show_spinner=False)
+def _recent_rating_actions(days: int = 7):
+    """Upgrades / downgrades in the trailing `days` window ending at the most
+    recent dated rating in the DB. The window is data-relative (not calendar)
+    because scrapes are fortnightly — a calendar week would read empty just
+    before each refresh. Compares each (company, agency)'s latest dated+graded
+    rating with its previous one on the normalized 1-20 grade scale
+    (lower = better). Dates are parsed per-unique-value: formats are mixed
+    (ISO + "Month D, YYYY") and pandas 3.0 rejects vectorised mixed parsing.
+    """
+    import sqlite3 as _sq
+    conn = _sq.connect(str(DB_PATH))
+    try:
+        raw = pd.read_sql_query(
+            """SELECT r.id, r.company_id, c.name, r.agency, r.rating_symbol,
+                      r.rating_grade, r.rating_date, r.rationale_url
+               FROM ratings r JOIN companies c ON c.id = r.company_id
+               WHERE r.rating_grade IS NOT NULL
+                 AND r.rating_date IS NOT NULL""",
+            conn)
+    finally:
+        conn.close()
+    if raw.empty:
+        return [], None, None
+    _dcache = {}
+    def _pdate(s):
+        if s not in _dcache:
+            try:
+                _ts = pd.to_datetime(s, errors="coerce")
+                if _ts is not pd.NaT and getattr(_ts, "tzinfo", None) is not None:
+                    _ts = _ts.tz_localize(None)
+                _dcache[s] = _ts
+            except (ValueError, TypeError):
+                _dcache[s] = pd.NaT
+        return _dcache[s]
+    raw["dt"] = pd.Series([_pdate(s) for s in raw["rating_date"]], index=raw.index)
+    raw = raw.dropna(subset=["dt"])
+    if raw.empty:
+        return [], None, None
+    end = raw["dt"].max()
+    start = end - pd.Timedelta(days=days - 1)
+    actions = []
+    for (_cid, _agency), g in raw.groupby(["company_id", "agency"]):
+        g = g.sort_values(["dt", "id"])
+        cur = g.iloc[-1]
+        if cur["dt"] < start:
+            continue
+        prev_rows = g[g["dt"] < cur["dt"]]
+        if prev_rows.empty:
+            continue
+        prev = prev_rows.iloc[-1]
+        if int(cur["rating_grade"]) == int(prev["rating_grade"]):
+            continue
+        actions.append({
+            "company": str(cur["name"]),
+            "agency":  str(_agency),
+            "from":    _fmt_action_symbol(prev["rating_symbol"]),
+            "to":      _fmt_action_symbol(cur["rating_symbol"]),
+            "up":      int(cur["rating_grade"]) < int(prev["rating_grade"]),
+            "date":    cur["dt"],
+            "url":     str(cur["rationale_url"] or ""),
+        })
+    actions.sort(key=lambda a: a["date"], reverse=True)
+    return actions, start, end
+
+
+def _fmt_action_symbol(sym) -> str:
+    """Compact a raw agency symbol for the actions strip: drop empty '--'
+    components of combined LT,ST symbols and shorten the INC boilerplate."""
+    s = str(sym or "").strip()
+    parts = [p.strip() for p in s.split(",") if p.strip() and p.strip() != "--"]
+    s = ", ".join(parts) if parts else s
+    s = re.sub(r"\s*ISSUER NOT COOPERATING\s*", " (INC)", s, flags=re.I)
+    return re.sub(r"\s{2,}", " ", s).strip()
+
+
 def main():
     st.set_page_config(
         page_title="Indian Credit Ratings",
@@ -1307,6 +1383,66 @@ def main():
     m3.metric("With Financials",  f"{stats.get('with_financials', 0):,}")
     last = stats.get("last_scraped") or "Never"
     m4.metric("Last Scraped", last[:16] if len(str(last)) > 16 else last)
+
+    # ---- Rating actions: upgrades / downgrades this week ----
+    _actions, _act_start, _act_end = _recent_rating_actions()
+    st.markdown(
+        "<div style='font-family:DM Sans,sans-serif;font-weight:700;font-size:1.05rem;"
+        "margin:10px 0 2px 2px;'>Rating Actions — week to "
+        f"{_act_end.strftime('%d %b %Y') if _act_end is not None else '—'}"
+        "</div>", unsafe_allow_html=True)
+    if not _actions:
+        st.caption("No upgrades or downgrades in the latest week of data.")
+    else:
+        st.caption(f"{sum(a['up'] for a in _actions)} upgrades · "
+                   f"{sum(not a['up'] for a in _actions)} downgrades · latest "
+                   "dated action per company/agency vs its previous rating")
+        _ups   = [a for a in _actions if a["up"]]
+        _downs = [a for a in _actions if not a["up"]]
+        import html as _html
+
+        def _action_row(a, up):
+            bg, bd, arrow, col = (("#F0FDF4", "#BBF7D0", "▲", "#059669") if up
+                                  else ("#FEF2F2", "#FECACA", "▼", "#DC2626"))
+            name = _html.escape(a["company"])
+            if a["url"]:
+                name = (f"<a href='{_html.escape(a['url'], quote=True)}' target='_blank' "
+                        f"style='color:#1F2937;text-decoration:none;'>{name}</a>")
+            return (
+                f"<div style='display:flex;justify-content:space-between;gap:10px;"
+                f"padding:7px 12px;border-radius:8px;background:{bg};"
+                f"border:1px solid {bd};margin-bottom:6px;font-family:DM Sans,sans-serif;"
+                f"font-size:0.82rem;'>"
+                f"<span style='min-width:0;overflow:hidden;text-overflow:ellipsis;"
+                f"white-space:nowrap;'><span style='color:{col};font-weight:700;'>{arrow}</span> "
+                f"<b>{name}</b> <span style='color:#6B7280;'>· {_html.escape(a['agency'])}</span></span>"
+                f"<span style='white-space:nowrap;color:#374151;'>"
+                f"{_html.escape(a['from'])} → <b>{_html.escape(a['to'])}</b> "
+                f"<span style='color:#6B7280;'>· {a['date'].strftime('%d %b')}</span></span>"
+                f"</div>")
+
+        _cu, _cd = st.columns(2)
+        _ACT_CAP = 6
+        with _cu:
+            st.markdown(f"**▲ Upgrades ({len(_ups)})**")
+            if not _ups:
+                st.caption("None this week.")
+            for a in _ups[:_ACT_CAP]:
+                st.markdown(_action_row(a, True), unsafe_allow_html=True)
+            if len(_ups) > _ACT_CAP:
+                with st.expander(f"+{len(_ups) - _ACT_CAP} more upgrades"):
+                    for a in _ups[_ACT_CAP:]:
+                        st.markdown(_action_row(a, True), unsafe_allow_html=True)
+        with _cd:
+            st.markdown(f"**▼ Downgrades ({len(_downs)})**")
+            if not _downs:
+                st.caption("None this week.")
+            for a in _downs[:_ACT_CAP]:
+                st.markdown(_action_row(a, False), unsafe_allow_html=True)
+            if len(_downs) > _ACT_CAP:
+                with st.expander(f"+{len(_downs) - _ACT_CAP} more downgrades"):
+                    for a in _downs[_ACT_CAP:]:
+                        st.markdown(_action_row(a, False), unsafe_allow_html=True)
 
     st.divider()
 
