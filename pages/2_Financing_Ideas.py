@@ -8,6 +8,10 @@ Company_Deep_Dive (?company=) and the bond tracker (?issuer=).
 To refresh the underlying research or add a company, regenerate the HTML
 via Claude ("refresh the financing ideas page" / "run a workup on X") and
 re-upload assets/debt_financing_ideas.html.
+
+The embedded HTML posts `streamlit:setFrameHeight` so the iframe grows to fit
+all cards (the old fixed 2600px frame + scroll-sentinel lazy-load stalled after
+~12 cards on Streamlit Cloud). `height` below is only the pre-resize fallback.
 """
 from pathlib import Path
 
@@ -41,6 +45,6 @@ if not _HTML_PATH.exists():
 
 components.html(
     _HTML_PATH.read_text(encoding="utf-8"),
-    height=2600,
+    height=2600,   # fallback only; iframe auto-resizes via setFrameHeight
     scrolling=True,
 )

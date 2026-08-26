@@ -467,7 +467,7 @@ Diffed <span style="font-family:monospace">data/ratings_current.csv</span> for g
   <h2 class="secTitle">Methodology</h2>
   <div class="meth">
     <p><b>Ranking = blended score (0–10)</b> = 40% near-term addressable need (refinanceable maturities next 12–24m + committed event/capex debt draw) + 25% structural size (gross debt & EBITDA scale) + 20% event probability (announced &amp; funded vs. speculative) + 15% market fit (rating band sweet-spot for spread product + demonstrated NCD appetite). Toggle above to re-rank purely by estimated opportunity size.</p>
-    <p style="margin-top:8px"><b>Size gate (widened Jul 2026):</b> a company qualifies with EBITDA ≥ ₹500 cr <i>or</i> revenue > ₹1,500 cr together with gross debt > ₹1,500 cr — the second path pulls in mid-market credits beyond the usual large-cap suspects. There is <b>no group-concentration screen</b>: multiple companies from the same conglomerate are ranked independently on their own merits. All qualifying ideas are kept — cards stream in as you scroll rather than being capped.</p>
+    <p style="margin-top:8px"><b>Size gate (widened Jul 2026):</b> a company qualifies with EBITDA ≥ ₹500 cr <i>or</i> revenue > ₹1,500 cr together with gross debt > ₹1,500 cr — the second path pulls in mid-market credits beyond the usual large-cap suspects. There is <b>no group-concentration screen</b>: multiple companies from the same conglomerate are ranked independently on their own merits. All qualifying ideas are kept and shown in full — nothing is capped.</p>
     <p style="margin-top:8px"><b>v3 rules (Jul 2026):</b> (1) <b>Thermal/coal screen</b> — companies whose business is coal/thermal power generation, coal mining or coal trading are excluded; their non-coal subsidiaries qualify in their own right (Tata Power is out, TPREL is in). Industrials using captive coal power as an input (steel, cement, aluminium) are tolerated — flag if you want this tightened. (2) <b>Deleveraging parents</b> — where the parent is deleveraging, the screen looks for capital-hungry verticals instead (Bharti → Nxtra). (3) <b>PE-backed borderline names</b> (Blackstone/Carlyle/KKR/ChrysCapital/Kedaara etc.) are included. (4) <b>SPV pools and restricted groups</b> are candidates in their own right where pool-level ratings clear A+. (5) <b>Systematic universe</b> — candidates are sourced from the CreditNexus ratings DB, deep-diving A+ names first and moving up the ladder (see screen queue below).</p>
     <h4>What was reviewed per company</h4>
     <p>Last 3 years of rating rationales (CRISIL / ICRA / CARE / Ind-Ra), FY24–FY26 results and earnings-call disclosures, recent NCD/bond issuance and refinancing actions, announced M&A and capex programmes, and press coverage through early July 2026. Capital-structure and lender-base entries are tagged <span class="flag">⚑ inferred</span> where they rest on typical disclosures rather than a document reviewed for this screen — verify these in the <a href="https://creditnexus.streamlit.app/Company_Deep_Dive" target="_blank" style="color:var(--indigo)">Company Deep Dive</a> before pitching.</p>
@@ -1375,8 +1375,7 @@ function togRag(btn){ const t = btn.dataset.r;
 }
 const esc = t => (t||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;");
 
-const BATCH = 6;
-let sortMode = "blend", activeTrigs = new Set(), q = "", visibleCount = BATCH;
+let sortMode = "blend", activeTrigs = new Set(), q = "";
 const openCards = new Set();
 
 function blended(s){ return (0.4*s.nt + 0.25*s.size + 0.2*s.event + 0.15*s.fit); }
@@ -1395,10 +1394,9 @@ function toggleCard(name){
   render(true);
 }
 function render(keepCount){
-  if(!keepCount) visibleCount = BATCH;
   const el = document.getElementById("cards");
   const rows = filteredRows();
-  const shown = rows.slice(0, visibleCount);
+  const shown = rows;
   el.innerHTML = rows.length ? shown.map((r,i)=>{
     const b = blended(r.scores);
     const rg = ragOf(r);
@@ -1411,7 +1409,7 @@ function render(keepCount){
           <div class="csub">${r.sector}</div>
           <div class="badges">
             <span class="badge b-rating">${r.rating}</span>
-            ${r.triggers.map(t=>`<span class="badge ${TRIG_LABEL[t][1]}">${TRIG_LABEL[t][0]}</span>`).join("")}${r.pe?`<span class="badge b-pe">PE-backed</span>`:``}
+            ${(r.triggers||[]).map(t=>`<span class="badge ${TRIG_LABEL[t][1]}">${TRIG_LABEL[t][0]}</span>`).join("")}${r.pe?`<span class="badge b-pe">PE-backed</span>`:``}
           </div>
           ${rg.note?`<div class="ragcmt">✎ ${esc(rg.note)}</div>`:``}
         </div>
@@ -1430,11 +1428,11 @@ function render(keepCount){
             <div class="sec"><h4>Key metrics</h4><dl class="kv">${Object.entries(r.kv).map(([k,v])=>`<dt>${k}</dt><dd>${v}</dd>`).join("")}</dl></div>
             <div class="sec"><h4>Capital structure</h4><p>${r.capstruct}</p></div>
             <div class="sec"><h4>Lender base</h4><p>${r.lenders}</p></div>
-            <div class="sec"><h4>Maturities & refi hooks</h4><ul>${r.maturities.map(m=>`<li>${m}</li>`).join("")}</ul></div>
+            <div class="sec"><h4>Maturities & refi hooks</h4><ul>${(r.maturities||[]).map(m=>`<li>${m}</li>`).join("")}</ul></div>
           </div>
           <div>
-            <div class="sec"><h4>Recent financing history</h4><ul>${r.finhist.map(m=>`<li>${m}</li>`).join("")}</ul></div>
-            <div class="sec"><h4>Rating rationale evolution</h4><div class="timeline">${r.ratingevo.map(m=>`<div class="t">${m.replace(/^([^:]+):/,"<b>$1:</b>")}</div>`).join("")}</div></div>
+            <div class="sec"><h4>Recent financing history</h4><ul>${(r.finhist||[]).map(m=>`<li>${m}</li>`).join("")}</ul></div>
+            <div class="sec"><h4>Rating rationale evolution</h4><div class="timeline">${(r.ratingevo||[]).map(m=>`<div class="t">${m.replace(/^([^:]+):/,"<b>$1:</b>")}</div>`).join("")}</div></div>
             <div class="sec"><h4>Covenant summary</h4><p>${r.covenants}</p></div>
             <div class="sec"><h4>Acquisition history</h4><p>${r.acquisitions}</p></div>
           </div>
@@ -1449,7 +1447,7 @@ function render(keepCount){
           <textarea placeholder="Add a comment with this assessment…" onchange="setRagNote(&quot;${nm}&quot;,this.value)">${esc(rg.note)}</textarea>
           <div class="raghint">Click a colour again to clear it. Assessments &amp; comments save in this browser; page-level defaults (e.g. Adani group = red) are baked into the data.</div>
         </div>
-        <div class="sec"><h4>Sources</h4><p class="srcs">${r.srcs.map(s=>`<a href="${s[1]}" target="_blank">${s[0]}</a>`).join(" · ")}</p></div>
+        <div class="sec"><h4>Sources</h4><p class="srcs">${(r.srcs||[]).map(s=>`<a href="${s[1]}" target="_blank">${s[0]}</a>`).join(" · ")}</p></div>
         <div class="deeplinks">
           <a href="https://creditnexus.streamlit.app/Company_Deep_Dive?company=${encodeURIComponent(r.q||r.name.split('(')[0].trim())}" target="_blank">↗ Ratings Deep Dive</a>
           <a href="https://creditnexus-bonds.streamlit.app/?issuer=${encodeURIComponent(r.q||r.name.split('(')[0].trim())}" target="_blank">↗ Bonds maturing</a>
@@ -1457,21 +1455,8 @@ function render(keepCount){
       </div>
     </div>`;
   }).join("") : `<div class="empty">No candidates match the current filters.</div>`;
-  // lazy-load sentinel: more cards stream in as you scroll
-  const more = rows.length - shown.length;
-  if(more > 0){
-    el.insertAdjacentHTML("beforeend",
-      `<div id="sentinel" class="empty" style="padding:18px">Loading ${Math.min(BATCH,more)} more of ${more} remaining…</div>`);
-    sentinelObs.observe(document.getElementById("sentinel"));
-  }
+  reportHeight();
 }
-const sentinelObs = new IntersectionObserver(entries=>{
-  if(entries.some(e=>e.isIntersecting)){
-    sentinelObs.disconnect();
-    visibleCount += BATCH;
-    render(true);
-  }
-},{rootMargin:"600px"});
 function setSort(m){ sortMode=m;
   document.getElementById("sortBlend").classList.toggle("on",m==="blend");
   document.getElementById("sortSize").classList.toggle("on",m==="size");
@@ -1486,6 +1471,21 @@ document.getElementById("q").addEventListener("input",e=>{ q=e.target.value.toLo
 
 document.getElementById("watch").innerHTML = WATCH.map(w=>`<div class="wl"><b>${w.n}</b> <span class="badge b-watch">watch</span><p>${w.w}</p></div>`).join("");
 render();
+
+// --- Auto-size the Streamlit component iframe to the content height ---
+// (fixed-height iframe + IntersectionObserver never fired on Cloud: the sentinel
+//  sat below the parent's visible rect, so cards stalled after two batches)
+function reportHeight(){
+  try{
+    const b = document.body.getBoundingClientRect();
+    const h = Math.ceil(b.bottom + window.scrollY + (parseFloat(getComputedStyle(document.body).marginBottom)||0)) + 24;
+    window.parent.postMessage({isStreamlitMessage:true, type:"streamlit:setFrameHeight", height:h}, "*");
+  }catch(e){}
+}
+try{ window.parent.postMessage({isStreamlitMessage:true, type:"streamlit:componentReady", apiVersion:1}, "*"); }catch(e){}
+new ResizeObserver(()=>reportHeight()).observe(document.body);
+window.addEventListener("load", reportHeight);
+setTimeout(reportHeight, 300);
 </script>
 </body>
 </html>
