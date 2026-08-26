@@ -1473,16 +1473,19 @@ document.getElementById("watch").innerHTML = WATCH.map(w=>`<div class="wl"><b>${
 render();
 
 // --- Auto-size the Streamlit component iframe to the content height ---
-// (fixed-height iframe + IntersectionObserver never fired on Cloud: the sentinel
-//  sat below the parent's visible rect, so cards stalled after two batches)
+// components.html renders a plain srcdoc iframe (sandbox allows same-origin), so
+// the page can resize its own frame via window.frameElement. The old fixed
+// 2600px frame + IntersectionObserver never fired on Cloud (sentinel sat below
+// the parent's visible rect) so cards stalled after two batches.
 function reportHeight(){
   try{
     const b = document.body.getBoundingClientRect();
     const h = Math.ceil(b.bottom + window.scrollY + (parseFloat(getComputedStyle(document.body).marginBottom)||0)) + 24;
+    const fe = window.frameElement;
+    if(fe){ fe.style.height = h + "px"; fe.setAttribute("scrolling","no"); }
     window.parent.postMessage({isStreamlitMessage:true, type:"streamlit:setFrameHeight", height:h}, "*");
   }catch(e){}
 }
-try{ window.parent.postMessage({isStreamlitMessage:true, type:"streamlit:componentReady", apiVersion:1}, "*"); }catch(e){}
 new ResizeObserver(()=>reportHeight()).observe(document.body);
 window.addEventListener("load", reportHeight);
 setTimeout(reportHeight, 300);
