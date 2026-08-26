@@ -462,16 +462,26 @@ def _is_valid_sector(s: str) -> bool:
 
 
 def _sector_checkbox_panel(available_sectors: list) -> list:
+    from database.queries import UNCLASSIFIED_SECTOR
     available_sectors = [s for s in available_sectors if _is_valid_sector(s)]
     grouped: dict[str, list] = {"Corporate": [], "Infrastructure": [],
                                 "Financial Institutions": []}
     for s in available_sectors:
         grouped[_group_of(s)].append(s)
 
+    # Most rating rows carry no sector (the CRISIL suggest feed and several
+    # other sources don't provide one), so the majority of companies are
+    # unclassified. The pseudo-sector checkbox below keeps them visible by
+    # default — without it, the default "all sectors ticked" state generated
+    # a `sector IN (...)` filter that silently hid every NULL-sector company
+    # (e.g. Britannia Industries).
+    _unc_key = f"chk_{UNCLASSIFIED_SECTOR}"
     for s in available_sectors:
         wkey = f"chk_{s}"
         if wkey not in st.session_state:
             st.session_state[wkey] = True
+    if _unc_key not in st.session_state:
+        st.session_state[_unc_key] = True
 
     st.markdown("**Sectors**")
 
@@ -479,15 +489,18 @@ def _sector_checkbox_panel(available_sectors: list) -> list:
     if qc1.button("All",  key="sec_all",  use_container_width=True):
         for s in available_sectors:
             st.session_state[f"chk_{s}"] = True
+        st.session_state[_unc_key] = True
         st.rerun()
     if qc2.button("None", key="sec_none", use_container_width=True):
         for s in available_sectors:
             st.session_state[f"chk_{s}"] = False
+        st.session_state[_unc_key] = False
         st.rerun()
     if qc3.button("Corp", key="sec_corp", use_container_width=True,
-                  help="Corporate sectors only"):
+                  help="Corporate sectors only (drops unclassified companies)"):
         for s in available_sectors:
             st.session_state[f"chk_{s}"] = (_group_of(s) == "Corporate")
+        st.session_state[_unc_key] = False
         st.rerun()
 
     selected = []
@@ -512,6 +525,14 @@ def _sector_checkbox_panel(available_sectors: list) -> list:
                 if checked:
                     selected.append(sector)
 
+    if st.checkbox(
+        "Unclassified (no sector)",
+        key=_unc_key,
+        help="Companies whose ratings carry no sector — the majority of the "
+             "DB, e.g. most CRISIL-only names like Britannia Industries.",
+    ):
+        selected.append(UNCLASSIFIED_SECTOR)
+
     return selected
 
 
@@ -522,9 +543,9 @@ def _sector_checkbox_panel(available_sectors: list) -> list:
 # ------------------------------------------------------------------ #
 _CSS = """
 <style>
-/* ═══════════════════════════════════════════════
+/* ═══════════════════════════════════════════
    Snazzy Indigo design system — DM Sans · Indigo · Frosted Glass
-   ═══════════════════════════════════════════════ */
+   ═══════════════════════════════════════════ */
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap');
 
 /* ── Design tokens ── */
@@ -1554,7 +1575,7 @@ def main():
             if _url_col in display_df.columns:
                 display_df[_url_col] = display_df[_url_col].fillna("")
 
-        # ── ICRA pre-processing ────────────────────────────────────────────────────
+        # ── ICRA pre-processing ────────────────────────────────────────────────────────────────────────
         # ICRA stores combined "LT_RATING, ST_RATING" in rating_symbol.
         # Extract only the long-term portion and parse its embedded outlook.
         #   "[ICRA]AAA (Stable), --"       -> AAA / Stable
@@ -1584,7 +1605,7 @@ def main():
             display_df['ICRA Rating']  = _icra_lt.apply(lambda x: x[0])
             display_df['ICRA Outlook'] = _icra_lt.apply(lambda x: x[1])
 
-        # ── Rating link formatting (all 4 agencies) ────────────────────────────────
+        # ── Rating link formatting (all 4 agencies) ──────────────────────────────────────────────
         # Builds "url##AAA / Stable" for rated companies, "" for not-rated.
         # LinkColumn display_text=r"##(.+)$" shows the rating text as a hyperlink.
         _PREFIX_RE = {
@@ -1616,7 +1637,7 @@ def main():
                     return display  # rated but no URL -> plain text (rare)
                 display_df[_ag] = display_df.apply(_fmt_link_rating, axis=1)
 
-        # ── Rating badge legend ──────────────────────────────────────────
+        # ── Rating badge legend ────────────────────────────────
         st.markdown(
             """
             <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;
