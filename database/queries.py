@@ -9,6 +9,9 @@ from typing import List, Optional
 
 import pandas as pd
 
+# UI pseudo-sector: selects companies whose ratings carry no sector value.
+UNCLASSIFIED_SECTOR = "(Unclassified)"
+
 
 def get_filtered_companies(
     conn: sqlite3.Connection,
@@ -195,11 +198,22 @@ def get_filtered_companies(
         )
         params.extend(outlooks * 4)
 
-    # Sector filter
+    # Sector filter. "(Unclassified)" is a UI pseudo-sector meaning
+    # "companies with no sector at all" — a large share of the DB (the CRISIL
+    # suggest feed and several other sources carry no sector), so a plain
+    # IN (...) filter would silently hide them (e.g. Britannia Industries).
     if sectors:
-        ph = ", ".join("?" for _ in sectors)
-        where_conditions.append(f"ap.sector IN ({ph})")
-        params.extend(sectors)
+        include_null = UNCLASSIFIED_SECTOR in sectors
+        named = [s for s in sectors if s != UNCLASSIFIED_SECTOR]
+        sector_conds = []
+        if named:
+            ph = ", ".join("?" for _ in named)
+            sector_conds.append(f"ap.sector IN ({ph})")
+            params.extend(named)
+        if include_null:
+            sector_conds.append("ap.sector IS NULL OR ap.sector = ''")
+        if sector_conds:
+            where_conditions.append("(" + " OR ".join(sector_conds) + ")")
 
     # Listed / unlisted
     if listed_only:
