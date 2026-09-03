@@ -1,0 +1,4 @@
+v6.6 - news-refresh (scan window 15-31 Aug, rebased on the 1-Sep v6.5 pass): 25 card updates, no promotions/demotions; ABReL US$1.6bn MUFG Sprng acquisition TL; Blackstone up-to-25% KRT OFS; Jio Platforms IPO SEBI observations; IndiGrid 1,100cr @7.44% + Mindspace 500cr @7.63% NCDs; Vedanta VAML 13,500cr TL refi + Ind-Ra AA+, third 2026 NCD lined up; TPREL/Maple ICRA reaffirmations applied; AESL 4,700cr Satara win; BKT 550cr + Apollo Tyres 500cr NCDs; IRB InvIT drop-down; Suzlon AP 10,500cr; Gabriel India to watch; finhist back-filled on 6 cards
+
+Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01U3H7HfbGBg8TDUCjwqTpDt
