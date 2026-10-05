@@ -14,15 +14,23 @@ file): exact match on an aggressive normalization (legal suffixes, '&'→and,
 (numerals, roman numerals, number words, short initials) on both sides — this
 blocks sibling-SPV mismatches like "Project 2" → "Project 1" or "SPR" → "S R".
 
+2026-10-05 overhaul: also writes data/missing_issuers.csv — every ACTIVE NSDL
+bond issuer with no ratings-DB match, sorted by number of live ISINs. This is
+the ground-truth "should be in the ratings portal but isn't" list; the audit
+(data/AUDIT.md) summarizes it each run. The file is git-staged here so the
+workflow's existing commit step publishes it.
+
 Usage (from the ratings-tool repo root):
     python build_isin_map.py                    # fetch NSDL live, write map
     python build_isin_map.py path/to/nsdl.xlsx  # use a local NSDL export
 On any fetch/parse failure the existing map is left untouched.
 """
 import collections
+import csv
 import io
 import re
 import sqlite3
+import subprocess
 import sys
 import time
 import warnings
@@ -42,6 +50,7 @@ except ImportError:
 ROOT = Path(__file__).resolve().parent
 DB = ROOT / "data" / "ratings.db"
 OUT = ROOT / "data" / "issuer_prefix_map.csv"
+MISSING_OUT = ROOT / "data" / "missing_issuers.csv"
 MIN_MAPPED = 1000   # refuse to overwrite the map with a suspiciously small one
 
 NSDL_API = ("https://www.indiabondinfo.nsdl.com/bds-service/v1/public/bdsinfo"
@@ -99,6 +108,16 @@ def fetch_nsdl(local_path: str | None) -> bytes:
     return r.content
 
 
+def _git_stage(*paths):
+    """Stage outputs so the workflow's commit step publishes them.
+    Never commits or pushes; no-op outside a git checkout."""
+    try:
+        subprocess.run(["git", "-C", str(ROOT), "add", *[str(p) for p in paths]],
+                       capture_output=True, text=True, timeout=30)
+    except Exception:
+        pass
+
+
 def main() -> int:
     if not DB.exists():
         sys.exit(f"ERROR: {DB} not found — run from the ratings-tool repo root.")
@@ -124,6 +143,7 @@ def main() -> int:
 
     today = date.today()
     issuer_prefixes = collections.defaultdict(set)
+    issuer_isin_count = collections.Counter()
     for r in rows[1:]:
         if not r or not r[1]:
             continue
@@ -133,6 +153,7 @@ def main() -> int:
         nm, isin = r[hdr["Name of Issuer"]], str(r[hdr["ISIN"]]).strip()
         if nm and len(isin) == 12 and isin.startswith("IN"):
             issuer_prefixes[str(nm).strip()].add(isin[:7])
+            issuer_isin_count[str(nm).strip()] += 1
     print(f"NSDL: {len(issuer_prefixes)} active issuers")
 
     conn = sqlite3.connect(str(DB))
@@ -178,6 +199,24 @@ def main() -> int:
             fuzzy_ct += 1
 
     print(f"matched: {len(matches)} issuers ({fuzzy_ct} via strict fuzzy)")
+
+    # ---- missing-issuer list (2026-10-05): active NSDL issuers with NO match -
+    # the ground truth for "should be in the ratings portal but isn't".
+    still_missing = sorted(
+        (n for n in issuer_prefixes if n not in matches),
+        key=lambda n: -issuer_isin_count[n])
+    try:
+        with open(MISSING_OUT, "w", newline="", encoding="utf-8") as f:
+            w = csv.writer(f)
+            w.writerow(["nsdl_issuer", "active_isins", "isin_prefixes"])
+            for n in still_missing:
+                w.writerow([n, issuer_isin_count[n],
+                            "|".join(sorted(issuer_prefixes[n]))])
+        print(f"wrote {MISSING_OUT}: {len(still_missing)} unmatched active issuers")
+        _git_stage(MISSING_OUT)
+    except Exception as exc:
+        print(f"missing-issuer list failed (non-fatal): {exc}", file=sys.stderr)
+
     if len(matches) < MIN_MAPPED:
         print(f"ABORT: only {len(matches)} matches (<{MIN_MAPPED}) — keeping existing map.",
               file=sys.stderr)

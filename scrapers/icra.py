@@ -21,6 +21,7 @@ from tqdm import tqdm
 
 from database.models import get_connection, init_db, upsert_company, insert_rating, insert_financial
 from parsers.rating import normalize_rating
+from parsers.dates import to_iso
 from parsers.pdf import extract_financials
 
 logger = logging.getLogger(__name__)
@@ -150,6 +151,12 @@ def _parse_record(record: dict) -> dict:
 
     normalized = normalize_rating(str(raw_rating))
 
+    # 2026-10-05: normalize to ISO (sources emit ISO datetimes, /Date(...)/
+    # and dd-MMM-yyyy variants) so text ordering is chronological.
+    rating_date_str = str(rating_date).strip() if rating_date else None
+    if rating_date_str:
+        rating_date_str = to_iso(rating_date_str) or rating_date_str
+
     return {
         "company_name": str(company_name).strip(),
         "raw_rating": str(raw_rating).strip(),
@@ -159,7 +166,7 @@ def _parse_record(record: dict) -> dict:
         "sector": str(sector).strip(),
         "sub_sector": str(sub_sector).strip(),
         "instrument": str(instrument).strip(),
-        "rating_date": str(rating_date).strip() if rating_date else None,
+        "rating_date": rating_date_str,
         "rationale_id": str(rationale_id).strip() if rationale_id else None,
         "company_id_icra": str(company_id_icra).strip() if company_id_icra else None,
         "rated_amount_cr": rated_amount,

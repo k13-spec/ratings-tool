@@ -11,6 +11,15 @@ Other:
     python run_scraper.py --crisil        # CRISIL ratings
     python run_scraper.py --all           # ICRA + CRISIL + BSE (steps 1+2 only)
     python run_scraper.py --icra --limit 50
+
+2026-10-05 data overhaul — the fortnightly workflow's existing flags now also
+run the coverage/staleness passes that used to exist but never ran in CI
+(the workflow file itself can't be edited from the maintenance session):
+    --icra       additionally runs a bounded ICRA discover slice
+                 (search-API universe diff -> detail pages, checkpointed)
+    --care-edge  additionally runs run_refresh (re-verify stale CARE ratings,
+                 oldest first) and a rotating run_discover slice
+Standalone: --care-refresh re-verifies stale CARE Edge ratings on demand.
 """
 
 import argparse
@@ -29,6 +38,13 @@ if str(PROJECT_ROOT) not in sys.path:
 # Create data directory
 (PROJECT_ROOT / "data").mkdir(parents=True, exist_ok=True)
 
+# Bounded side-pass sizes for the fortnightly CI run (kept modest so the
+# whole job stays well inside the workflow's 350-minute timeout; the
+# checkpoints/rotation make successive runs converge on full coverage).
+ICRA_DISCOVER_SLICE = 300     # missing-company detail pages per run
+CARE_REFRESH_SLICE = 400      # stale CARE Edge companies re-verified per run
+CARE_DISCOVER_SLICE = 40      # rotating aa..zz prefixes per run
+
 # ------------------------------------------------------------------ #
 # Logging setup                                                        #
 # ------------------------------------------------------------------ #
@@ -44,6 +60,16 @@ logging.basicConfig(
 logger = logging.getLogger("run_scraper")
 
 
+def _git_stage(*rel_paths):
+    """Stage checkpoint files so the workflow's commit step publishes them.
+    Never commits or pushes; silently a no-op outside a git checkout."""
+    try:
+        subprocess.run(["git", "-C", str(PROJECT_ROOT), "add", *rel_paths],
+                       capture_output=True, text=True, timeout=30)
+    except Exception:
+        pass
+
+
 # ------------------------------------------------------------------ #
 # CLI argument parsing                                                 #
 # ------------------------------------------------------------------ #
@@ -54,7 +80,7 @@ def build_parser() -> argparse.ArgumentParser:
         epilog=__doc__,
     )
     parser.add_argument(
-        "--icra", action="store_true", help="Run ICRA scraper"
+        "--icra", action="store_true", help="Run ICRA scraper (+ bounded discover slice)"
     )
     parser.add_argument(
         "--crisil", action="store_true", help="Run CRISIL scraper"
@@ -91,7 +117,12 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--care-edge", action="store_true",
-        help="Search CareEdge for each DB company without a CARE Edge rating; extract rating + brief financials from PR PDF"
+        help="Search CareEdge for each DB company without a CARE Edge rating; "
+             "also re-verifies stale CARE ratings and runs a rotating discover slice"
+    )
+    parser.add_argument(
+        "--care-refresh", action="store_true",
+        help="Re-verify stale (>6m or undated) CARE Edge ratings against the live site, oldest first"
     )
     parser.add_argument(
         "--care-edge-financials", action="store_true",
@@ -99,11 +130,11 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--care-edge-discover", action="store_true",
-        help="Alphabetical prefix search on CareEdge to discover and add net-new companies (aa..zz)"
+        help="Alphabetical prefix search on CareEdge to discover and add net-new companies (rotates aa..zz across runs)"
     )
     parser.add_argument(
         "--india-ratings", action="store_true",
-        help="Enumerate India Ratings issuer IDs (1-15000) and upsert companies + ratings"
+        help="Enumerate India Ratings issuer IDs and upsert companies + ratings"
     )
     parser.add_argument(
         "--india-ratings-reset", action="store_true",
@@ -152,6 +183,21 @@ def run_icra(limit=None) -> dict:
     result = run(limit=limit)
     elapsed = time.time() - t0
     logger.info("ICRA done in %.1fs: %s", elapsed, ", ".join(f"{k}={v}" for k, v in result.items()))
+    return result
+
+
+def run_icra_discover_slice(limit=ICRA_DISCOVER_SLICE) -> dict:
+    """Bounded ICRA discover pass appended to the fortnightly --icra step."""
+    logger.info("=" * 60)
+    logger.info("Starting ICRA discover slice (limit=%d)", limit)
+    logger.info("=" * 60)
+    from scrapers.icra import run_id_scan
+    t0 = time.time()
+    result = run_id_scan(limit=limit)
+    elapsed = time.time() - t0
+    _git_stage("data/icra_discover_checkpoint.txt")
+    logger.info("ICRA discover slice done in %.1fs: %s", elapsed,
+                ", ".join(f"{k}={v}" for k, v in result.items()))
     return result
 
 
@@ -232,6 +278,19 @@ def run_care_edge(limit=None) -> dict:
     result = run(limit=limit)
     elapsed = time.time() - t0
     logger.info("CareEdge done in %.1fs: %s", elapsed, ", ".join(f"{k}={v}" for k, v in result.items()))
+    return result
+
+
+def run_care_edge_refresh(limit=CARE_REFRESH_SLICE) -> dict:
+    logger.info("=" * 60)
+    logger.info("Starting CareEdge stale-rating refresh (limit=%s)", limit)
+    logger.info("=" * 60)
+    from scrapers.care_edge import run_refresh
+    t0 = time.time()
+    result = run_refresh(limit=limit)
+    elapsed = time.time() - t0
+    logger.info("CareEdge refresh done in %.1fs: %s", elapsed,
+                ", ".join(f"{k}={v}" for k, v in result.items()))
     return result
 
 
@@ -343,6 +402,7 @@ def main():
 
     # Require at least one action
     care_edge = getattr(args, "care_edge", False)
+    care_refresh = getattr(args, "care_refresh", False)
     care_edge_financials = getattr(args, "care_edge_financials", False)
     care_edge_discover = getattr(args, "care_edge_discover", False)
     india_ratings = getattr(args, "india_ratings", False)
@@ -353,7 +413,7 @@ def main():
     force = getattr(args, 'force', False)
     if not any([args.icra, args.crisil, args.bse, args.nse, args.icra_pdfs,
                 args.crisil_index, args.crisil_financials, args.all,
-                care_edge, care_edge_financials, care_edge_discover,
+                care_edge, care_refresh, care_edge_financials, care_edge_discover,
                 india_ratings, india_ratings_reset, icra_discover, icra_fix_source_ids,
                 rationale_nd_ebitda]):
         parser.print_help()
@@ -366,6 +426,14 @@ def main():
     try:
         if args.icra or args.all:
             all_results["ICRA"] = run_icra(limit=args.limit)
+            # 2026-10-05: coverage side-pass — companies in ICRA's search-API
+            # universe that the paginated listing never surfaces. Bounded and
+            # checkpointed; never fails the ICRA step.
+            if not args.limit:          # skip during small test runs
+                try:
+                    all_results["ICRA-Discover-Slice"] = run_icra_discover_slice()
+                except Exception as exc:
+                    logger.error("ICRA discover slice failed (non-fatal): %s", exc)
 
         if args.crisil or args.all:
             all_results["CRISIL"] = run_crisil(limit=args.limit, dry_run=args.dry_run)
@@ -390,6 +458,7 @@ def main():
             t0 = time.time()
             result = run_id_scan(limit=args.limit)
             elapsed = time.time() - t0
+            _git_stage("data/icra_discover_checkpoint.txt")
             logger.info("ICRA discover done in %.1fs: %s", elapsed, ", ".join(f"{k}={v}" for k, v in result.items()))
             all_results["ICRA-Discover"] = result
 
@@ -401,6 +470,21 @@ def main():
 
         if care_edge:
             all_results["CareEdge"] = run_care_edge(limit=args.limit)
+            # 2026-10-05: staleness + coverage side-passes. run() above only
+            # ADDS ratings to companies that have none — these keep the
+            # existing CARE book current and grow the net-new universe.
+            try:
+                all_results["CareEdge-Refresh"] = run_care_edge_refresh()
+            except Exception as exc:
+                logger.error("CareEdge refresh failed (non-fatal): %s", exc)
+            try:
+                all_results["CareEdge-Discover-Slice"] = run_care_edge_discover(
+                    limit=CARE_DISCOVER_SLICE)
+            except Exception as exc:
+                logger.error("CareEdge discover slice failed (non-fatal): %s", exc)
+
+        if care_refresh:
+            all_results["CareEdge-Refresh"] = run_care_edge_refresh(limit=args.limit)
 
         if care_edge_financials:
             all_results["CareEdge-Financials"] = run_care_edge_financials(limit=args.limit)
