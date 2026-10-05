@@ -21,6 +21,7 @@ import requests
 
 from database.models import get_connection, init_db, upsert_company, insert_rating
 from parsers.rating import normalize_rating
+from parsers.dates import to_iso
 
 logger = logging.getLogger(__name__)
 
@@ -272,11 +273,12 @@ def _parse_record(value: str) -> Optional[dict]:
         if not outlook and len(parts) > 1:
             outlook = parts[1].strip().capitalize()
 
-    # Extract date
+    # Extract date — normalized to ISO (2026-10-05) so the "latest per
+    # (company, agency)" text ordering in the app/export is chronological.
     rating_date = None
     m = _DATE_RE.search(action_text)
     if m:
-        rating_date = m.group(1)
+        rating_date = to_iso(m.group(1)) or m.group(1)
 
     # Rough sector from company name / action text
     sector = ""
@@ -379,6 +381,8 @@ def run(limit: Optional[int] = None, dry_run: bool = False) -> dict:
             # ordering then picks up). Without this, every full re-run of the
             # suggest dump inserted ~38k duplicate rows.
             # Must stay in sync with the backfill formula in db_maintenance.py.
+            # 2026-10-05: hashes the ISO-normalized date; db_maintenance
+            # re-hashes legacy rows the same way so unchanged ratings dedupe.
             _sid = "h" + hashlib.sha1(
                 f"{parsed['raw_rating']}|{parsed['outlook'] or ''}|"
                 f"{parsed['rating_date'] or ''}".encode()
