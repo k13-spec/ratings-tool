@@ -20,13 +20,16 @@ from tqdm import tqdm
 
 from database.models import get_connection, init_db, upsert_company, insert_rating
 from parsers.rating import normalize_rating
+from parsers.dates import to_iso
 
 logger = logging.getLogger(__name__)
 
 AGENCY         = "India Ratings"
 BASE_URL       = "https://www.indiaratings.co.in"
 API_BASE       = f"{BASE_URL}/home"
-MAX_ISSUER_ID  = 15000
+# 2026-10-05: raised 15000 -> 18000; the audit tracks the highest live ID and
+# flags "ceiling pressure" when new issuers approach the scan ceiling.
+MAX_ISSUER_ID  = 18000
 CHECKPOINT     = Path(__file__).parent.parent / "data" / "india_ratings_checkpoint.txt"
 
 HEADERS = {
@@ -147,6 +150,9 @@ def run(conn=None, limit: int = None, reset: bool = False) -> dict:
             sector      = issuer.get("sector")    or None
             sub_sector  = issuer.get("subSector") or None
             eff_date    = issuer.get("effectiveDate") or None
+            # 2026-10-05: normalize to ISO so "latest per agency" text
+            # ordering is chronological across all agencies' rows.
+            eff_date    = to_iso(eff_date) or eff_date
 
             company_id = upsert_company(conn, name)
             stats["companies_upserted"] += 1

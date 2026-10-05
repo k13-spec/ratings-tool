@@ -4,10 +4,18 @@ Post-scrape maintenance + export for ratings-tool. Idempotent — safe to run
 after every scraper pass (the fortnightly ratings-refresh workflow does).
 
 Steps:
-  0. Backfill content-hash source_id on legacy CRISIL / India Ratings rows
-     (same formulas as scrapers/crisil.py and scrapers/india_ratings.py),
-     then remove exact-duplicate rating rows sharing (company, agency,
-     source_id) — keeps the newest.
+  0a. Normalize every ratings.rating_date to ISO YYYY-MM-DD (2026-10-05
+      overhaul). The app and the export both pick the "latest" rating per
+      (company, agency) by ORDER BY rating_date DESC on a TEXT column, i.e.
+      lexicographically — with the old mixed formats ("September 25, 2024",
+      "12-Jan-24", ISO, ASP.NET /Date(...)/) a stale row could sort above a
+      fresh one, which is exactly how the portal ended up showing dated
+      ratings for names that HAD newer rows. ISO text sorts chronologically.
+  0.  Backfill content-hash source_id on legacy CRISIL / India Ratings rows
+      (same formulas as scrapers/crisil.py and scrapers/india_ratings.py),
+      re-hash CRISIL rows whose hash was built from a pre-normalization date
+      string, then remove exact-duplicate rating rows sharing (company,
+      agency, source_id) — keeps the newest.
   1. Realign rating_grade to the symbol map wherever they disagree
      (recurring CRISIL D/C artifact, agencies lagging symbol updates).
   2. NULL the outlook='Crisil' regex artifact.
@@ -19,13 +27,17 @@ Steps:
      with the ICRA LT and CARE Edge LT preferences). NOTE: the previous
      export preferred the BEST-EVER grade per company/agency, which
      under-reported downgrades once re-scraping began.
+  5. Audit (audit_ratings.py): staleness buckets, withdrawn/INC-as-current,
+     coverage gaps -> data/audit_report.json + data/AUDIT.md (git-staged so
+     the workflow's commit step publishes them). Failures never break the run.
 
 Safety: refuses to write the CSV if the export shrinks below MIN_ROWS or by
 more than 20% vs the existing file.
 
 Usage (from the ratings-tool repo root):
-    python db_maintenance.py            # apply + export
+    python db_maintenance.py            # apply + export + audit
     python db_maintenance.py --dry-run  # report only, write nothing
+    python db_maintenance.py --no-audit # skip the audit step
 """
 import csv
 import hashlib
@@ -33,8 +45,13 @@ import os
 import re
 import sqlite3
 import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from parsers.dates import to_iso  # noqa: E402
 
 DRY = "--dry-run" in sys.argv
+NO_AUDIT = "--no-audit" in sys.argv
 DB = os.path.join("data", "ratings.db")
 CSV_OUT = os.path.join("data", "ratings_current.csv")
 MIN_ROWS = 20000
@@ -78,6 +95,31 @@ FROM ranked WHERE rn = 1 ORDER BY company_name, agency
 """
 
 
+def step0a_normalize_dates(cur):
+    print("=" * 62)
+    print("STEP 0a — normalize rating_date to ISO (date normalize)")
+    print("=" * 62)
+    rows = cur.execute(
+        "SELECT id, rating_date FROM ratings "
+        "WHERE rating_date IS NOT NULL AND rating_date != ''").fetchall()
+    fixes, already_iso, unparseable = [], 0, 0
+    iso_re = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+    for rid, raw in rows:
+        raw_s = str(raw)
+        if iso_re.match(raw_s):
+            already_iso += 1
+            continue
+        iso = to_iso(raw_s)
+        if iso:
+            fixes.append((iso, rid))
+        else:
+            unparseable += 1
+    print(f"  dated rows: {len(rows)} | already ISO: {already_iso} | "
+          f"date normalize fixes: {len(fixes)} | unparseable (left as-is): {unparseable}")
+    if not DRY and fixes:
+        cur.executemany("UPDATE ratings SET rating_date=? WHERE id=?", fixes)
+
+
 def step0_backfill_source_ids(cur):
     print("=" * 62)
     print("STEP 0 — backfill content-hash source_id (CRISIL / India Ratings)")
@@ -86,10 +128,30 @@ def step0_backfill_source_ids(cur):
     rows = cur.execute(
         "SELECT id, rating_symbol, outlook, rating_date FROM ratings "
         "WHERE agency='CRISIL' AND (source_id IS NULL OR source_id='')").fetchall()
-    cr = [( "h" + hashlib.sha1(
+    cr = [("h" + hashlib.sha1(
             f"{r[1] or ''}|{r[2] or ''}|{r[3] or ''}".encode()).hexdigest()[:12], r[0])
           for r in rows]
     print(f"  CRISIL rows to backfill: {len(cr)}")
+    if not DRY:
+        cur.executemany("UPDATE ratings SET source_id=? WHERE id=?", cr)
+
+    # Re-hash CRISIL content-hash rows after date normalization (2026-10-05):
+    # legacy hashes were built from the RAW date string ("12-Jan-24"), fresh
+    # scrapes hash the ISO date — without re-hashing, every re-scrape of an
+    # unchanged rating would insert a duplicate row instead of deduping.
+    rows = cur.execute(
+        "SELECT id, rating_symbol, outlook, rating_date, source_id FROM ratings "
+        "WHERE agency='CRISIL' AND source_id LIKE 'h%'").fetchall()
+    rehash = []
+    for rid, sym, outlook, rdate, sid in rows:
+        want = "h" + hashlib.sha1(
+            f"{sym or ''}|{outlook or ''}|{rdate or ''}".encode()).hexdigest()[:12]
+        if want != sid:
+            rehash.append((want, rid))
+    print(f"  CRISIL rows to re-hash post date-normalization: {len(rehash)}")
+    if not DRY and rehash:
+        cur.executemany("UPDATE ratings SET source_id=? WHERE id=?", rehash)
+
     # India Ratings rows with the legacy positional id ("123_0")
     rows = cur.execute(
         "SELECT id, instrument_name, rating_symbol, outlook, rationale_url, source_id "
@@ -103,8 +165,8 @@ def step0_backfill_source_ids(cur):
         h = hashlib.sha1(f"{instr or ''}|{sym or ''}|{outlook or ''}".encode()).hexdigest()[:10]
         ir.append((f"{issuer_id}_h{h}", rid))
     print(f"  India Ratings rows to backfill: {len(ir)}")
-    if not DRY:
-        cur.executemany("UPDATE ratings SET source_id=? WHERE id=?", cr + ir)
+    if not DRY and ir:
+        cur.executemany("UPDATE ratings SET source_id=? WHERE id=?", ir)
 
     # CRISIL noise rows: the suggest feed is a rolling ACTIONS feed and some
     # entries carry no parseable rating at all — such rows hold no information
@@ -242,11 +304,23 @@ def step4_export(cur):
     return True
 
 
+def step5_audit():
+    print("=" * 62)
+    print("STEP 5 — audit (staleness / hygiene / coverage)")
+    print("=" * 62)
+    try:
+        from audit_ratings import run_audit
+        run_audit(network=True)
+    except Exception as exc:                      # audit must never break the run
+        print(f"  audit failed (non-fatal): {exc}", file=sys.stderr)
+
+
 def main() -> int:
     if not os.path.exists(DB):
         sys.exit(f"ERROR: {DB} not found — run from the ratings-tool repo root.")
     conn = sqlite3.connect(DB)
     cur = conn.cursor()
+    step0a_normalize_dates(cur)
     step0_backfill_source_ids(cur)
     step1_realign_grades(cur)
     step2_outlook_artifact(cur)
@@ -257,6 +331,8 @@ def main() -> int:
     if not DRY:
         cur.execute("PRAGMA wal_checkpoint(TRUNCATE)")
     conn.close()
+    if not DRY and not NO_AUDIT:
+        step5_audit()
     print("\nDONE." if ok else "\nDONE (export skipped — see ABORT above).")
     return 0 if ok else 1
 
