@@ -1,13 +1,20 @@
 """
 CareEdge (CARE Ratings) scraper.
 
-Three modes:
+Four modes:
   run(conn, limit)          — fetch CARE Edge ratings for DB companies without one,
                               plus extract brief financials from the PR PDF.
   run_financials(conn, limit)— extract brief financials from PDFs for companies that
                               already have a CARE Edge rating but no financials yet.
   run_discover(conn, limit) — alphabetical prefix search to find net-new companies
                               not yet in the DB, then add them with ratings+financials.
+                              2026-10-05: rotates through the aa..zz prefixes across
+                              runs via data/care_discover_checkpoint.txt instead of
+                              always re-searching the first N.
+  run_refresh(conn, limit)  — 2026-10-05: re-verify companies whose latest CARE Edge
+                              rating is stale (>6m) or undated against the live site;
+                              run() never revisits a company once it has a CARE
+                              rating, which silently froze the whole CARE book.
 
 API endpoints (discovered via JS inspection of careratings.com):
   GET /header/searchlist?cinput={query}
@@ -24,11 +31,15 @@ PDF structure:
 """
 
 import io
+import json
 import logging
 import re
 import socket
 import string
+import subprocess
 import time
+from datetime import date, timedelta
+from pathlib import Path
 from typing import Optional
 
 import pdfplumber
@@ -43,6 +54,7 @@ from database.models import (
     upsert_company,
 )
 from parsers.rating import normalize_rating
+from parsers.dates import to_iso
 
 logger = logging.getLogger(__name__)
 
@@ -51,6 +63,10 @@ SEARCH_URL = f"{BASE_URL}/header/searchlist"
 COMPANY_URL = f"{BASE_URL}/rrcompany"
 PDF_BASE_URL = f"{BASE_URL}/upload/CompanyFiles/PR"
 AGENCY = "CARE Edge"
+
+_DATA_DIR = Path(__file__).resolve().parent.parent / "data"
+REFRESH_STATE = _DATA_DIR / "care_refresh_state.json"
+DISCOVER_CKPT = _DATA_DIR / "care_discover_checkpoint.txt"
 
 HEADERS = {
     "User-Agent": (
@@ -127,6 +143,17 @@ def _fetch_pdf_bytes(session: requests.Session, file_url: str) -> Optional[bytes
     except Exception as exc:
         logger.debug("CE PDF fetch failed for %r: %s", file_url, exc)
         return None
+
+
+def _git_stage(*paths):
+    """Stage checkpoint/state files so the refresh workflow's commit step
+    publishes them. Never commits or pushes; no-op outside a git checkout."""
+    try:
+        subprocess.run(
+            ["git", "-C", str(_DATA_DIR.parent), "add", *[str(p) for p in paths]],
+            capture_output=True, text=True, timeout=30)
+    except Exception:
+        pass
 
 
 # ------------------------------------------------------------------ #
@@ -455,7 +482,10 @@ def _process_pdf(
     pdf_url = f"{PDF_BASE_URL}/{file_url}"
 
     if insert_ratings:
-        rating_date = _extract_rating_date(pdf_bytes)
+        raw_date = _extract_rating_date(pdf_bytes)
+        # 2026-10-05: store ISO so "latest per agency" text-ordering is
+        # chronological ("September 25, 2026" sorted BELOW ISO dates).
+        rating_date = to_iso(raw_date) or raw_date
         sector      = _extract_sector(pdf_bytes)
         instruments = _parse_rating_table(pdf_bytes)
 
@@ -642,16 +672,32 @@ def run_discover(conn=None, limit: int = None) -> dict:
     brief financials extracted from the most recent press release PDF.
 
     limit controls the number of 2-letter prefixes searched (max 676).
+
+    2026-10-05: prefixes now ROTATE across runs via
+    data/care_discover_checkpoint.txt. Previously a limited run always
+    searched the FIRST `limit` prefixes, so coverage never advanced past
+    the start of the alphabet.
     """
     if conn is None:
         init_db()
         conn = get_connection()
 
-    queries = [a + b for a in string.ascii_lowercase for b in string.ascii_lowercase]
-    if limit:
-        queries = queries[:limit]
+    all_queries = [a + b for a in string.ascii_lowercase for b in string.ascii_lowercase]
 
-    logger.info("CareEdge discover: %d prefix queries to run", len(queries))
+    # Rotation: start after the last prefix done, wrap around.
+    start_idx = 0
+    try:
+        if DISCOVER_CKPT.exists():
+            last = DISCOVER_CKPT.read_text().strip()
+            if last in all_queries:
+                start_idx = (all_queries.index(last) + 1) % len(all_queries)
+    except Exception:
+        pass
+    rotated = all_queries[start_idx:] + all_queries[:start_idx]
+    queries = rotated[:limit] if limit else rotated
+
+    logger.info("CareEdge discover: %d prefix queries (starting at %r)",
+                len(queries), queries[0] if queries else None)
     socket.setdefaulttimeout(30)
     session = _build_session()
     stats = {
@@ -698,6 +744,12 @@ def run_discover(conn=None, limit: int = None) -> dict:
             logger.error("CE discover error for query=%r: %s", query, exc)
             stats["errors"] += 1
 
+        # Persist + stage rotation checkpoint after every prefix
+        try:
+            DISCOVER_CKPT.write_text(query)
+        except Exception:
+            pass
+
         time.sleep(0.3)
 
         if stats["queries"] % 50 == 0:
@@ -707,5 +759,137 @@ def run_discover(conn=None, limit: int = None) -> dict:
                 stats.get("ratings_added", 0), stats.get("financials_added", 0),
             )
 
+    _git_stage(DISCOVER_CKPT)
     logger.info("CareEdge discover done: %s", stats)
+    return stats
+
+
+# ------------------------------------------------------------------ #
+# Re-verification of existing CARE Edge ratings (2026-10-05 overhaul) #
+# ------------------------------------------------------------------ #
+# run() only ever ADDS a CARE Edge rating to companies that have none, so
+# once captured a CARE rating was never looked at again and went stale
+# silently. run_refresh() re-checks companies whose latest CARE rating is
+# older than max_age_days (or undated), oldest first: if the newest press
+# release on careratings.com differs from what we hold, it is parsed and
+# inserted (source_id = PDF filename keeps it idempotent). A "last checked"
+# state file stops the same no-news companies from hogging every run.
+
+def _load_refresh_state() -> dict:
+    try:
+        return json.loads(REFRESH_STATE.read_text(encoding="utf-8"))
+    except Exception:
+        return {}
+
+
+def _save_refresh_state(state: dict):
+    try:
+        REFRESH_STATE.write_text(json.dumps(state, separators=(",", ":")),
+                                 encoding="utf-8")
+        _git_stage(REFRESH_STATE)
+    except Exception:
+        pass
+
+
+def run_refresh(conn=None, limit: int = None, max_age_days: int = 183,
+                recheck_after_days: int = 75) -> dict:
+    """Re-verify stale CARE Edge ratings against the live site.
+
+    Picks companies whose LATEST CARE Edge rating is older than max_age_days
+    or undated, skips ones re-checked within recheck_after_days, oldest
+    rating first, up to `limit` companies.
+    """
+    if conn is None:
+        init_db()
+        conn = get_connection()
+
+    rows = conn.execute("""
+        SELECT c.id AS cid, c.name AS cname, r.rating_date AS rdate,
+               r.source_id AS sid
+        FROM companies c JOIN ratings r ON r.company_id = c.id
+        WHERE r.agency = ? AND r.id = (
+            SELECT r2.id FROM ratings r2
+            WHERE r2.company_id = c.id AND r2.agency = ?
+            ORDER BY r2.rating_date IS NULL, r2.rating_date DESC, r2.id DESC
+            LIMIT 1
+        )
+    """, (AGENCY, AGENCY)).fetchall()
+
+    today = date.today()
+    cutoff_iso = (today - timedelta(days=max_age_days)).isoformat()
+    state = _load_refresh_state()
+    recheck_cut = (today - timedelta(days=recheck_after_days)).isoformat()
+
+    candidates = []
+    for row in rows:
+        cid, name, rdate, sid = row["cid"], row["cname"], row["rdate"], row["sid"]
+        iso = to_iso(rdate)
+        if iso and iso >= cutoff_iso:
+            continue                       # fresh enough
+        last_checked = state.get(str(cid), "")
+        if last_checked and last_checked >= recheck_cut:
+            continue                       # recently re-verified, no news
+        candidates.append((iso or "0000-00-00", cid, name, sid))
+
+    candidates.sort()                      # oldest (and undated) first
+    if limit:
+        candidates = candidates[:limit]
+
+    logger.info("CareEdge refresh: %d stale companies to re-verify "
+                "(bar %dd, recheck window %dd)",
+                len(candidates), max_age_days, recheck_after_days)
+    socket.setdefaulttimeout(30)
+    session = _build_session()
+    stats = {"checked": 0, "no_match": 0, "unchanged": 0,
+             "ratings_added": 0, "financials_added": 0, "errors": 0}
+
+    for _, company_id, company_name, latest_sid in tqdm(
+            candidates, desc="CareEdge Refresh", unit="co"):
+        # Site-health guard: if the first 20 lookups ALL fail to match, CARE
+        # is likely unreachable/blocking — abort WITHOUT stamping companies
+        # as "checked", so the next run retries them.
+        if stats["checked"] == 20 and stats["no_match"] == 20:
+            logger.error("CareEdge refresh: first 20 lookups all failed — "
+                         "site unreachable? aborting pass; state is NOT saved "
+                         "so these companies are retried next run.")
+            return stats
+        try:
+            stats["checked"] += 1
+
+            results = _search_companies(session, company_name)
+            match = _find_match(results, company_name)
+            if not match:
+                words = [w for w in company_name.split() if len(w) > 3]
+                if words:
+                    results = _search_companies(session, words[0])
+                    match = _find_match(results, company_name)
+            if not match:
+                stats["no_match"] += 1
+                state[str(company_id)] = today.isoformat()
+                time.sleep(0.3)
+                continue
+
+            prs = _get_company_prs(session, match["CompanyName"])
+            file_url = prs[0].get("FileURL", "") if prs else ""
+            if not file_url or file_url == (latest_sid or ""):
+                stats["unchanged"] += 1
+                state[str(company_id)] = today.isoformat()
+                time.sleep(0.3)
+                continue
+
+            _process_pdf(session, conn, company_id, company_name, file_url,
+                         stats, insert_ratings=True)
+            state[str(company_id)] = today.isoformat()
+            time.sleep(0.5)
+
+        except Exception as exc:
+            logger.error("CE refresh error for %r: %s", company_name, exc)
+            stats["errors"] += 1
+
+        if stats["checked"] % 100 == 0:
+            _save_refresh_state(state)
+            logger.info("CareEdge refresh progress: %s", stats)
+
+    _save_refresh_state(state)
+    logger.info("CareEdge refresh done: %s", stats)
     return stats
