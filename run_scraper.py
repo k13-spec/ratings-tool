@@ -38,12 +38,17 @@ if str(PROJECT_ROOT) not in sys.path:
 # Create data directory
 (PROJECT_ROOT / "data").mkdir(parents=True, exist_ok=True)
 
-# Bounded side-pass sizes for the fortnightly CI run (kept modest so the
-# whole job stays well inside the workflow's 350-minute timeout; the
-# checkpoints/rotation make successive runs converge on full coverage).
-ICRA_DISCOVER_SLICE = 300     # missing-company detail pages per run
-CARE_REFRESH_SLICE = 400      # stale CARE Edge companies re-verified per run
-CARE_DISCOVER_SLICE = 40      # rotating aa..zz prefixes per run
+# Bounded side-pass sizes for the fortnightly CI run. The checkpoints and
+# rotation make successive runs converge on full coverage, so smaller slices
+# only slow convergence, never lose it.
+# 2026-10-06: halved from 300/400/40 — the first overhaul run (dispatched
+# 2026-10-05 16:30 IST) produced no commit within the workflow's 350-minute
+# timeout, and these passes plus the raised India Ratings ceiling are the
+# new runtime. Budget: baseline ~3.5h + IndRa +18k IDs ~30m + these slices
+# ~30-40m leaves comfortable headroom under 350m.
+ICRA_DISCOVER_SLICE = 150     # missing-company detail pages per run
+CARE_REFRESH_SLICE = 200      # stale CARE Edge companies re-verified per run
+CARE_DISCOVER_SLICE = 15      # rotating aa..zz prefixes per run
 
 # ------------------------------------------------------------------ #
 # Logging setup                                                        #
