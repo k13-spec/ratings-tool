@@ -1,0 +1,306 @@
+{
+ "generated_at": "2026-11-12T05:24:45Z",
+ "staleness_bar_days": 183,
+ "totals": {
+  "companies": 35991,
+  "rated_companies": 33585,
+  "rating_rows": 44065,
+  "current_rows": 36156,
+  "companies_with_graded_current": 33077,
+  "companies_with_no_graded_current": 508
+ },
+ "staleness": {
+  "CRISIL": {
+   "companies": 24504,
+   "fresh_0_6m": 0,
+   "aging_6_12m": 0,
+   "dated_12_18m": 0,
+   "stale_18m_plus": 0,
+   "undated_or_unparseable": 24504,
+   "withdrawn_as_current": 0,
+   "not_cooperating": 0,
+   "ungraded_current": 10
+  },
+  "ICRA": {
+   "companies": 4873,
+   "fresh_0_6m": 1120,
+   "aging_6_12m": 1214,
+   "dated_12_18m": 547,
+   "stale_18m_plus": 1992,
+   "undated_or_unparseable": 0,
+   "withdrawn_as_current": 97,
+   "not_cooperating": 1974,
+   "ungraded_current": 273
+  },
+  "CARE Edge": {
+   "companies": 1162,
+   "fresh_0_6m": 38,
+   "aging_6_12m": 453,
+   "dated_12_18m": 498,
+   "stale_18m_plus": 171,
+   "undated_or_unparseable": 2,
+   "withdrawn_as_current": 0,
+   "not_cooperating": 0,
+   "ungraded_current": 0
+  },
+  "India Ratings": {
+   "companies": 5617,
+   "fresh_0_6m": 0,
+   "aging_6_12m": 0,
+   "dated_12_18m": 0,
+   "stale_18m_plus": 0,
+   "undated_or_unparseable": 5617,
+   "withdrawn_as_current": 0,
+   "not_cooperating": 2035,
+   "ungraded_current": 384
+  }
+ },
+ "hygiene": {
+  "needs_reverification_by_agency": {
+   "CRISIL": 24504,
+   "ICRA": 3753,
+   "CARE Edge": 1124,
+   "India Ratings": 5617
+  },
+  "needs_reverification_total": 34998
+ },
+ "coverage": {
+  "graded_companies_by_agency_count": {
+   "1": 30816,
+   "2": 2124,
+   "3": 123,
+   "4": 14
+  },
+  "crisil": {
+   "index_entries": 18170,
+   "db_companies": 24504
+  },
+  "india_ratings": {
+   "max_issuer_id_seen": 14997,
+   "scan_ceiling": 18000,
+   "ceiling_pressure": false
+  },
+  "care_edge": {
+   "db_companies": 1162,
+   "discover_prefix_checkpoint": "ao"
+  },
+  "icra": {
+   "universe_companies": 12224,
+   "db_companies_with_icra_id": 4844,
+   "missing_from_db": 7382,
+   "missing_sample": [
+    "360 ONE Asset Management Limited",
+    "360 ONE Distribution Services Limited",
+    "3B Films Pvt. Ltd.",
+    "3D PLM Software Solutions Limited",
+    "3F Industries Ltd.",
+    "4E Junction",
+    "5Paisa Capital Limited",
+    "7 Star Company",
+    "7 Star Construction",
+    "A & L Apparels Pvt Ltd",
+    "A B Motions Private Limited",
+    "A B Renewable Energy Private Limited",
+    "A One Ispat Private Limited",
+    "A P Goyal Shimla University",
+    "A P R Textiles",
+    "A Plus Design House Llp",
+    "A S K Brothers Ltd",
+    "A&J Microns Private Limited",
+    "A. R. Stanchem Pvt.Ltd",
+    "A. S. Export",
+    "A. S. Steel Traders (VSP) Private Limited",
+    "A.H. Memorial Educational Trust",
+    "A.M. Bhanderi",
+    "A.M. Textiles and Knitwears Limited",
+    "A.M.N. Jewellers Private Limited"
+   ]
+  }
+ },
+ "worst_stale_examples": {
+  "ICRA": [
+   {
+    "company": "Tamil Nadu Newsprint & Papers Limited",
+    "rating": "[ICRA]A+ (Stable)",
+    "rating_date": "2023-10-27",
+    "age_days": 1112
+   },
+   {
+    "company": "Mathura Fibres and Cotton Industries",
+    "rating": "[ICRA]B+ (Stable)",
+    "rating_date": "2025-01-07",
+    "age_days": 674
+   },
+   {
+    "company": "JSW Mahanadi Power Company Limited",
+    "rating": "Withdrawn, Withdrawn",
+    "rating_date": "2025-05-09",
+    "age_days": 552
+   },
+   {
+    "company": "OPG Energy Private Limited",
+    "rating": "[ICRA]BB- (Stable), --",
+    "rating_date": "2025-05-07",
+    "age_days": 554
+   },
+   {
+    "company": "Bangalore International Airport Limited",
+    "rating": "[ICRA]AAA (Stable), --",
+    "rating_date": "2025-05-05",
+    "age_days": 556
+   },
+   {
+    "company": "IL&FS Tamil Nadu Power Company Limited",
+    "rating": "Withdrawn, --",
+    "rating_date": "2025-04-09",
+    "age_days": 582
+   },
+   {
+    "company": "Aravali Power Company Private Limited",
+    "rating": "[ICRA]AA+ (Stable), --",
+    "rating_date": "2025-04-07",
+    "age_days": 584
+   },
+   {
+    "company": "National Highways Authority of India",
+    "rating": "[ICRA]AAA (Stable), --",
+    "rating_date": "2025-04-02",
+    "age_days": 589
+   },
+   {
+    "company": "Delhi Airport Parking Services Private Limited",
+    "rating": "[ICRA]A (Stable), --",
+    "rating_date": "2025-03-29",
+    "age_days": 593
+   },
+   {
+    "company": "GMR Ambala - Chandigarh Expressways Private Limited",
+    "rating": "Withdrawn, --",
+    "rating_date": "2025-03-28",
+    "age_days": 594
+   },
+   {
+    "company": "Ocean Sparkle Limited",
+    "rating": "[ICRA]AA (Stable), --",
+    "rating_date": "2025-03-28",
+    "age_days": 594
+   },
+   {
+    "company": "KKV AGRO POWERS LIMITED",
+    "rating": "[ICRA]BB+ (Stable), --",
+    "rating_date": "2025-02-25",
+    "age_days": 625
+   },
+   {
+    "company": "Tamil Nadu Dindigul Karur Expressways Limited (TNDK)",
+    "rating": "[ICRA]D  ISSUER NOT COOPERATING, --",
+    "rating_date": "2025-02-06",
+    "age_days": 644
+   },
+   {
+    "company": "Sambalpur - Rourkela Tollway Limited",
+    "rating": "Withdrawn, --",
+    "rating_date": "2025-01-31",
+    "age_days": 650
+   },
+   {
+    "company": "Surat Goods Transport Private Limited",
+    "rating": "[ICRA]A- (Stable), [ICRA]A2+",
+    "rating_date": "2024-11-22",
+    "age_days": 720
+   }
+  ],
+  "CARE Edge": [
+   {
+    "company": "JM Financial Products Limited",
+    "rating": "AA",
+    "rating_date": "2020-10-22",
+    "age_days": 2212
+   },
+   {
+    "company": "Jai Sakthi Mills",
+    "rating": "B-",
+    "rating_date": "2025-02-13",
+    "age_days": 637
+   },
+   {
+    "company": "Dhabaleswar Traders",
+    "rating": "B-",
+    "rating_date": "2025-02-19",
+    "age_days": 631
+   },
+   {
+    "company": "Jagannath Polypacks Limited",
+    "rating": "C",
+    "rating_date": "2025-03-18",
+    "age_days": 604
+   },
+   {
+    "company": "Bhati Associates Private Limited",
+    "rating": "C",
+    "rating_date": "2025-03-20",
+    "age_days": 602
+   },
+   {
+    "company": "SBW Udyog Limited",
+    "rating": "BB",
+    "rating_date": "2025-02-03",
+    "age_days": 647
+   },
+   {
+    "company": "Ashiyana Constructions",
+    "rating": "B-",
+    "rating_date": "2025-03-04",
+    "age_days": 618
+   },
+   {
+    "company": "Jyoti Hospital Private Limited",
+    "rating": "B-",
+    "rating_date": "2025-04-29",
+    "age_days": 562
+   },
+   {
+    "company": "Akash Agro Industries - Sirsa",
+    "rating": "C",
+    "rating_date": "2025-04-28",
+    "age_days": 563
+   },
+   {
+    "company": "Akash Agro Industries",
+    "rating": "C",
+    "rating_date": "2025-04-28",
+    "age_days": 563
+   },
+   {
+    "company": "Prasad Agro Industries",
+    "rating": "D",
+    "rating_date": "2025-05-02",
+    "age_days": 559
+   },
+   {
+    "company": "Sri Lakshmi Mini Rice Mill",
+    "rating": "B-",
+    "rating_date": "2025-03-03",
+    "age_days": 619
+   },
+   {
+    "company": "Rajendra Ispat Private Limited",
+    "rating": "B",
+    "rating_date": "2025-02-20",
+    "age_days": 630
+   },
+   {
+    "company": "Pari Agri Grain Industries Private Limited",
+    "rating": "B-",
+    "rating_date": "2025-04-09",
+    "age_days": 582
+   },
+   {
+    "company": "RM Dairy Products LLP",
+    "rating": "D",
+    "rating_date": "2025-05-12",
+    "age_days": 549
+   }
+  ]
+ }
+}
