@@ -46,6 +46,8 @@ jobs:
     timeout-minutes: 350
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 50
 
       - uses: actions/setup-python@v5
         with:
@@ -85,7 +87,12 @@ jobs:
           N_ROWS=$(grep -oP 'export rows: \K\d+' maint_log.txt || echo "?")
           FAILS=$(grep -hl 'FAILED' icra_log.txt crisil_log.txt ir_log.txt care_log.txt 2>/dev/null | wc -l)
           git commit -m "Auto-refresh ratings: ${N_ROWS} current rows (${FAILS} scraper failures)"
-          git push
+          # App commits can land on master during the multi-hour run; rebase
+          # the data commit on top instead of losing it to a rejected push.
+          for i in 1 2 3; do
+            git pull --rebase origin master && git push && break
+            sleep 20
+          done
 
       - name: Job summary
         if: always()
