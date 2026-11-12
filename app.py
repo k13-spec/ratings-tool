@@ -1046,38 +1046,68 @@ def _load_nsdl_bonds():
         return pd.DataFrame(columns=["Issuer", "Issuer_norm", "Days"])
 
 
-def _add_bond_counts(display_df, bonds_df):
-    # Append Bonds 30d / 90d / 1yr columns to display_df.
-    display_df = display_df.copy()
-    zeros = [0] * len(display_df)
-    if bonds_df.empty:
-        display_df["Bonds 30d"] = zeros
-        display_df["Bonds 90d"] = zeros
-        display_df["Bonds 1yr"] = zeros
-        display_df["Bonds total"] = zeros
-        return display_df
-    issuer_norms = bonds_df["Issuer_norm"].values
-    days_arr = bonds_df["Days"].values
-    b30, b90, b365, b_total = [], [], [], []
-    for cname in display_df["Company Name"]:
+@st.cache_data(ttl=86400, show_spinner=False, max_entries=4)
+def _bond_count_table(names: tuple, bonds_df) -> dict:
+    """{company name: (bonds<=30d, <=90d, <=1yr, total)} for every name.
+
+    Same matching rule as before (first 18 chars of the normalised company
+    name found anywhere in the normalised NSDL issuer name), but computed
+    with one C-level substring scan per company over a single joined string
+    of the UNIQUE issuer names, and cached. The old per-rerun Python loop
+    compared every company with every bond (~33k x ~22k = ~700M checks),
+    which left the table spinning for minutes on Streamlit Cloud.
+    """
+    import bisect
+    import numpy as np
+    if bonds_df is None or bonds_df.empty:
+        return {}
+    g = bonds_df.groupby("Issuer_norm")["Days"]
+    agg = pd.DataFrame({
+        "b30":  g.apply(lambda d: int((d <= 30).sum())),
+        "b90":  g.apply(lambda d: int((d <= 90).sum())),
+        "b365": g.apply(lambda d: int((d <= 365).sum())),
+        "tot":  g.size(),
+    })
+    norms = [str(n) for n in agg.index]
+    vals = agg[["b30", "b90", "b365", "tot"]].to_numpy(dtype="int64")
+    # "\n" never occurs inside a normalised name, so a match cannot straddle
+    # two issuers.
+    starts, pos, parts = [], 0, []
+    for n in norms:
+        starts.append(pos)
+        parts.append(n)
+        pos += len(n) + 1
+    blob = "\n".join(parts)
+    by_key: dict = {}
+    out: dict = {}
+    for cname in names:
         key = _normalize_co(str(cname))
         if len(key) < 4:
-            b30.append(0); b90.append(0); b365.append(0); b_total.append(0)
+            out[cname] = (0, 0, 0, 0)
             continue
-        key_short = key[:18]
-        idx = [i for i, n in enumerate(issuer_norms) if key_short in n]
-        d = days_arr[idx] if idx else []
-        import numpy as np
-        d = np.array(d)
-        b30.append(int((d <= 30).sum()))
-        b90.append(int((d <= 90).sum()))
-        b365.append(int((d <= 365).sum()))
-        b_total.append(len(idx))
-    display_df["Bonds 30d"] = b30
-    display_df["Bonds 90d"] = b90
-    display_df["Bonds 1yr"] = b365
-    display_df["Bonds total"] = b_total
+        ks = key[:18]
+        if ks not in by_key:
+            hit, i = set(), blob.find(ks)
+            while i != -1:
+                hit.add(bisect.bisect_right(starts, i) - 1)
+                i = blob.find(ks, i + 1)
+            by_key[ks] = tuple(int(x) for x in vals[sorted(hit)].sum(axis=0)) if hit else (0, 0, 0, 0)
+        out[cname] = by_key[ks]
+    return out
+
+
+def _add_bond_counts(display_df, bonds_df):
+    # Append Bonds 30d / 90d / 1yr / total columns to display_df.
+    display_df = display_df.copy()
+    names = display_df["Company Name"]
+    table = _bond_count_table(tuple(sorted(set(names.dropna().astype(str)))), bonds_df)
+    counts = [table.get(str(n), (0, 0, 0, 0)) for n in names]
+    display_df["Bonds 30d"]   = [c[0] for c in counts]
+    display_df["Bonds 90d"]   = [c[1] for c in counts]
+    display_df["Bonds 1yr"]   = [c[2] for c in counts]
+    display_df["Bonds total"] = [c[3] for c in counts]
     return display_df
+
 
 @st.cache_data(ttl=3600, show_spinner=False)
 def _recent_rating_actions(days: int = 7):
