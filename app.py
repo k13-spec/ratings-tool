@@ -498,22 +498,22 @@ _CSS = """
 
 /* ── Design tokens ── */
 :root {
-    --bg:           #F8F9FF;
+    --bg:           #FFFFFF;
     --surface:      #FFFFFF;
     --surface-glass:rgba(255,255,255,0.72);
-    --border:       #E0E2EF;
-    --border-soft:  #ECEEFF;
+    --border:       #DCE5E1;
+    --border-soft:  #E6F0EC;
     --text:         #111827;
     --text-muted:   #6B7280;
-    --accent:       #6366F1;
-    --accent-hov:   #4F46E5;
-    --accent-light: #EEF2FF;
-    --accent-dim:   rgba(99,102,241,0.12);
+    --accent:       #006A4E;
+    --accent-hov:   #00523C;
+    --accent-light: #F1F7F4;
+    --accent-dim:   rgba(0,106,78,0.12);
     --secondary:    #F3F4F6;
     --secondary-hov:#E5E7EB;
-    --shadow-xs:    0 1px 3px rgba(99,102,241,0.08);
-    --shadow-sm:    0 4px 16px rgba(99,102,241,0.12);
-    --shadow-md:    0 8px 32px rgba(99,102,241,0.16);
+    --shadow-xs:    0 1px 3px rgba(0,106,78,0.08);
+    --shadow-sm:    0 4px 16px rgba(0,106,78,0.12);
+    --shadow-md:    0 8px 32px rgba(0,106,78,0.16);
     --radius-sm:    8px;
     --radius-md:    12px;
     --radius-lg:    16px;
@@ -578,7 +578,7 @@ section[data-testid="stSidebar"] > div {
     background: var(--surface-glass) !important;
     backdrop-filter: blur(24px) saturate(180%) !important;
     -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
-    border-right: 1px solid rgba(99,102,241,0.15) !important;
+    border-right: 1px solid rgba(0,106,78,0.15) !important;
 }
 /* Sidebar section header */
 [data-testid="stSidebar"] h1,
@@ -653,7 +653,7 @@ section[data-testid="stSidebar"] > div {
     position: absolute;
     top: 0; left: 0;
     width: 3px; height: 100%;
-    background: linear-gradient(180deg, var(--accent), #818CF8);
+    background: linear-gradient(180deg, var(--accent), #1F8A6B);
     border-radius: 2px 0 0 2px;
 }
 [data-testid="stMetricLabel"] p {
@@ -713,7 +713,7 @@ hr { border-color: var(--border) !important; opacity: 1 !important; }
 [data-testid="stBaseButton-primary"],
 [data-testid="stDownloadButton"] button {
     border-radius: var(--radius-sm) !important;
-    background: linear-gradient(135deg, var(--accent) 0%, #818CF8 100%) !important;
+    background: linear-gradient(135deg, var(--accent) 0%, #1F8A6B 100%) !important;
     color: #FFFFFF !important;
     border: none !important;
     font-weight: 600 !important;
@@ -725,7 +725,7 @@ hr { border-color: var(--border) !important; opacity: 1 !important; }
 [data-testid="stBaseButton-primary"]:hover,
 [data-testid="stDownloadButton"] button:hover {
     background: linear-gradient(135deg, var(--accent-hov) 0%, var(--accent) 100%) !important;
-    box-shadow: 0 4px 16px rgba(99,102,241,0.35) !important;
+    box-shadow: 0 4px 16px rgba(0,106,78,0.35) !important;
     transform: translateY(-1px);
 }
 /* Secondary */
@@ -733,13 +733,13 @@ hr { border-color: var(--border) !important; opacity: 1 !important; }
     border-radius: var(--radius-sm) !important;
     background: var(--accent-light) !important;
     color: var(--accent) !important;
-    border: 1px solid rgba(99,102,241,0.25) !important;
+    border: 1px solid rgba(0,106,78,0.25) !important;
     font-weight: 600 !important;
     font-family: var(--font) !important;
     transition: all 0.15s ease !important;
 }
 [data-testid="stBaseButton-secondary"]:hover {
-    background: #E0E7FF !important;
+    background: #D9EBE4 !important;
     border-color: var(--accent) !important;
     box-shadow: 0 0 0 3px var(--accent-dim) !important;
 }
@@ -762,7 +762,7 @@ hr { border-color: var(--border) !important; opacity: 1 !important; }
 [data-testid="stDataEditor"],
 [data-testid="stDataFrame"] {
     border-radius: var(--radius-lg) !important;
-    border: 1px solid rgba(99,102,241,0.2) !important;
+    border: 1px solid rgba(0,106,78,0.2) !important;
     box-shadow: var(--shadow-xs) !important;
     overflow: hidden;
     background: var(--surface) !important;
@@ -810,7 +810,7 @@ hr { border-color: var(--border) !important; opacity: 1 !important; }
 }
 /* Multiselect tags — indigo pill */
 [data-baseweb="tag"] {
-    background: linear-gradient(135deg, var(--accent), #818CF8) !important;
+    background: linear-gradient(135deg, var(--accent), #1F8A6B) !important;
     border-radius: 20px !important;
     border: none !important;
 }
@@ -1164,14 +1164,14 @@ def main():
     st.markdown(
         """
         <div style="
-            background: linear-gradient(135deg, #6366F1 0%, #818CF8 50%, #A5B4FC 100%);
+            background: linear-gradient(135deg, #006A4E 0%, #1F8A6B 50%, #3FA384 100%);
             border-radius: 16px;
             padding: 28px 32px 22px 32px;
             margin-bottom: 8px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            box-shadow: 0 8px 32px rgba(99,102,241,0.22);
+            box-shadow: 0 8px 32px rgba(0,106,78,0.22);
         ">
             <div>
                 <div style="font-family:'DM Sans',sans-serif;font-size:1.65rem;font-weight:700;
@@ -1187,14 +1187,14 @@ def main():
             <div>
                 <a href="https://creditnexus.streamlit.app/Financing_Ideas" target="_self"
                    style="font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;
-                          color:#6366F1;background:#FFFFFF;border-radius:8px;
+                          color:#006A4E;background:#FFFFFF;border-radius:8px;
                           padding:7px 16px;text-decoration:none;white-space:nowrap;
                           box-shadow:0 2px 8px rgba(0,0,0,0.12);display:inline-block;
                           margin-right:8px;">
                     💡 Financing Ideas
                 </a><a href="https://creditnexus-bonds.streamlit.app" target="_blank"
                    style="font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;
-                          color:#6366F1;background:#FFFFFF;border-radius:8px;
+                          color:#006A4E;background:#FFFFFF;border-radius:8px;
                           padding:7px 16px;text-decoration:none;white-space:nowrap;
                           box-shadow:0 2px 8px rgba(0,0,0,0.12);display:inline-block;">
                     ↗ Bond Tracker
@@ -1683,7 +1683,7 @@ def main():
             """
             <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;
                         margin-bottom:10px;padding:10px 14px;
-                        background:#F8F9FF;border:1px solid #E0E2EF;border-radius:10px;">
+                        background:#FFFFFF;border:1px solid #DCE5E1;border-radius:10px;">
                 <span style="font-family:'DM Sans',sans-serif;font-size:0.7rem;font-weight:700;
                              color:#6B7280;letter-spacing:0.08em;text-transform:uppercase;
                              margin-right:6px;">Rating scale →</span>
@@ -1693,7 +1693,7 @@ def main():
                 <span style="background:#0369A1;color:#fff;border-radius:6px;
                              padding:2px 9px;font-size:0.72rem;font-weight:600;
                              font-family:'DM Sans',sans-serif;">AA</span>
-                <span style="background:#6366F1;color:#fff;border-radius:6px;
+                <span style="background:#006A4E;color:#fff;border-radius:6px;
                              padding:2px 9px;font-size:0.72rem;font-weight:600;
                              font-family:'DM Sans',sans-serif;">A</span>
                 <span style="background:#7C3AED;color:#fff;border-radius:6px;
@@ -1860,7 +1860,7 @@ def main():
             '<div style="text-align:center;margin-top:40px;padding-bottom:16px;'
             'font-size:12px;font-family:\'DM Sans\',sans-serif;color:var(--text-muted,#6B7280)">'
             '<a href="https://www.linkedin.com/in/saxenakriti/" target="_blank"'
-            ' style="color:#6366F1;text-decoration:none;font-weight:500">Contact</a></div>',
+            ' style="color:#006A4E;text-decoration:none;font-weight:500">Contact</a></div>',
             unsafe_allow_html=True,
         )
     elif display_df is not None and display_df.empty:
