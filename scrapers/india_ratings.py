@@ -32,9 +32,11 @@ API_BASE       = f"{BASE_URL}/home"
 # 2026-10-05: raised 15000 -> 18000; the audit tracks the highest live ID and
 # flags "ceiling pressure" when new issuers approach the scan ceiling.
 MAX_ISSUER_ID  = 18000
-FETCH_WORKERS  = 4      # concurrent issuer fetches
-FETCH_CHUNK    = 20     # IDs per batch (checkpoint granularity)
+FETCH_WORKERS  = 2      # concurrent issuer fetches (4 got the scan throttled)
+FETCH_CHUNK    = 10     # IDs per batch (checkpoint granularity)
 CHUNK_PAUSE_S  = 0.5    # pause between batches
+BACKOFFS_S     = (60, 180, 420)   # waits before retrying a refused batch
+EMPTY_RUN_PROBE = 100   # consecutive empty IDs that trigger a liveness probe
 CHECKPOINT     = Path(__file__).parent.parent / "data" / "india_ratings_checkpoint.txt"
 
 HEADERS = {
@@ -58,6 +60,10 @@ def _build_session() -> requests.Session:
     return s
 
 
+class _Refused(Exception):
+    """The API answered with a non-200 status (throttling / block)."""
+
+
 _tls = threading.local()
 
 
@@ -73,11 +79,17 @@ def _get_issuer(session: requests.Session, issuer_id: int) -> dict | None:
     try:
         resp = session.get(url, timeout=15)
         if resp.status_code != 200:
-            return None
+            # 12 Nov 2026: a non-200 used to be treated as "no such issuer".
+            # When the site throttled the scan after ~2,500 IDs, the
+            # remaining 15,475 were silently counted as empty. A refusal
+            # is now an error the caller must back off from and retry.
+            raise _Refused(resp.status_code)
         data = resp.json()
         if not data:
             return None
         return data[0] if isinstance(data, list) else data
+    except _Refused:
+        raise
     except Exception as exc:
         logger.debug("Issuer %d fetch error: %s", issuer_id, exc)
         return None
@@ -223,6 +235,7 @@ def run(conn=None, limit: int = None, reset: bool = False,
     t_start = time.time()
     ids = list(id_range)
     stopped_early = False
+    empty_run, last_found_id = 0, 0
 
     def _fetch(issuer_id):
         try:
@@ -240,7 +253,26 @@ def run(conn=None, limit: int = None, reset: bool = False,
                 stopped_early = True
                 break
             chunk = ids[i:i + FETCH_CHUNK]
-            for issuer_id, issuer, exc in pool.map(_fetch, chunk):
+            results = list(pool.map(_fetch, chunk))
+            # Throttled? Back off and retry the whole batch, one request at a
+            # time. If the site still refuses, stop here: the checkpoint stays
+            # at the last fully-scanned batch and the next run resumes from it.
+            for wait in BACKOFFS_S:
+                if not any(isinstance(e, _Refused) for _, _, e in results):
+                    break
+                logger.warning("India Ratings: request refused near ID %d (%s); "
+                               "backing off %ds", chunk[0],
+                               next(e for _, _, e in results if isinstance(e, _Refused)), wait)
+                time.sleep(wait)
+                results = [_fetch(x) for x in chunk]
+            if any(isinstance(e, _Refused) for _, _, e in results):
+                logger.error("India Ratings: still refused at ID %d after %d "
+                             "back-offs; stopping, next run resumes here",
+                             chunk[0], len(BACKOFFS_S))
+                stats["refused"] = 1
+                stopped_early = True
+                break
+            for issuer_id, issuer, exc in results:
                 stats["processed"] += 1
                 if exc is not None:
                     logger.error("Error on issuer_id=%d: %s", issuer_id, exc)
@@ -248,12 +280,40 @@ def run(conn=None, limit: int = None, reset: bool = False,
                     continue
                 if not issuer:
                     stats["empty"] += 1
+                    empty_run += 1
                     continue
+                empty_run, last_found_id = 0, issuer_id
                 try:
                     _store_issuer(conn, issuer_id, issuer, stats)
                 except Exception as exc2:
                     logger.error("Error on issuer_id=%d: %s", issuer_id, exc2)
                     stats["errors"] += 1
+            # A long run of "empty" IDs is either a genuinely sparse range or
+            # a silent block (200 + empty body). Tell them apart by re-asking
+            # for an issuer that answered a moment ago.
+            if empty_run >= EMPTY_RUN_PROBE and last_found_id:
+                alive = False
+                for wait in (0,) + BACKOFFS_S:
+                    if wait:
+                        logger.warning("India Ratings: %d empty IDs in a row and "
+                                       "known issuer %d no longer answers; backing "
+                                       "off %ds", empty_run, last_found_id, wait)
+                        time.sleep(wait)
+                    _, probe, perr = _fetch(last_found_id)
+                    if probe and perr is None:
+                        alive = True
+                        break
+                if alive and wait == 0:
+                    empty_run = 0            # sparse range, carry on
+                else:
+                    # Blocked (or just unblocked): everything since the last
+                    # real answer is suspect, so rescan from there.
+                    stats["refused"] = 1
+                    _save_checkpoint(last_found_id)
+                    logger.error("India Ratings: silent block detected; stopping, "
+                                 "next run resumes from ID %d", last_found_id + 1)
+                    stopped_early = True
+                    break
             _save_checkpoint(chunk[-1])
             pbar.update(len(chunk))
             if (i // FETCH_CHUNK) % 25 == 24:
