@@ -28,8 +28,8 @@ st.markdown(
     """
     <style>
       [data-testid="stToolbarActions"], [data-testid="stMainMenu"], [data-testid="stAppDeployButton"] {display: none !important;}
-      [data-testid="stSidebarNav"] li:first-child a span {font-size: 0 !important;}
-      [data-testid="stSidebarNav"] li:first-child a span::after {content: "Ratings Dashboard"; font-size: 0.875rem;}
+      [data-testid="stSidebarNav"] li:first-child a p {font-size: 0 !important;}
+      [data-testid="stSidebarNav"] li:first-child a p::after {content: "Ratings Dashboard"; font-size: 0.875rem; line-height: 1.6;}
     </style>
     """,
     unsafe_allow_html=True,
