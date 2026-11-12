@@ -30,6 +30,10 @@ Steps:
   5. Audit (audit_ratings.py): staleness buckets, withdrawn/INC-as-current,
      coverage gaps -> data/audit_report.json + data/AUDIT.md (git-staged so
      the workflow's commit step publishes them). Failures never break the run.
+  6. Consolidate the Financing Ideas assets/dfi_patches series into
+     assets/debt_financing_ideas.html (GitHub Actions runs only — weekly
+     cloud news refreshes land small patch files because they cannot push
+     the ~1 MB page; this folds them in and clears the series).
 
 Safety: refuses to write the CSV if the export shrinks below MIN_ROWS or by
 more than 20% vs the existing file.
@@ -315,6 +319,104 @@ def step5_audit():
         print(f"  audit failed (non-fatal): {exc}", file=sys.stderr)
 
 
+def step6_consolidate_financing_ideas():
+    """Fold assets/dfi_patches into assets/debt_financing_ideas.html.
+
+    Weekly cloud news-refresh sessions cannot push the ~1 MB page, so they
+    land small find/replace patch files via the GitHub API and
+    pages/2_Financing_Ideas.py applies them at render time. This step (run
+    only inside the GitHub Actions ratings-refresh workflow, which has
+    contents:write) folds the series back into the committed page so the
+    canonical file catches up, then removes the series and commits.
+    Strict: consolidates only when every pair applies exactly once and the
+    result matches the manifest's target_sha256; a series older than the
+    committed page (full page re-landed since) is deleted as stale.
+    Must never break the data run — everything is wrapped and non-fatal.
+    """
+    import hashlib
+    import json
+    import re
+    import subprocess
+    from datetime import date
+
+    try:
+        root = os.path.dirname(os.path.abspath(__file__))
+        page = os.path.join(root, "assets", "debt_financing_ideas.html")
+        pdir = os.path.join(root, "assets", "dfi_patches")
+        man_p = os.path.join(pdir, "manifest.json")
+        if not (os.path.exists(man_p) and os.path.exists(page)):
+            return
+        print("=" * 62)
+        print("STEP 6 — consolidate Financing Ideas patch series")
+        print("=" * 62)
+        with open(man_p, encoding="utf-8") as f:
+            man = json.load(f)
+        with open(page, encoding="utf-8") as f:
+            html = f.read()
+
+        months = {m: i + 1 for i, m in enumerate(
+            "Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec".split())}
+        stale = False
+        try:
+            m = re.search(r"compiled (\d{1,2}) ([A-Za-z]{3})[a-z]* (\d{4})", html)
+            base_d = (date(int(m.group(3)), months[m.group(2).title()],
+                           int(m.group(1))) if m else None)
+            series_d = date.fromisoformat(str(man.get("compiled", ""))[:10])
+            stale = bool(base_d and base_d > series_d)
+        except Exception:
+            pass
+
+        if stale:
+            print("  series predates the committed page — removing stale series")
+        else:
+            for fname in man.get("series", []):
+                fp = os.path.join(pdir, str(fname))
+                if not os.path.exists(fp):
+                    print(f"  {fname} missing — leaving series in place")
+                    return
+                with open(fp, encoding="utf-8") as f:
+                    pairs = json.load(f)
+                for p in pairs:
+                    find = p.get("find", "")
+                    if html.count(find) != 1:
+                        print("  a pair no longer applies cleanly — leaving series in place")
+                        return
+                    html = html.replace(find, p.get("replace", ""))
+            tgt = man.get("target_sha256")
+            got = hashlib.sha256(html.encode("utf-8")).hexdigest()
+            if tgt and got != tgt:
+                print("  sha mismatch after applying the series — leaving series in place")
+                return
+            with open(page, "w", encoding="utf-8") as f:
+                f.write(html)
+            print("  series folded into the page")
+
+        git = ["git", "-c", "user.name=github-actions[bot]",
+               "-c", "user.email=41898282+github-actions[bot]@users.noreply.github.com"]
+        subprocess.run(git + ["rm", "-r", "-q", "--ignore-unmatch", pdir],
+                       cwd=root, check=False)
+        subprocess.run(git + ["add", page], cwd=root, check=False)
+        if subprocess.run(["git", "diff", "--cached", "--quiet"],
+                          cwd=root).returncode == 0:
+            print("  nothing to commit")
+            return
+        msg = ("Financing Ideas: remove stale patch series (page re-landed in full)"
+               if stale else
+               "Financing Ideas: consolidate weekly patch series into the page (automated)")
+        subprocess.run(git + ["commit", "-m", msg], cwd=root, check=False)
+        for _ in range(3):
+            subprocess.run(["git", "pull", "--rebase", "origin", "master"],
+                           cwd=root, check=False)
+            if subprocess.run(["git", "push", "origin", "HEAD:master"],
+                              cwd=root, check=False).returncode == 0:
+                print("  consolidation pushed")
+                return
+        print("  push failed — consolidation commit left for the workflow's push step",
+              file=sys.stderr)
+    except Exception as exc:                      # must never break the run
+        print(f"  consolidation failed (non-fatal): {exc}", file=sys.stderr)
+
+
 def main() -> int:
     if not os.path.exists(DB):
         sys.exit(f"ERROR: {DB} not found — run from the ratings-tool repo root.")
@@ -333,6 +435,8 @@ def main() -> int:
     conn.close()
     if not DRY and not NO_AUDIT:
         step5_audit()
+    if not DRY and os.environ.get("GITHUB_ACTIONS") == "true":
+        step6_consolidate_financing_ideas()
     print("\nDONE." if ok else "\nDONE (export skipped — see ABORT above).")
     return 0 if ok else 1
 
