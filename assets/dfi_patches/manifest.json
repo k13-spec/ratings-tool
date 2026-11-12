@@ -1,0 +1,8 @@
+{
+ "compiled": "2026-11-12",
+ "series": [
+  "patch_001.json"
+ ],
+ "target_sha256": "cbef29897dde50583c2e079c97e14bd05ac4ab9cabdaf88251599de73e6bb174",
+ "note": "Weekly news-refresh series. Applied at render time by pages/2_Financing_Ideas.py; consolidated into assets/debt_financing_ideas.html by db_maintenance.py (fortnightly workflow). A full re-land of the page with a newer hero 'compiled' date retires the series."
+}
