@@ -115,6 +115,19 @@
   .negflag .ns{margin-top:6px;font-size:12px}
   .negflag .ns a{color:#B91C1C;text-decoration:underline;margin-right:10px}
   .b-neg{background:#DC2626;color:#fff}
+  .negflag.amber{background:#FFFBEB;border-color:#FDE68A;border-left-color:#D97706;color:#78350F}
+  .negflag.amber b.t{color:#B45309}
+  .negflag.amber .ns a{color:#B45309}
+  .b-neg.amber{background:#D97706}
+  .wl .negflag{margin:8px 0 0 0;font-size:13px}
+  .fxbox{margin:0 22px 14px 22px;background:#EFF6FF;border:1px solid #BFDBFE;border-left:5px solid #2563EB;border-radius:10px;padding:12px 16px;font-size:13.5px;color:#1E3A8A}
+  .fxbox b.t{display:block;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#1D4ED8;margin-bottom:4px}
+  .fxbox .ns{margin-top:6px;font-size:12px}
+  .fxbox .ns a{color:#1D4ED8;text-decoration:underline;margin-right:10px}
+  .wl .fxbox{margin:8px 0 0 0;font-size:13px}
+  .b-fx{background:#DBEAFE;color:#1E40AF}
+  #fxBtn{border:1.5px solid var(--border);background:#fff;border-radius:999px;padding:8px 13px;font-family:inherit;font-size:12.5px;font-weight:600;color:#1D4ED8;cursor:pointer}
+  #fxBtn.on{border-color:#2563EB;background:#EFF6FF}
   #negBtn{border:1.5px solid var(--border);background:#fff;border-radius:999px;padding:8px 13px;font-family:inherit;font-size:12.5px;font-weight:600;color:#B91C1C;cursor:pointer}
   #negBtn.on{border-color:#DC2626;background:#FEF2F2}
 
@@ -175,7 +188,8 @@
   <div class="controls">
     <input type="text" id="q" placeholder="Filter by company, sector, lender, theme…">
     <select id="city" onchange="setCity(this.value)" title="Filter by headquarters city"><option value="">All HQ cities</option></select>
-    <button id="negBtn" onclick="toggleNeg()" title="Show only names carrying a material negative-media red flag">⚑ Red flags only</button>
+    <button id="negBtn" onclick="toggleNeg()" title="Show only names carrying a red flag or watch item">⚑ Flagged only</button>
+    <button id="fxBtn" onclick="toggleFx()" title="Show only names with a foreign-currency funding need that could be met by INR borrowing swapped into the currency">₹→FX need only</button>
     <div class="seg">
       <button id="sortBlend" class="on" onclick="setSort('blend')">Rank: blended score</button>
       <button id="sortSize" onclick="setSort('size')">Rank: opportunity size</button>
@@ -1400,7 +1414,7 @@ function togRag(btn){ const t = btn.dataset.r;
 }
 const esc = t => (t||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;");
 
-let sortMode = "blend", activeTrigs = new Set(), q = "", cityF = "", negOnly = false;
+let sortMode = "blend", activeTrigs = new Set(), q = "", cityF = "", negOnly = false, fxOnly = false;
 const openCards = new Set();
 
 function blended(s){ return (0.4*s.nt + 0.25*s.size + 0.2*s.event + 0.15*s.fit); }
@@ -1413,6 +1427,7 @@ function filteredRows(){
   if(activeRags.size) rows = rows.filter(r => activeRags.has(ragOf(r).cat || "none"));
   if(cityF) rows = rows.filter(r => cityOf(r)===cityF);
   if(negOnly) rows = rows.filter(r => r.neg);
+  if(fxOnly) rows = rows.filter(r => r.fx);
   if(q) rows = rows.filter(r => JSON.stringify(r).toLowerCase().includes(q));
   return rows;
 }
@@ -1441,7 +1456,7 @@ function render(keepCount){
           <div class="cityline">📍 HQ: ${r.city||"—"}</div>
           <div class="badges">
             <span class="badge b-rating">${r.rating}</span>
-            ${(r.triggers||[]).map(t=>`<span class="badge ${TRIG_LABEL[t][1]}">${TRIG_LABEL[t][0]}</span>`).join("")}${r.pe?`<span class="badge b-pe">PE-backed</span>`:``}${isNew?`<span class="badge b-new">New · added ${esc(r.added)}</span>`:``}${r.neg?`<span class="badge b-neg">⚑ Negative media</span>`:``}
+            ${(r.triggers||[]).map(t=>`<span class="badge ${TRIG_LABEL[t][1]}">${TRIG_LABEL[t][0]}</span>`).join("")}${r.pe?`<span class="badge b-pe">PE-backed</span>`:``}${isNew?`<span class="badge b-new">New · added ${esc(r.added)}</span>`:``}${r.neg?`<span class="badge b-neg${r.neg.level==="amber"?' amber':''}">⚑ ${r.neg.level==="amber"?'Watch item':'Red flag'}</span>`:``}${r.fx?`<span class="badge b-fx">₹→FX · INR + swap</span>`:``}
           </div>
           ${rg.note?`<div class="ragcmt">✎ ${esc(rg.note)}</div>`:``}
         </div>
@@ -1452,7 +1467,7 @@ function render(keepCount){
           <div class="score-num">blended ${b.toFixed(1)} / 10</div>
         </div>
       </div>
-      ${r.neg?`<div class="negflag"><b class="t">⚑ Red flag · material negative media${r.neg.asof?` · checked ${esc(r.neg.asof)}`:``}</b>${r.neg.text}${(r.neg.srcs||[]).length?`<div class="ns">Sources: ${r.neg.srcs.map(x=>`<a href="${x[1]}" target="_blank" rel="noopener">${esc(x[0])}</a>`).join("")}</div>`:``}</div>`:``}
+      ${negHtml(r.neg)}${fxHtml(r.fx)}
       <div class="thesis">${r.thesis}</div>
       <div class="detail">
         <div class="rationale">${r.rationale}</div>
@@ -1494,6 +1509,16 @@ function render(keepCount){
   reportHeight();
 }
 const cityOf = r => (r.city||"").replace(" ⚑","").trim();
+function negHtml(n){
+  if(!n) return "";
+  const am = n.level==="amber";
+  return `<div class="negflag${am?' amber':''}"><b class="t">⚑ ${am?'Watch item':'Red flag'} · negative media${n.asof?` · checked ${esc(n.asof)}`:``}</b>${n.text}${(n.srcs||[]).length?`<div class="ns">Sources: ${n.srcs.map(x=>`<a href="${x[1]}" target="_blank" rel="noopener">${esc(x[0])}</a>`).join("")}</div>`:``}</div>`;
+}
+function fxHtml(x){
+  if(!x) return "";
+  return `<div class="fxbox"><b class="t">₹→FX · foreign-currency need, INR borrowing plus swap${x.asof?` · checked ${esc(x.asof)}`:``}</b><b>Need:</b> ${x.need}${x.view?`<br><b>INR + swap view:</b> ${x.view}`:``}${(x.srcs||[]).length?`<div class="ns">Sources: ${x.srcs.map(y=>`<a href="${y[1]}" target="_blank" rel="noopener">${esc(y[0])}</a>`).join("")}</div>`:``}</div>`;
+}
+function toggleFx(){ fxOnly=!fxOnly; document.getElementById("fxBtn").classList.toggle("on",fxOnly); render(); }
 function toggleNeg(){ negOnly=!negOnly; const b=document.getElementById("negBtn"); b.classList.toggle("on",negOnly); render(); }
 function setCity(v){ cityF=v; document.getElementById("city").classList.toggle("on",!!v); render(); }
 (function(){
@@ -1515,7 +1540,7 @@ function togTrig(btn){ const t=btn.dataset.t;
 }
 document.getElementById("q").addEventListener("input",e=>{ q=e.target.value.toLowerCase(); render(); });
 
-document.getElementById("watch").innerHTML = WATCH.map(w=>`<div class="wl"><b>${w.n}</b> <span class="badge b-watch">watch</span><p>${w.w}</p></div>`).join("");
+document.getElementById("watch").innerHTML = WATCH.map(w=>`<div class="wl"><b>${w.n}</b> <span class="badge b-watch">watch</span><p>${w.w}</p>${negHtml(w.neg)}${fxHtml(w.fx)}</div>`).join("");
 render();
 
 // --- Auto-size the Streamlit component iframe to the content height ---
