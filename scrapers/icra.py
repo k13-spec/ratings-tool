@@ -502,7 +502,8 @@ def _fetch_and_parse_detail(session: requests.Session, company_id: str, company_
     return records if records else None
 
 
-def run_id_scan(limit: Optional[int] = None, delay: float = 0.5) -> dict:
+def run_id_scan(limit: Optional[int] = None, delay: float = 0.5,
+                max_seconds: Optional[float] = None) -> dict:
     """
     Discover ICRA-rated companies missing from the paginated listing by:
       1. Querying the ICRA search API (a–z, 0–9) to get all ~14k company IDs
@@ -510,7 +511,15 @@ def run_id_scan(limit: Optional[int] = None, delay: float = 0.5) -> dict:
       3. Fetching the RatingDetails page for each missing company
 
     Resumes from checkpoint (data/icra_discover_checkpoint.txt) if present.
+
+    `limit` caps companies ADDED; `max_seconds` caps wall-clock time. Most
+    "missing" IDs have no rating page, so a limit on adds alone let the
+    fortnightly slice crawl ~2,700 pages (2h+) and time the whole workflow
+    out (Oct-Nov 2026). The time budget is what bounds a CI run; the
+    checkpoint (committed by the workflow) rotates successive runs through
+    the missing list and wraps around once it is exhausted.
     """
+    _t_start = time.time()
     init_db()
     conn = get_connection()
     session = _build_session()
@@ -541,12 +550,19 @@ def run_id_scan(limit: Optional[int] = None, delay: float = 0.5) -> dict:
     if checkpoint_id:
         sorted_missing = [(cid, name) for cid, name in sorted_missing if int(cid) > int(checkpoint_id)]
         logger.info("%d companies remaining after checkpoint", len(sorted_missing))
+        if not sorted_missing:
+            # Rotation finished: start again from the lowest ID next run.
+            logger.info("Checkpoint is past the last missing ID; wrapping around")
+            sorted_missing = sorted(missing.items(), key=lambda x: int(x[0]))
 
     # Step 3: fetch detail pages for missing companies
     added_count = 0
     with tqdm(total=len(sorted_missing), desc="ICRA discover", unit="companies") as pbar:
         for company_id, company_name in sorted_missing:
             if limit is not None and added_count >= limit:
+                break
+            if max_seconds is not None and time.time() - _t_start >= max_seconds:
+                logger.info("ICRA discover: time budget (%.0fs) reached, stopping", max_seconds)
                 break
 
             records = _fetch_and_parse_detail(session, company_id, company_name)

@@ -7,13 +7,19 @@
 # Pipeline per run:
 #   run_scraper.py --icra                 ICRA paginated listing (RationaleId dedupe)
 #   run_scraper.py --crisil               CRISIL suggest dump (content-hash dedupe)
-#   run_scraper.py --india-ratings-reset  full issuer-ID rescan (content-hash dedupe)
+#   run_scraper.py --india-ratings        rolling issuer-ID rescan, 4 parallel fetches,
+#                                         resumes from the committed checkpoint
 #   run_scraper.py --care-edge --limit 200  incremental CARE Edge discovery
 #   db_maintenance.py                     backfill/dedupe, grade realign, outlook
 #                                         artifact, Renewable Energy reclass,
 #                                         export ratings_current.csv (guarded)
 #   build_isin_map.py                     NSDL issuer-prefix -> company map
 #   commit + push                         live apps pick it up on redeploy/cache
+#
+# Every scraper step is wall-clock bounded (timeout + in-code budgets; worst
+# case 45+15+215+45 = 320 min) so the commit step always runs inside the
+# 350-minute job limit. Oct-Nov 2026: four runs were cancelled at that limit
+# before committing, which froze the live data at 22 Sep.
 #
 # Individual scrapers are allowed to fail (an agency blocking runner IPs
 # mustn't kill the run) — db_maintenance.py's export guards protect the CSV,
@@ -49,16 +55,16 @@ jobs:
         run: pip install requests pandas openpyxl tqdm pdfplumber rapidfuzz
 
       - name: ICRA
-        run: python run_scraper.py --icra 2>&1 | tee icra_log.txt || echo "ICRA FAILED" | tee -a icra_log.txt
+        run: timeout 45m python run_scraper.py --icra 2>&1 | tee icra_log.txt || echo "ICRA FAILED" | tee -a icra_log.txt
 
       - name: CRISIL
-        run: python run_scraper.py --crisil 2>&1 | tee crisil_log.txt || echo "CRISIL FAILED" | tee -a crisil_log.txt
+        run: timeout 15m python run_scraper.py --crisil 2>&1 | tee crisil_log.txt || echo "CRISIL FAILED" | tee -a crisil_log.txt
 
-      - name: India Ratings (full rescan)
-        run: python run_scraper.py --india-ratings-reset 2>&1 | tail -50 | tee ir_log.txt || echo "INDIA RATINGS FAILED" | tee -a ir_log.txt
+      - name: India Ratings (rolling full rescan, resumes from checkpoint)
+        run: timeout 215m python run_scraper.py --india-ratings 2>&1 | tail -50 | tee ir_log.txt || echo "INDIA RATINGS FAILED" | tee -a ir_log.txt
 
       - name: CARE Edge (incremental discovery)
-        run: python run_scraper.py --care-edge --limit 200 2>&1 | tail -30 | tee care_log.txt || echo "CARE EDGE FAILED" | tee -a care_log.txt
+        run: timeout 45m python run_scraper.py --care-edge --limit 200 2>&1 | tail -30 | tee care_log.txt || echo "CARE EDGE FAILED" | tee -a care_log.txt
 
       - name: Normalize DB and export ratings_current.csv
         run: python db_maintenance.py 2>&1 | tee maint_log.txt
@@ -71,6 +77,7 @@ jobs:
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add data/ratings.db data/ratings_current.csv data/issuer_prefix_map.csv
+          git add data/india_ratings_checkpoint.txt data/icra_discover_checkpoint.txt 2>/dev/null || true
           if git diff --cached --quiet; then
             echo "No data changes — nothing to commit."
             exit 0

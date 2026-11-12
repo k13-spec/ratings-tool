@@ -46,7 +46,14 @@ if str(PROJECT_ROOT) not in sys.path:
 # timeout, and these passes plus the raised India Ratings ceiling are the
 # new runtime. Budget: baseline ~3.5h + IndRa +18k IDs ~30m + these slices
 # ~30-40m leaves comfortable headroom under 350m.
-ICRA_DISCOVER_SLICE = 150     # missing-company detail pages per run
+ICRA_DISCOVER_SLICE = 150     # companies ADDED per run (not pages fetched)
+# 2026-11-12: wall-clock budgets. Four consecutive runs (5 Oct - 7 Nov) were
+# cancelled at the 350-minute workflow timeout before the commit step, so no
+# ratings were published for seven weeks: the ICRA slice crawled ~2,700 pages
+# (2h07m) to find 150 additions, then the 18k-ID India Ratings scan ran out
+# of time. Budgets, not counts, are what keep the run inside the window.
+ICRA_DISCOVER_BUDGET_S = 20 * 60
+INDIA_RATINGS_BUDGET_S = 200 * 60
 CARE_REFRESH_SLICE = 200      # stale CARE Edge companies re-verified per run
 CARE_DISCOVER_SLICE = 15      # rotating aa..zz prefixes per run
 
@@ -198,7 +205,7 @@ def run_icra_discover_slice(limit=ICRA_DISCOVER_SLICE) -> dict:
     logger.info("=" * 60)
     from scrapers.icra import run_id_scan
     t0 = time.time()
-    result = run_id_scan(limit=limit)
+    result = run_id_scan(limit=limit, max_seconds=ICRA_DISCOVER_BUDGET_S)
     elapsed = time.time() - t0
     _git_stage("data/icra_discover_checkpoint.txt")
     logger.info("ICRA discover slice done in %.1fs: %s", elapsed,
@@ -519,7 +526,8 @@ def main():
             logger.info("=" * 60)
             from scrapers.india_ratings import run as run_ir
             t0 = time.time()
-            result = run_ir(limit=args.limit, reset=india_ratings_reset)
+            result = run_ir(limit=args.limit, reset=india_ratings_reset,
+                            max_seconds=INDIA_RATINGS_BUDGET_S)
             elapsed = time.time() - t0
             logger.info("India Ratings done in %.1fs: %s", elapsed,
                         ", ".join(f"{k}={v}" for k, v in result.items()))
