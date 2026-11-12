@@ -1,13 +1,13 @@
 {
- "generated_at": "2026-11-12T05:24:45Z",
+ "generated_at": "2026-11-12T10:02:38Z",
  "staleness_bar_days": 183,
  "totals": {
-  "companies": 35991,
-  "rated_companies": 33585,
-  "rating_rows": 44065,
-  "current_rows": 36156,
-  "companies_with_graded_current": 33077,
-  "companies_with_no_graded_current": 508
+  "companies": 36218,
+  "rated_companies": 33814,
+  "rating_rows": 46010,
+  "current_rows": 36427,
+  "companies_with_graded_current": 33300,
+  "companies_with_no_graded_current": 514
  },
  "staleness": {
   "CRISIL": {
@@ -22,53 +22,53 @@
    "ungraded_current": 10
   },
   "ICRA": {
-   "companies": 4873,
-   "fresh_0_6m": 1120,
-   "aging_6_12m": 1214,
-   "dated_12_18m": 547,
-   "stale_18m_plus": 1992,
+   "companies": 4884,
+   "fresh_0_6m": 1130,
+   "aging_6_12m": 1215,
+   "dated_12_18m": 546,
+   "stale_18m_plus": 1993,
    "undated_or_unparseable": 0,
    "withdrawn_as_current": 97,
-   "not_cooperating": 1974,
+   "not_cooperating": 1984,
    "ungraded_current": 273
   },
   "CARE Edge": {
-   "companies": 1162,
-   "fresh_0_6m": 38,
+   "companies": 1164,
+   "fresh_0_6m": 50,
    "aging_6_12m": 453,
-   "dated_12_18m": 498,
-   "stale_18m_plus": 171,
+   "dated_12_18m": 489,
+   "stale_18m_plus": 170,
    "undated_or_unparseable": 2,
    "withdrawn_as_current": 0,
    "not_cooperating": 0,
    "ungraded_current": 0
   },
   "India Ratings": {
-   "companies": 5617,
+   "companies": 5875,
    "fresh_0_6m": 0,
    "aging_6_12m": 0,
    "dated_12_18m": 0,
    "stale_18m_plus": 0,
-   "undated_or_unparseable": 5617,
+   "undated_or_unparseable": 5875,
    "withdrawn_as_current": 0,
-   "not_cooperating": 2035,
-   "ungraded_current": 384
+   "not_cooperating": 2047,
+   "ungraded_current": 391
   }
  },
  "hygiene": {
   "needs_reverification_by_agency": {
    "CRISIL": 24504,
-   "ICRA": 3753,
-   "CARE Edge": 1124,
-   "India Ratings": 5617
+   "ICRA": 3754,
+   "CARE Edge": 1114,
+   "India Ratings": 5875
   },
-  "needs_reverification_total": 34998
+  "needs_reverification_total": 35247
  },
  "coverage": {
   "graded_companies_by_agency_count": {
-   "1": 30816,
-   "2": 2124,
-   "3": 123,
+   "1": 31001,
+   "2": 2159,
+   "3": 126,
    "4": 14
   },
   "crisil": {
@@ -76,18 +76,18 @@
    "db_companies": 24504
   },
   "india_ratings": {
-   "max_issuer_id_seen": 14997,
+   "max_issuer_id_seen": 15631,
    "scan_ceiling": 18000,
    "ceiling_pressure": false
   },
   "care_edge": {
-   "db_companies": 1162,
-   "discover_prefix_checkpoint": "ao"
+   "db_companies": 1164,
+   "discover_prefix_checkpoint": "bd"
   },
   "icra": {
-   "universe_companies": 12224,
-   "db_companies_with_icra_id": 4844,
-   "missing_from_db": 7382,
+   "universe_companies": 12225,
+   "db_companies_with_icra_id": 4855,
+   "missing_from_db": 7372,
    "missing_sample": [
     "360 ONE Asset Management Limited",
     "360 ONE Distribution Services Limited",

@@ -1,27 +1,27 @@
 # Ratings data audit
 
-Generated 2026-11-12T05:24:45Z by the fortnightly refresh. Staleness bar: 183 days (ratings older than this are queued for re-verification; agencies formally review annually, so 6-12m is "aging", not necessarily wrong).
+Generated 2026-11-12T10:02:38Z by the fortnightly refresh. Staleness bar: 183 days (ratings older than this are queued for re-verification; agencies formally review annually, so 6-12m is "aging", not necessarily wrong).
 
-Companies: 35991 total, 33585 rated, 33077 with at least one graded current rating (508 rated but nothing graded-current). Current (company, agency) rows: 36156.
+Companies: 36218 total, 33814 rated, 33300 with at least one graded current rating (514 rated but nothing graded-current). Current (company, agency) rows: 36427.
 
 ## Staleness of current ratings, by agency
 
 | Agency | Companies | <=6m | 6-12m | 12-18m | >18m | Undated | Withdrawn-as-current | Not cooperating | Ungraded |
 |---|---|---|---|---|---|---|---|---|---|
-| CARE Edge | 1162 | 38 | 453 | 498 | 171 | 2 | 0 | 0 | 0 |
+| CARE Edge | 1164 | 50 | 453 | 489 | 170 | 2 | 0 | 0 | 0 |
 | CRISIL | 24504 | 0 | 0 | 0 | 0 | 24504 | 0 | 0 | 10 |
-| ICRA | 4873 | 1120 | 1214 | 547 | 1992 | 0 | 97 | 1974 | 273 |
-| India Ratings | 5617 | 0 | 0 | 0 | 0 | 5617 | 0 | 2035 | 384 |
+| ICRA | 4884 | 1130 | 1215 | 546 | 1993 | 0 | 97 | 1984 | 273 |
+| India Ratings | 5875 | 0 | 0 | 0 | 0 | 5875 | 0 | 2047 | 391 |
 
-Needs re-verification (older than 6m or undated): 34998 (CARE Edge: 1124, CRISIL: 24504, ICRA: 3753, India Ratings: 5617).
+Needs re-verification (older than 6m or undated): 35247 (CARE Edge: 1114, CRISIL: 24504, ICRA: 3754, India Ratings: 5875).
 
 ## Coverage
 
-Graded companies by number of agencies covering them: 1 agency(ies): 30816, 2 agency(ies): 2124, 3 agency(ies): 123, 4 agency(ies): 14.
-ICRA: universe 12224, in DB 4844, missing 7382.
+Graded companies by number of agencies covering them: 1 agency(ies): 31001, 2 agency(ies): 2159, 3 agency(ies): 126, 4 agency(ies): 14.
+ICRA: universe 12225, in DB 4855, missing 7372.
 CRISIL: index entries 18170, DB companies 24504.
-India Ratings: max issuer ID seen 14997 of scan ceiling 18000.
-CARE Edge: DB companies 1162, discover rotation checkpoint ao.
+India Ratings: max issuer ID seen 15631 of scan ceiling 18000.
+CARE Edge: DB companies 1164, discover rotation checkpoint bd.
 
 ## Worst stale examples (>18m), per agency
 
