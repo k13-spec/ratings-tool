@@ -23,6 +23,18 @@ st.set_page_config(
     layout="wide",
 )
 
+# Viewer-facing chrome: no Fork / GitHub / developer menu; readable nav label
+st.markdown(
+    """
+    <style>
+      [data-testid="stToolbarActions"], [data-testid="stMainMenu"], [data-testid="stAppDeployButton"] {display: none !important;}
+      [data-testid="stSidebarNav"] li:first-child a span {font-size: 0 !important;}
+      [data-testid="stSidebarNav"] li:first-child a span::after {content: "Ratings Dashboard"; font-size: 0.875rem;}
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
 # ------------------------------------------------------------------
 # Helpers
 # ------------------------------------------------------------------

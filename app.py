@@ -461,81 +461,29 @@ def _is_valid_sector(s: str) -> bool:
     return True
 
 
-def _sector_checkbox_panel(available_sectors: list) -> list:
+def _sector_multiselects(available_sectors: list) -> list:
+    """One searchable multiselect per sector group. Blank = no sector filter
+    (every company, including the many whose ratings carry no sector)."""
     from database.queries import UNCLASSIFIED_SECTOR
     available_sectors = [s for s in available_sectors if _is_valid_sector(s)]
     grouped: dict[str, list] = {"Corporate": [], "Infrastructure": [],
                                 "Financial Institutions": []}
     for s in available_sectors:
         grouped[_group_of(s)].append(s)
-
-    # Most rating rows carry no sector (the CRISIL suggest feed and several
-    # other sources don't provide one), so the majority of companies are
-    # unclassified. The pseudo-sector checkbox below keeps them visible by
-    # default — without it, the default "all sectors ticked" state generated
-    # a `sector IN (...)` filter that silently hid every NULL-sector company
-    # (e.g. Britannia Industries).
-    _unc_key = f"chk_{UNCLASSIFIED_SECTOR}"
-    for s in available_sectors:
-        wkey = f"chk_{s}"
-        if wkey not in st.session_state:
-            st.session_state[wkey] = True
-    if _unc_key not in st.session_state:
-        st.session_state[_unc_key] = True
-
     st.markdown("**Sectors**")
-
-    qc1, qc2, qc3 = st.columns(3)
-    if qc1.button("All",  key="sec_all",  use_container_width=True):
-        for s in available_sectors:
-            st.session_state[f"chk_{s}"] = True
-        st.session_state[_unc_key] = True
-        st.rerun()
-    if qc2.button("None", key="sec_none", use_container_width=True):
-        for s in available_sectors:
-            st.session_state[f"chk_{s}"] = False
-        st.session_state[_unc_key] = False
-        st.rerun()
-    if qc3.button("Corp", key="sec_corp", use_container_width=True,
-                  help="Corporate sectors only (drops unclassified companies)"):
-        for s in available_sectors:
-            st.session_state[f"chk_{s}"] = (_group_of(s) == "Corporate")
-        st.session_state[_unc_key] = False
-        st.rerun()
-
-    selected = []
-    for grp in ["Corporate", "Infrastructure", "Financial Institutions"]:
-        members = grouped.get(grp, [])
-        if not members:
-            continue
-        with st.expander(grp, expanded=(grp == "Corporate")):
-            ga1, ga2 = st.columns(2)
-            if ga1.button("All",  key=f"grp_all_{grp}",  use_container_width=True):
-                for s in members:
-                    st.session_state[f"chk_{s}"] = True
-                st.rerun()
-            if ga2.button("None", key=f"grp_none_{grp}", use_container_width=True):
-                for s in members:
-                    st.session_state[f"chk_{s}"] = False
-                st.rerun()
-
-            for sector in sorted(members):
-                label = sector if sector else "(unclassified)"
-                checked = st.checkbox(label, key=f"chk_{sector}")
-                if checked:
-                    selected.append(sector)
-
-    if st.checkbox(
-        "Unclassified (no sector)",
-        key=_unc_key,
-        help="Companies whose ratings carry no sector — the majority of the "
-             "DB, e.g. most CRISIL-only names like Britannia Industries.",
+    selected: list = []
+    for grp, members in grouped.items():
+        if members:
+            selected += st.multiselect(grp, sorted(members), placeholder="All",
+                                       key=f"sec_ms_{grp}")
+    if selected and st.checkbox(
+        "Include unclassified companies",
+        key="sec_ms_unclassified",
+        help="Companies whose ratings carry no sector (most CRISIL-only "
+             "names, e.g. Britannia Industries).",
     ):
         selected.append(UNCLASSIFIED_SECTOR)
-
     return selected
-
-
 
 
 # ------------------------------------------------------------------ #
@@ -598,6 +546,23 @@ section.main > div,
 [data-testid="stMarkdownContainer"] span {
     color: var(--text) !important;
     font-family: var(--font) !important;
+}
+
+/* ── Use the full width for the table (default side padding is 5rem) ── */
+[data-testid="stMainBlockContainer"] {
+    padding-left: 2rem !important;
+    padding-right: 2rem !important;
+    padding-top: 3rem !important;
+    max-width: 100% !important;
+}
+/* ── Viewer-facing: no Fork / GitHub / developer menu ── */
+[data-testid="stToolbarActions"],
+[data-testid="stMainMenu"],
+[data-testid="stAppDeployButton"] { display: none !important; }
+/* ── Sidebar nav: the entry script is app.py, so its link reads "app" ── */
+[data-testid="stSidebarNav"] li:first-child a span { font-size: 0 !important; }
+[data-testid="stSidebarNav"] li:first-child a span::after {
+    content: "Ratings Dashboard"; font-size: 0.875rem;
 }
 
 /* ── Top header bar ── */
@@ -1168,10 +1133,14 @@ def _recent_rating_actions(days: int = 7):
             "from":    _fmt_action_symbol(prev["rating_symbol"]),
             "to":      _fmt_action_symbol(cur["rating_symbol"]),
             "up":      int(cur["rating_grade"]) < int(prev["rating_grade"]),
+            "best":    min(int(cur["rating_grade"]), int(prev["rating_grade"])),
             "date":    cur["dt"],
             "url":     str(cur["rationale_url"] or ""),
         })
+    # Highest-rated names first (the AAA-A book is what the desk covers);
+    # most recent first within a grade.
     actions.sort(key=lambda a: a["date"], reverse=True)
+    actions.sort(key=lambda a: a["best"])
     return actions, start, end
 
 
@@ -1257,56 +1226,6 @@ def main():
     with st.sidebar:
         st.header("Filters")
 
-        if st.button("↺  Refresh Data", type="secondary", use_container_width=True):
-            _cached_sectors.clear()
-            _cached_agencies.clear()
-            _cached_stats.clear()
-            _cached_query.clear()
-            st.rerun()
-
-        st.divider()
-
-        # ---- Scraper controls ----
-        with st.expander("▶  Run Scrapers", expanded=False):
-            col1, col2 = st.columns(2)
-            with col1:
-                run_icra   = st.button("ICRA",   use_container_width=True)
-                run_nse    = st.button("NSE",    use_container_width=True)
-            with col2:
-                run_crisil = st.button("CRISIL", use_container_width=True)
-                run_all    = st.button("All",    use_container_width=True, type="primary")
-            run_crisil_fin = st.button(
-                "CRISIL Financials", use_container_width=True,
-                help="Fetch Key Financial Indicators from CRISIL rationale HTML pages"
-            )
-
-            for flag, label, spinner_label in [
-                (run_icra,       ["--icra"],              "ICRA ratings..."),
-                (run_crisil,     ["--crisil"],            "CRISIL ratings..."),
-                (run_nse,        ["--nse"],               "NSE/yfinance financials..."),
-                (run_crisil_fin, ["--crisil-financials"], "CRISIL HTML financials..."),
-                (run_all,        ["--all"],               "All scrapers (this may take a while)..."),
-            ]:
-                if flag:
-                    with st.spinner(f"Running {spinner_label}"):
-                        out = _run_scraper(label)
-                    st.code(out[:2000])
-                    _cached_stats.clear()
-                    _cached_query.clear()
-
-        st.divider()
-
-        # Pre-fill from deep-link: ?company=Tata
-        _qp_company = st.query_params.get("company", "")
-        # ---- Company Name Search ----
-        company_search = st.text_input(
-            "Search Company Name",
-            placeholder="e.g. Tata, Reliance…",
-            value=_qp_company,
-        ).strip()
-
-        st.divider()
-
         # ---- Rating Agency ----
         available_agencies = _cached_agencies()
         selected_agencies = st.multiselect(
@@ -1314,25 +1233,6 @@ def main():
             options=available_agencies or ["ICRA", "CRISIL"],
             default=available_agencies or ["ICRA", "CRISIL"],
         )
-
-        # ---- Rating Grade ----
-        grade_options = {
-            "AAA only":       (1, 1),
-            "AA+ or better":  (1, 2),
-            "AA or better":   (1, 3),
-            "AA- or better":  (1, 4),
-            "A+ or better":   (1, 5),
-            "A or better":    (1, 6),
-            "A- or better":   (1, 7),
-            "BBB+ or better": (1, 8),
-            "All":            (1, 20),
-        }
-        grade_choice = st.selectbox(
-            "Minimum Rating",
-            options=list(grade_options.keys()),
-            index=list(grade_options.keys()).index("A- or better"),
-        )
-        min_grade, max_grade = grade_options[grade_choice]
 
         # ---- Exact ratings (tick to include only these grades) ----
         _SYM2GRADE = {
@@ -1349,12 +1249,8 @@ def main():
             default=[],
             placeholder="e.g. AA-",
             help="Show only companies whose best grade is one of the ticked "
-                 "grades (e.g. tick just AA-). Overrides Minimum Rating.",
+                 "grades (e.g. tick just AA-). Overrides Minimum rating.",
         )
-        if exact_ratings:
-            # Query the full grade range, then filter to the ticked grades
-            min_grade, max_grade = 1, 20
-
         # ---- Outlook ----
         outlook_options = ["Stable", "Positive", "Negative", "Watch",
                            "Watch Negative", "Watch Positive", "Watch Developing"]
@@ -1369,7 +1265,7 @@ def main():
 
         # ---- Sector checkboxes ----
         available_sectors = _cached_sectors()
-        selected_sectors = _sector_checkbox_panel(available_sectors)
+        selected_sectors = _sector_multiselects(available_sectors)
 
         st.divider()
 
@@ -1425,6 +1321,45 @@ def main():
             value=False,
             help="Adds Bonds 30d/90d/1yr from NSDL. First load ~30s; cached 24h.",
         )
+
+        st.divider()
+        # ---- Data refresh / maintenance (kept out of the way of the filters) ----
+        with st.expander("Data refresh", expanded=False):
+            if st.button("↺  Refresh Data", type="secondary", use_container_width=True):
+                _cached_sectors.clear()
+                _cached_agencies.clear()
+                _cached_stats.clear()
+                _cached_query.clear()
+                st.rerun()
+
+            # ---- Scraper controls ----
+            st.caption("Run scrapers (maintenance)")
+            if True:
+                col1, col2 = st.columns(2)
+                with col1:
+                    run_icra   = st.button("ICRA",   use_container_width=True)
+                    run_nse    = st.button("NSE",    use_container_width=True)
+                with col2:
+                    run_crisil = st.button("CRISIL", use_container_width=True)
+                    run_all    = st.button("All",    use_container_width=True, type="primary")
+                run_crisil_fin = st.button(
+                    "CRISIL Financials", use_container_width=True,
+                    help="Fetch Key Financial Indicators from CRISIL rationale HTML pages"
+                )
+
+                for flag, label, spinner_label in [
+                    (run_icra,       ["--icra"],              "ICRA ratings..."),
+                    (run_crisil,     ["--crisil"],            "CRISIL ratings..."),
+                    (run_nse,        ["--nse"],               "NSE/yfinance financials..."),
+                    (run_crisil_fin, ["--crisil-financials"], "CRISIL HTML financials..."),
+                    (run_all,        ["--all"],               "All scrapers (this may take a while)..."),
+                ]:
+                    if flag:
+                        with st.spinner(f"Running {spinner_label}"):
+                            out = _run_scraper(label)
+                        st.code(out[:2000])
+                        _cached_stats.clear()
+                        _cached_query.clear()
     # Main area                                                  #
     # --------------------------------------------------------- #
     stats = _cached_stats()
@@ -1433,7 +1368,11 @@ def main():
     m2.metric("Rated Companies",  f"{stats.get('rated_companies', 0):,}")
     m3.metric("With Financials",  f"{stats.get('with_financials', 0):,}")
     last = stats.get("last_scraped") or "Never"
-    m4.metric("Last Scraped", last[:16] if len(str(last)) > 16 else last)
+    try:
+        _last_lbl = pd.to_datetime(str(last)).strftime("%d %b %Y")
+    except Exception:
+        _last_lbl = str(last)[:16]
+    m4.metric("Ratings as of", _last_lbl)
 
     # ---- Rating actions: upgrades / downgrades this week ----
     _actions, _act_start, _act_end = _recent_rating_actions()
@@ -1497,6 +1436,78 @@ def main():
                         st.markdown(_action_row(a, False), unsafe_allow_html=True)
 
     st.divider()
+
+    # ---- Table controls (search, minimum rating, columns) ----
+    grade_options = {
+        "AAA only":       (1, 1),
+        "AA+ or better":  (1, 2),
+        "AA or better":   (1, 3),
+        "AA- or better":  (1, 4),
+        "A+ or better":   (1, 5),
+        "A or better":    (1, 6),
+        "A- or better":   (1, 7),
+        "BBB+ or better": (1, 8),
+        "All":            (1, 20),
+    }
+    _k1, _k2, _k3 = st.columns([3, 1.6, 1.2])
+    _qp_company = st.query_params.get("company", "")     # deep-link pre-fill
+    company_search = _k1.text_input(
+        "Search company name", placeholder="e.g. Tata, Reliance…",
+        value=_qp_company,
+    ).strip()
+    grade_choice = _k2.selectbox(
+        "Minimum rating",
+        options=list(grade_options.keys()),
+        # A deep link to one company must find it whatever its rating
+        index=list(grade_options.keys()).index("All" if _qp_company else "A+ or better"),
+    )
+    min_grade, max_grade = grade_options[grade_choice]
+    if exact_ratings:
+        # Query the full grade range, then filter to the ticked grades
+        min_grade, max_grade = 1, 20
+    _ALL_TABLE_COLS = [
+        "Company Name",
+        "View Bonds", "Bonds 30d", "Bonds 90d", "Bonds 1yr",
+        "CRISIL", "ICRA", "Care Edge", "India Ratings",
+        "Sector",
+        "Revenue (Cr)", "EBITDA (Cr)", "EBITDA Margin %",
+        "Total Debt (Cr)", "Net Debt (Cr)", "ND/EBITDA",
+        "Rating Date", "Notes",
+    ]
+    _CORE_TABLE_COLS = [
+        "Company Name", "View Bonds", "CRISIL", "ICRA", "Care Edge",
+        "India Ratings", "Sector", "Revenue (Cr)", "EBITDA (Cr)",
+        "ND/EBITDA", "Rating Date", "Notes",
+    ]
+    if "rt_col_picker" not in st.session_state:
+        _qp_cols = st.query_params.get("cols", "")
+        _from_qp = (list(_ALL_TABLE_COLS) if _qp_cols == "*" else
+                    [c for c in _qp_cols.split("|") if c in _ALL_TABLE_COLS])
+        st.session_state.rt_col_picker = _from_qp or list(_CORE_TABLE_COLS)
+    with _k3:
+        # spacer so the button lines up with the labelled inputs beside it
+        st.markdown('<div style="height:1.75rem"></div>', unsafe_allow_html=True)
+        with st.popover("Columns", use_container_width=True):
+            st.caption("Choose which columns the table shows. The Excel "
+                       "export always has every column.")
+            _cb1, _cb2 = st.columns(2)
+            if _cb1.button("All", use_container_width=True, key="rt_cols_all"):
+                st.session_state.rt_col_picker = list(_ALL_TABLE_COLS)
+            if _cb2.button("Core", use_container_width=True, key="rt_cols_core"):
+                st.session_state.rt_col_picker = list(_CORE_TABLE_COLS)
+            _picked = st.multiselect("Visible columns", _ALL_TABLE_COLS,
+                                     key="rt_col_picker",
+                                     label_visibility="collapsed")
+    _visible_cols = [c for c in _ALL_TABLE_COLS if c in (_picked or _ALL_TABLE_COLS)]
+    # Mirror into the URL so a view can be bookmarked / shared
+    _cols_param = ("" if _visible_cols == _CORE_TABLE_COLS else
+                   "*" if len(_visible_cols) == len(_ALL_TABLE_COLS) else
+                   "|".join(_visible_cols))
+    if _cols_param:
+        if st.query_params.get("cols", "") != _cols_param:
+            st.query_params["cols"] = _cols_param
+    elif "cols" in st.query_params:
+        del st.query_params["cols"]
 
     # ---- DB query ----
     with st.spinner("Querying database..."):
@@ -1726,6 +1737,7 @@ def main():
             height=620,
             hide_index=True,
             disabled=non_note_cols,
+            column_order=[c for c in _visible_cols if c in editor_df.columns],
             column_config={
                 "Company Name":  st.column_config.TextColumn("Company",       width="medium"),
                 # --- Agency rating cols: value = "url##AAA/Stable" or "" ---

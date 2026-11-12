@@ -34,6 +34,9 @@ st.markdown(
       .block-container {padding-top: 1.2rem; padding-bottom: 0; max-width: 1240px;}
       header[data-testid="stHeader"] {background: transparent;}
       iframe {border: none;}
+      [data-testid="stToolbarActions"], [data-testid="stMainMenu"], [data-testid="stAppDeployButton"] {display: none !important;}
+      [data-testid="stSidebarNav"] li:first-child a span {font-size: 0 !important;}
+      [data-testid="stSidebarNav"] li:first-child a span::after {content: "Ratings Dashboard"; font-size: 0.875rem;}
     </style>
     """,
     unsafe_allow_html=True,
